@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.saradabar.cpadcustomizetool">
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="jp.co.benesse.dcha.permission.ACCESS_SYSTEM" />
+    <application
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:allowBackup="false">
+        <activity android:name=".WelAppActivity" android:theme="@style/WelcomeScreenTheme.Light"/>
+        <activity
+            android:clearTaskOnLaunch="true"
+            android:name=".MainActivity"
+            android:label="@string/start_check_activity"
+            android:theme="@android:style/Theme.Material.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.HOME"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".StartActivity"
+            android:label="@string/main_normal_settings_activity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Menu.Update.UpdateActivity"
+            android:label="@string/app_update_activity"
+            android:theme="@style/AppTheme"
+            tools:ignore="InnerclassSeparator" />
+        <activity
+            android:name=".Menu.AppInfoActivity"
+            android:label="@string/app_info_activity"
+            android:theme="@style/AppTheme"
+            tools:ignore="InnerclassSeparator" />
+        <activity
+            android:name=".SetHome.SetHomeAppActivity"
+            android:label="@string/app_home_activity"
+            android:theme="@style/AppTheme"
+            tools:ignore="InnerclassSeparator" />
+        <activity
+            android:documentLaunchMode="always"
+            android:name=".Mode.EmergencyMode.EmergencyModeActivity"
+            android:label="@string/emergency_activity"
+            android:theme="@style/AppTheme"
+            tools:ignore="InnerclassSeparator">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:documentLaunchMode="always"
+            android:name=".Mode.NormalMode.NormalModeActivity"
+            android:label="@string/normal_mode_activity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:documentLaunchMode="always"
+            android:name=".RebootActivity"
+            android:label="@string/reboot"
+            android:icon="@drawable/reboot"
+            android:theme="@style/Translucent">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".BlockToUninstall.BlockToUninstall"
+            android:theme="@style/AppTheme"
+            tools:ignore="InnerclassSeparator"
+            android:label="@string/block_to_uninstall"/>
+
+        <service
+            android:name=".Service.KeepNavigationBarService"
+            android:label="@string/service_keep_service"
+            tools:ignore="InnerclassSeparator" />
+        <service
+            android:name=".Service.KeepMarketAppService"
+            android:label="@string/service_keep_market_app_service"
+            tools:ignore="InnerclassSeparator" />
+        <service
+            android:name=".Service.KeepDchaService"
+            android:label="@string/service_keep_dcha_state"
+            tools:ignore="InnerclassSeparator" />
+        <service
+            android:name=".Service.KeepUsbDebugService"
+            android:label="@string/service_keep_usb_debug"
+            tools:ignore="InnerclassSeparator" />
+        <service
+            android:name=".Service.KeepHomeService"
+            android:label="@string/service_keep_home"
+            tools:ignore="InnerclassSeparator" />
+        <receiver
+            android:name=".Receiver.UpdateBroadcastReceiver"
+            tools:ignore="InnerclassSeparator">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Receiver.BootCompletedReceiver"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            tools:ignore="InnerclassSeparator">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Receiver.AdministratorReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/administrator" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

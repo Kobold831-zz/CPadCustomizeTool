@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="その他の設定">
+        <Preference
+            android:key="intent_android_settings"
+            android:title="設定を起動" />
+        <Preference
+            android:key="intent_sys_ui_adjustment"
+            android:title="システムUI調整ツールを起動" />
+        <Preference
+            android:key="intent_block_to_uninstall_settings"
+            android:title="ユーザーアプリのアンインストールを無効"
+            android:summary="Device-Ownerの権限を使用してユーザーアプリのアンインストールをブロックします。" />
+        <Preference
+            android:key="disable_device_owner"
+            android:title="Device-Ownerを無効"
+            android:summary="Device-Ownerの権限を使用した機能は使用できなくなります\nアンインストールブロック機能によりブロック中のアプリは維持されます\nこの操作を行った後、デバイス管理者が無効になる場合があります"/>
+    </PreferenceCategory>
+</PreferenceScreen>

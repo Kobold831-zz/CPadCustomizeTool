@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    defaultConfig {
+        applicationId "com.saradabar.cpadcustomizetool"
+        minSdkVersion 22
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 22
+        versionCode 21
+        versionName "1.3.9"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+        }
+    }
+
+}
+
+dependencies {
+    implementation files('libs/IDchaService.jar')
+    implementation 'com.stephentuso:welcome:1.4.1'
+}

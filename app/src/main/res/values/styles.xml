@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme">
+        <item name="android:colorAccent">#DC143C</item>
+    </style>
+
+    <!-- Translucent theme -->
+    <drawable name="Translucent">#7f000000</drawable>
+    <style name="Translucent" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/Translucent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

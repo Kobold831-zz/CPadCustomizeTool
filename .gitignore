@@ -1,0 +1,4 @@
+# プロジェクトの除外パス
+/.gradle/
+/app/build/
+/app/build/intermediates/javac/debug/classes/

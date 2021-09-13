@@ -1,0 +1,129 @@
+<resources>
+    <!-- アプリ・アクティビティ -->
+    <string name="app_name">CPad Customize Tool</string>
+    <string name="start_check_activity">カスタマイズツール</string>
+    <string name="main_normal_settings_activity">設定</string>
+    <string name="service_keep_service">ナビゲーションバー維持サービス (停止しないでください)</string>
+    <string name="service_keep_market_app_service">提供元不明の許可維持サービス (停止しないでください)</string>
+    <string name="service_keep_dcha_state">システムUI通常用維持サービス (停止しないでください)</string>
+    <string name="service_keep_usb_debug">USBデバッグ維持サービス (停止しないでください)</string>
+    <string name="service_keep_home">ホーム維持サービス (停止しないでください)</string>
+    <string name="app_home_activity">ホーム</string>
+    <string name="emergency_activity">緊急モード</string>
+    <string name="normal_mode_activity">通常モード</string>
+    <string name="app_info_activity">アプリの情報</string>
+    <string name="app_update_activity">アップデート</string>
+    <string name="select_home_launcher">ホームを選択してください</string>
+    <string name="reboot">再起動</string>
+    <string name="block_to_uninstall">アンインストールブロック設定</string>
+
+    <!-- 起動チェック -->
+    <string name="start_check_common_error">エラーが発生しました。</string>
+    <string name="start_check_model">端末を確認中…</string>
+    <string name="start_check_dchaservice">DchaServiceを確認中…</string>
+    <string name="start_check_permission">権限を確認中…</string>
+    <string name="start_check_important_news">重要なお知らせです。\nよく読んでください。</string>
+    <string name="start_check_settings_permissions">権限設定をするか選択してください。</string>
+    <string name="start_grant_permission">権限設定中…</string>
+    <string name="start_starting_main">メイン画面を起動しています…</string>
+    <string name="start_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、https://ctabwiki.nerrog.net/の許諾契約およびこの規約に同意するものとし、\n開発者は一切の問題において責任を負わないものとします。</string>
+
+    <!-- カードビュー -->
+    <string name="card_android_settings">Android設定</string>
+    <string name="card_system_ui">システムUI設定</string>
+    <string name="card_emergency_mode">緊急モード</string>
+    <string name="card_normal_mode">通常モード</string>
+    <string name="card_option">オプション</string>
+    <string name="card_other">その他</string>
+
+    <!-- メイン設定 -->
+    <string name="main_pre_category_system_ui">システムUI設定</string>
+    <string name="main_pre_title_system_ui">システムUIを学習用に変更</string>
+    <string name="main_pre_title_keep_system_ui">システムUIを通常用に維持</string>
+    <string name="main_pre_title_navigation_bar">ナビゲーションバーを非表示</string>
+    <string name="main_pre_title_keep_navigation_bar">ナビゲーションバーの表示を維持</string>
+    <string name="main_pre_category_android_settings">Android設定</string>
+    <string name="main_pre_title_usb_debug">USBデバッグ</string>
+    <string name="main_pre_title_keep_usb_debug">USBデバッグの有効を維持</string>
+    <string name="main_pre_title_non_market">提供元不明のアプリを許可</string>
+    <string name="main_pre_title_keep_non_market">提供元不明のアプリの許可を維持</string>
+    <string name="main_pre_title_change_home">ホームを変更</string>
+    <string name="main_pre_title_keep_home">ホームを維持</string>
+    <string name="main_pre_sum_keep_home">スイッチをオンにする前まで設定していたホームランチャーをおよそ2秒周期で維持します。</string>
+    <string name="main_pre_title_other_settings">その他の設定</string>
+    <string name="main_pre_category_emergency_mode">緊急モード</string>
+    <string name="main_pre_title_select_course">受講中の講座名を選択</string>
+    <string name="main_pre_title_change_settings">緊急モード実行時に変更する設定を変更</string>
+    <string name="main_pre_sum_change_settings">デフォルトではすべての設定が変更されます</string>
+    <string name="main_pre_title_manual">緊急モードの説明</string>
+    <string name="main_pre_category_change_to_normal_mode">通常モード</string>
+    <string name="main_pre_title_change_to_normal_mode_settings">通常モード実行時に変更する設定を変更</string>
+    <string name="main_pre_sum_change_to_normal_mode_settings">デフォルトではすべての設定が変更されます</string>
+    <string name="main_pre_title_normal_mode_manual">通常モードの説明</string>
+    <string name="main_pre_category_other_settings">その他のオプション</string>
+    <string name="main_pre_title_reboot">再起動</string>
+    <string name="main_pre_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
+    <string name="main_pre_sum_reboot">再起動しています…</string>
+    <string name="main_pre_sum_not_use">この機能は使用できません</string>
+    <string name="main_pre_title_resolution">解像度設定</string>
+
+    <!-- メイン設定エラー -->
+    <string name="main_error_message_enable_own">このアプリは現在使用できません。\nDevice-Ownerを解除する場合は、\"Device-Ownerを解除\"を押してください。\nアンインストールブロックを解除する場合は、\"アンインストールブロックを開く\"を押してください。</string>
+    <string name="main_error_message_disable_own">このアプリは現在使用できません。</string>
+    <string name="main_error_button_1">Device-Ownerを解除</string>
+    <string name="main_error_button_2">アンインストールブロックを開く</string>
+
+    <!-- その他の設定 -->
+
+    <!-- メニュー -->
+    <string name="menu_select_app_info">アプリ情報</string>
+    <string name="menu_select_app_settings">アプリ設定</string>
+    <string name="menu_select_update">アップデートの確認</string>
+
+    <!-- ダイアログ -->
+    <string name="dialog_title_update">アプリの更新</string>
+    <string name="dialog_title_common_error">起動エラー</string>
+    <string name="dialog_common_ok">OK</string>
+    <string name="dialog_common_yes">はい</string>
+    <string name="dialog_common_no">いいえ</string>
+    <string name="dialog_common_through">無視</string>
+    <string name="dialog_common_settings">設定</string>
+    <string name="dialog_common_exit">終了</string>
+    <string name="dialog_common_continue">続行</string>
+    <string name="dialog_title_reboot">再起動しますか？</string>
+    <string name="dialog_error_not_pad2">この端末は”チャレンジパッド2・3・NEO”ではありません。\n安全の為このアプリは使用できません。</string>
+    <string name="dialog_error_not_dchaservice">”DchaService”が正常に動作していません。\n安全の為このアプリは使用できません。\n\n”DchaService”を使用しない場合、”続行”を押してください。</string>
+    <string name="dialog_title_notice_start">＊重要なお知らせ＊</string>
+    <string name="dialog_notice_start">このアプリはアンチウイルスソフトに”不審なプログラム”として検出される場合があります。\nこれは誤検知です。\n質問がある場合は、DiscordのCTabLaboに所属している”サラダバー”に問い合わせしてください。\nこのダイアログは次回起動以降表示しません。</string>
+    <string name="dialog_title_grant_permission">権限設定</string>
+    <string name="dialog_grant_permission">以下の権限を設定します。\n\n＜android.permission.WRITE_SECURE_SETTINGS＞\n\n続けるには再起動が必要です。\nこのダイアログは次回起動以降表示しません。\n\nこの設定をせずに続行することもできます。実行しない場合、”いいえ”を押してください。権限設定をしない場合、次に表示される設定画面において、以下の項目を使用する際ADBで権限を付与する必要があります。\n\n権限を付与しなければ使用できない項目：\n\n＜提供元不明のアプリを許可＞\n＜提供元不明のアプリを許可を維持＞\n＜USBデバッグ＞\n＜USBデバッグの有効を維持＞\n\nADBで付与しなければいけない権限：\n\n＜android.permission.WRITE_SECURE_SETTINGS＞\n\n権限設定を実行しますか？</string>
+    <string name="dialog_no_update">アップデートはありません。</string>
+    <string name="dialog_emergency_select_course">受講中の講座名を選択してください。</string>
+    <string name="dialog_mode_select_settings">実行時に変更する設定を選択してください。\n設定変更後は”OK”を押してください。</string>
+    <string name="dialog_title_dcha_service">以下の内容を確認してください。</string>
+    <string name="dialog_dcha_service">DchaServiceを使用すると、使用者自身に危険性があることを十分に理解する必要があります。\nこの機能を使用したことによる全ての責任は自己責任であり、開発者は一切責任を負いません。\nDchaServiceの機能を使用しますか？</string>
+    <string name="dialog_title_emergency_manual">緊急モードの説明</string>
+    <string name="dialog_emergency_manual">この機能はアクティビティを呼び出して使用します。\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します。\n\n使用する場合ホームランチャーから”.Mode.EmergencyMode.EmergencyModeActivity”を追加し、タップしてください。\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします。\n\n＊ナビゲーションバーを隠す＊\n\n＊アプリ履歴を全消去＊（YouTubeを見ているときなどにバックグラウンドで再生されるのを阻止します）\n\n＊ホームを勉強ホームに変更＊（ホームボタンを押しても勉強ホームが表示されるため親にバレる確率が下がります）\n\n＊システムUIを学習用に変更＊</string>
+    <string name="dialog_emergency_manual_red">\nシステムUIを変更するためOneToucher等のアクティビティや他のアプリを起動させるアプリをインストールしておかないと初期化以外に勉強ホームから抜け出すことができなくなります。アプリ履歴を全消去はナビゲーションバーの□ボタンを押すと表示されるアプリ履歴のアプリを終了するだけであり、バックグランド上で動いているOneToucher等のアプリは停止しません。</string>
+    <string name="dialog_title_normal_manual">通常モードの説明</string>
+    <string name="dialog_normal_manual">この機能はアクティビティを呼び出して使用します。\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します。\n\n使用する場合ホームランチャーから”.Mode.NormalMode.NormalModeActivity”を追加し、タップしてください。\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします。\n\n＊ナビゲーションバーを表示＊\n\n＊ホームをNovaLauncherに変更＊\n\n＊システムUIを通常用に変更＊\n\n＊NovaLauncherを起動＊</string>
+    <string name="dialog_normal_manual_red">\nホームの起動,変更はNovaLauncherのみ対応しています、NovaLauncherがインストールされていない状態で実行時にNovaLauncherを起動,ホームをNovaLauncherに変更が選択されていた場合スルーされます。</string>
+    <string name="dialog_error_not_grant_permission">システム設定の変更が許可されていません。\n”設定”を押した後に表示されるスイッチを有効にし許可してください。</string>
+    <string name="dialog_question_device_owner">Device-Ownerを無効にしますか？</string>
+    <string name="dialog_question_device_admin">デバイス管理者を無効にしますか？\nこの操作を行うとDchaServiceによってアプリがアンインストールされる可能性があります。</string>
+
+    <!-- トースト -->
+    <string name="toast_common_success">成功しました。</string>
+    <string name="toast_start_reboot">設定しました。再起動します。</string>
+    <string name="toast_reboot">再起動します。</string>
+    <string name="toast_not_course">選択された講座はこの端末上に存在しません。</string>
+    <string name="toast_not_install_nova">"NovaLauncherがインストールされていない為ホームの起動,変更は行いません。"</string>
+    <string name="toast_not_install_dcha">DchaServiceが機能していないためこの機能は使用できません。</string>
+    <string name="toast_not_change">権限を付与してから再試行してください。</string>
+    <string name="toast_error_not_use">現在この機能は使用できません。</string>
+    <string name="toast_notice_disable_own">Device-Ownerは無効になりました。</string>
+
+    <!-- アプリ情報 -->
+    <string name="info_app_state_not_use">アプリの状態:このアプリは現在使用できません。/このアプリは開発者により使用制限をされているか開発が停止した可能性があります。詳しい情報は下記Wikiにて確認をしてください。</string>
+    <string name="info_app_state_use">アプリの状態:リリースバージョン/このアプリは現在サポートされており、使用可能です。</string>
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="kouza_text" >
+        <item>小学講座</item>
+        <item>中学講座・その他</item>
+    </string-array>
+
+    <string-array name="kouza_value" >
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="Emergency_Settings_text" >
+        <item>システムUIを変更</item>
+        <item>ナビゲーションバーを非表示</item>
+        <item>ホームを変更</item>
+        <item>アプリ履歴を全消去</item>
+    </string-array>
+
+    <string-array name="Emergency_Settings_value" >
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="normal_mode_text" >
+        <item>システムUIを通常用に変更</item>
+        <item>ナビゲーションバーを表示</item>
+        <item>ホームをNovaLauncherに変更</item>
+        <item>実行時にNovaLauncherを起動</item>
+    </string-array>
+
+    <string-array name="normal_mode_value" >
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+</resources>
