@@ -288,8 +288,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
         toast = Toast.makeText(this, R.string.start_check_model, Toast.LENGTH_SHORT);
         toast.show();
         switch (Build.MODEL) {
-            case "TAB-A03-B":
-            case "TAB-A04-B":
+            case "TAB-A03-BS":
+            case "TAB-A03-BR":
+            case "TAB-A03-BR2":
+            case "TAB-A03-BR2B":
+            case "TAB-A03-BR3":
+            case "TAB-A04-BR3":
             case "TAB-A05-BD":
                 checkDcha();
                 break;
