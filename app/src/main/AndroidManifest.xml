@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress ALL -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.saradabar.cpadcustomizetool">
@@ -27,10 +28,10 @@
             android:label="@string/start_check_activity"
             android:theme="@android:style/Theme.Material.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.HOME"/>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.HOME"/>
             </intent-filter>
         </activity>
         <activity
@@ -38,23 +39,23 @@
             android:label="@string/main_normal_settings_activity"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".Menu.Update.UpdateActivity"
+            android:name=".menu.check.UpdateActivity"
             android:label="@string/app_update_activity"
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator" />
         <activity
-            android:name=".Menu.AppInfoActivity"
+            android:name=".menu.InformationActivity"
             android:label="@string/app_info_activity"
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator" />
         <activity
-            android:name=".SetHome.SetHomeAppActivity"
+            android:name=".set.SetLauncherActivity"
             android:label="@string/app_home_activity"
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator" />
         <activity
             android:documentLaunchMode="always"
-            android:name=".Mode.EmergencyMode.EmergencyModeActivity"
+            android:name=".mode.emergency.EmergencyActivity"
             android:label="@string/emergency_activity"
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator">
@@ -64,7 +65,7 @@
         </activity>
         <activity
             android:documentLaunchMode="always"
-            android:name=".Mode.NormalMode.NormalModeActivity"
+            android:name=".mode.normal.NormalActivity"
             android:label="@string/normal_mode_activity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -75,35 +76,35 @@
             android:name=".RebootActivity"
             android:label="@string/reboot"
             android:icon="@drawable/reboot"
-            android:theme="@style/Translucent">
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".BlockToUninstall.BlockToUninstall"
+            android:name=".set.BlockerActivity"
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator"
             android:label="@string/block_to_uninstall"/>
 
         <service
-            android:name=".Service.KeepNavigationBarService"
+            android:name=".service.KeepNavigationBarService"
             android:label="@string/service_keep_service"
             tools:ignore="InnerclassSeparator" />
         <service
-            android:name=".Service.KeepMarketAppService"
+            android:name=".service.KeepMarketAppService"
             android:label="@string/service_keep_market_app_service"
             tools:ignore="InnerclassSeparator" />
         <service
-            android:name=".Service.KeepDchaService"
+            android:name=".service.KeepDchaService"
             android:label="@string/service_keep_dcha_state"
             tools:ignore="InnerclassSeparator" />
         <service
-            android:name=".Service.KeepUsbDebugService"
+            android:name=".service.KeepUsbDebugService"
             android:label="@string/service_keep_usb_debug"
             tools:ignore="InnerclassSeparator" />
         <service
-            android:name=".Service.KeepHomeService"
+            android:name=".service.KeepHomeService"
             android:label="@string/service_keep_home"
             tools:ignore="InnerclassSeparator" />
         <receiver

@@ -13,8 +13,10 @@ import android.widget.Toast;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
-import static com.saradabar.cpadcustomizetool.Common.Customizetool.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.Common.Customizetool.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDchaService;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
 public class RebootActivity extends Activity {
 
@@ -25,8 +27,8 @@ public class RebootActivity extends Activity {
     }
 
     private void Reboot() {
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
-                b.setTitle(R.string.dialog_title_reboot)
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+                d.setTitle(R.string.dialog_title_reboot)
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                     Intent intent = new Intent(DCHA_SERVICE);
@@ -34,8 +36,12 @@ public class RebootActivity extends Activity {
                     bindService(intent, new ServiceConnection() {
                         @Override
                         public void onServiceConnected(ComponentName name, IBinder service) {
-                            IDchaService mDchaService = IDchaService.Stub.asInterface(service);
-                            Toast.makeText(getApplication(), R.string.toast_reboot, Toast.LENGTH_SHORT).show();
+                            mDchaService = IDchaService.Stub.asInterface(service);
+                            if(toast != null) {
+                                toast.cancel();
+                            }
+                            toast = Toast.makeText(getApplicationContext(), R.string.toast_reboot, Toast.LENGTH_SHORT);
+                            toast.show();
                             try {
                                 mDchaService.rebootPad(0,null);
                             } catch (RemoteException e) {
@@ -48,13 +54,12 @@ public class RebootActivity extends Activity {
                         }
                     }, Context.BIND_AUTO_CREATE);
                 })
-
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finishAndRemoveTask())
                 .show();
     }
 
     @Override
-    public final void onPause() {
+    public void onPause() {
         super.onPause();
         finishAndRemoveTask();
     }

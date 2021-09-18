@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.stephentuso:welcome:1.4.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b3544c81ae0b385b86e08ae92f6f4a0c/welcome-1.4.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b3544c81ae0b385b86e08ae92f6f4a0c/welcome-1.4.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b3544c81ae0b385b86e08ae92f6f4a0c/welcome-1.4.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/46857ed10f7dc847de442f21bff50217/transformed/welcome-1.4.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/46857ed10f7dc847de442f21bff50217/transformed/welcome-1.4.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/46857ed10f7dc847de442f21bff50217/transformed/welcome-1.4.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.stephentuso/welcome/1.4.1/c86ec9d840d5592eb7499fb90335d14f301a1cb9/welcome-1.4.1-javadoc.jar!/" />

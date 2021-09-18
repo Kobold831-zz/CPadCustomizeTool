@@ -35,7 +35,7 @@
             android:title="@string/main_pre_title_change_home">
             <intent
                 android:action="android.intent.action.MAIN"
-                android:targetClass="com.saradabar.cpadcustomizetool.SetHome.SetHomeAppActivity"
+                android:targetClass="com.saradabar.cpadcustomizetool.set.SetLauncherActivity"
                 android:targetPackage="com.saradabar.cpadcustomizetool">
             </intent>
         </Preference>

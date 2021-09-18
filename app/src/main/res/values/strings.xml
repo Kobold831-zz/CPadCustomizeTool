@@ -28,13 +28,10 @@
     <string name="start_starting_main">メイン画面を起動しています…</string>
     <string name="start_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、https://ctabwiki.nerrog.net/の許諾契約およびこの規約に同意するものとし、\n開発者は一切の問題において責任を負わないものとします。</string>
 
-    <!-- カードビュー -->
-    <string name="card_android_settings">Android設定</string>
-    <string name="card_system_ui">システムUI設定</string>
-    <string name="card_emergency_mode">緊急モード</string>
-    <string name="card_normal_mode">通常モード</string>
-    <string name="card_option">オプション</string>
-    <string name="card_other">その他</string>
+    <!-- welcome -->
+    <string name="wel_title">利用規約</string>
+    <string name="wel_not_agree">同意しない</string>
+    <string name="wel_agree">同意する</string>
 
     <!-- メイン設定 -->
     <string name="main_pre_category_system_ui">システムUI設定</string>
@@ -74,6 +71,8 @@
     <string name="main_error_button_2">アンインストールブロックを開く</string>
 
     <!-- その他の設定 -->
+    <string name="un_text_1">すべて無効</string>
+    <string name="un_text_2">すべて有効</string>
 
     <!-- メニュー -->
     <string name="menu_select_app_info">アプリ情報</string>
@@ -122,8 +121,14 @@
     <string name="toast_not_change">権限を付与してから再試行してください。</string>
     <string name="toast_error_not_use">現在この機能は使用できません。</string>
     <string name="toast_notice_disable_own">Device-Ownerは無効になりました。</string>
+    <string name="toast_unknown_activity">ブラウザを開けませんでした。</string>
 
     <!-- アプリ情報 -->
+    <string name="info_text_1">アプリの情報</string>
+    <string name="info_text_2">開発者：Kobold\n\nこのアプリについてのお問い合わせ：\n\nCTabLaboサーバーまでお問い合わせください。\n\nCTabLaboサーバーは下のボタンより参加可能です。</string>
+    <string name="info_text_3">一部のコード及び画像は”よびばいと”さんのを使用しています。</string>
+    <string name="info_text_4">使用している外部ライブラリー\n\nwelcome-android\nCopyright 2015\-2017 Stephen Tuso</string>
+    <string name="info_button">サイトに飛ぶ</string>
     <string name="info_app_state_not_use">アプリの状態:このアプリは現在使用できません。/このアプリは開発者により使用制限をされているか開発が停止した可能性があります。詳しい情報は下記Wikiにて確認をしてください。</string>
     <string name="info_app_state_use">アプリの状態:リリースバージョン/このアプリは現在サポートされており、使用可能です。</string>
 </resources>

@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: com.android.support:support-compat:25.3.1@aar">
     <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8ed34a4e6960a1fadb1d84b38bcdd704/support-compat-25.3.1/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/7ad4ce0c0b7a58c0a440e5212c2b8122/transformed/support-compat-25.3.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8ed34a4e6960a1fadb1d84b38bcdd704/support-compat-25.3.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8ed34a4e6960a1fadb1d84b38bcdd704/support-compat-25.3.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8ed34a4e6960a1fadb1d84b38bcdd704/support-compat-25.3.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/7ad4ce0c0b7a58c0a440e5212c2b8122/transformed/support-compat-25.3.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/7ad4ce0c0b7a58c0a440e5212c2b8122/transformed/support-compat-25.3.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/7ad4ce0c0b7a58c0a440e5212c2b8122/transformed/support-compat-25.3.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

@@ -1,63 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <TextView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:text="\n＜このアプリの情報＞\n" />
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_gravity="center_vertical|center_horizontal">
 
     <TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/menu_text_1" />
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:text="@string/info_text_1" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/menu_text_1" />
+
+    <TextView
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/menu_text_2" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/menu_text_3" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/menu_text_4" />
 
     <TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/menu_text_5" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="開発者:サラダバー\n\n＜このアプリについてのお問い合わせ＞\n\nCTabLaboサーバーに所属の”サラダバー”まで問い合わせしてください。\nCTabLaboサーバーはhttps://ctabwiki.mlより参加可能です。\n" />
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/info_text_2" />
 
     <Button
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:text="サイトに飛ぶ"
-    android:onClick="web" />
+        android:id="@+id/info_button"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:text="@string/info_button" />
 
     <TextView
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:textStyle="bold"
         android:textSize="15sp"
-        android:layout_marginTop="50sp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="一部のコード及び画像は”よびばいと”さんのを使用しています。"/>
+        android:text="@string/info_text_3" />
 
     <TextView
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:textStyle="bold"
         android:textSize="15sp"
-        android:layout_marginTop="50sp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="使用している外部ライブラリー：\n\n[welcome-android\nCopyright 2015-2017 Stephen Tuso]"/>
-
+        android:text="@string/info_text_4" />
 </LinearLayout>

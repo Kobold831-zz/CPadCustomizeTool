@@ -4,11 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.saradabar.cpadcustomizetool.Service.KeepDchaService;
-import com.saradabar.cpadcustomizetool.Service.KeepHomeService;
-import com.saradabar.cpadcustomizetool.Service.KeepMarketAppService;
-import com.saradabar.cpadcustomizetool.Service.KeepNavigationBarService;
-import com.saradabar.cpadcustomizetool.Service.KeepUsbDebugService;
+import com.saradabar.cpadcustomizetool.service.KeepDchaService;
+import com.saradabar.cpadcustomizetool.service.KeepHomeService;
+import com.saradabar.cpadcustomizetool.service.KeepMarketAppService;
+import com.saradabar.cpadcustomizetool.service.KeepNavigationBarService;
+import com.saradabar.cpadcustomizetool.service.KeepUsbDebugService;
 
 public class UpdateBroadcastReceiver extends BroadcastReceiver {
     @Override

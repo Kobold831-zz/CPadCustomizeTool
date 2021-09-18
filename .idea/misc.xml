@@ -5,11 +5,13 @@
       <map>
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/app_info.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/block_un_item.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/block_un_list.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/block_un_main.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/custom_layout.xml" value="0.36666666666666664" />
-        <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/information.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/information.xml" value="0.33" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/item.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/launcher_item.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/launcher_list.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/list_home.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/main_error.xml" value="0.36666666666666664" />
@@ -18,6 +20,7 @@
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/main_home.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/not_use_main.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/layout/welcome_scroll.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Kazuya/AndroidStudioProjects/CPadCustomizeTool/app/src/main/res/xml/pre_app_settings.xml" value="0.5338276181649676" />
       </map>
     </option>
   </component>

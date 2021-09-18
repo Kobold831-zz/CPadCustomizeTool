@@ -1,9 +1,10 @@
 package com.saradabar.cpadcustomizetool;
 
-
 import android.annotation.SuppressLint;
 import android.support.v4.app.Fragment;
 
+import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.flagment.WelScrollFragment;
 import com.stephentuso.welcome.BasicPage;
 import com.stephentuso.welcome.FragmentWelcomePage;
 import com.stephentuso.welcome.TitlePage;
@@ -33,8 +34,8 @@ public class WelAppActivity extends WelcomeActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if (!(Common.Customizetool.start_flag == 1||Common.Customizetool.start_flag == 2)) {
-            Common.Customizetool.start_flag = 3;
+        if (!(Common.Variable.START_FLAG == 1 || Common.Variable.START_FLAG == 2)) {
+            Common.Variable.START_FLAG = 3;
         }
     }
 }

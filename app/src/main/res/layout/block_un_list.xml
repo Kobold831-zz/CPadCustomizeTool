@@ -4,29 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <GridLayout
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="center_vertical|center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="2">
+        android:layout_height="wrap_content">
+
         <Button
             android:id="@+id/un_button_disable"
-            android:text="すべて無効"
+            android:text="@string/un_text_1"
             android:layout_margin="8dp"
-            android:layout_columnWeight="1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="?android:button" />
+
         <Button
             android:id="@+id/un_button_enable"
-            android:text="すべて有効"
+            android:text="@string/un_text_2"
             android:layout_margin="8dp"
-            android:layout_columnWeight="1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </GridLayout>
+            android:layout_height="wrap_content"
+            style="?android:attr/button" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/un_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 </LinearLayout>
