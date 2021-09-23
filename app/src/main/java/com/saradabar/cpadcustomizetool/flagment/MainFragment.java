@@ -1,5 +1,29 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
+import static android.content.Context.DEVICE_POLICY_SERVICE;
+import static android.widget.Toast.LENGTH_SHORT;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_MARKET_APP_FALSE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_MARKET_APP_TRUE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_REBOOT;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_STATE_0;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_STATE_3;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_TEST;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_USB_DEBUG_FALSE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_USB_DEBUG_TRUE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_VIEW_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.installData;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+
 import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -19,8 +43,10 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -30,14 +56,15 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.StartActivity;
+import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.service.KeepDchaService;
 import com.saradabar.cpadcustomizetool.service.KeepHomeService;
 import com.saradabar.cpadcustomizetool.service.KeepMarketAppService;
@@ -50,33 +77,7 @@ import java.util.Set;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
-import static android.content.Context.DEVICE_POLICY_SERVICE;
-import static android.widget.Toast.LENGTH_SHORT;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDchaService;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
-
 public class MainFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
-
-    private int connectionFlag;
-
-    private static final int FLAG_TEST = 0;
-    private static final int FLAG_SET_DCHA_STATE_0 = 1;
-    private static final int FLAG_SET_DCHA_STATE_3 = 2;
-    private static final int FLAG_HIDE_NAVIGATION_BAR = 3;
-    private static final int FLAG_VIEW_NAVIGATION_BAR = 4;
-    private static final int FLAG_REBOOT = 5;
-    private static final int FLAG_USB_DEBUG_TRUE = 6;
-    private static final int FLAG_USB_DEBUG_FALSE = 7;
-    private static final int FLAG_MARKET_APP_TRUE = 8;
-    private static final int FLAG_MARKET_APP_FALSE = 9;
 
     private final String dchaStateString = DCHA_STATE;
     private final String hideNavigationBarString = HIDE_NAVIGATION_BAR;
@@ -84,6 +85,10 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     private AlertDialog alertDialog;
 
     private ContentResolver resolver;
+
+    private int connectionFlag;
+
+    private IDchaService mDchaService;
 
     private final Uri contentDchaState = Settings.System.getUriFor(dchaStateString);
     private final Uri contentHideNavigationBar = Settings.System.getUriFor(hideNavigationBarString);
@@ -107,6 +112,21 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
             switchKeepUsbDebug,
             switchKeepHome,
             switchDeviceAdministrator;
+
+    private Preference preferenceDchaService,
+            preferenceEmergencyManual,
+            preferenceNormalManual,
+            preferenceOtherSettings,
+            preferenceReboot,
+            preferenceRebootShortCut,
+            preferenceSilentInstall,
+            preferenceTEST;
+
+    private static MainFragment instance = null;
+
+    public static MainFragment getInstance() {
+        return instance;
+    }
 
     private static Set<String> getEmergencySettings(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -238,30 +258,38 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         }
     };
 
-    /* 接続 */
-    private final ServiceConnection dchaServiceConnection = new ServiceConnection() {
+    public void bindDchaService(int flag) {
+        connectionFlag = flag;
+        Intent intent = new Intent(DCHA_SERVICE);
+        intent.setPackage(PACKAGE_DCHASERVICE);
+        getActivity().bindService(intent, dchaServiceConnection, Context.BIND_AUTO_CREATE);
+    }
 
+    public ServiceConnection dchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
             try {
                 switch (connectionFlag) {
-                    case FLAG_SET_DCHA_STATE_0:
+                    case Common.Variable.FLAG_SET_DCHA_STATE_0:
                         mDchaService.setSetupStatus(0);
                         break;
-                    case FLAG_SET_DCHA_STATE_3:
+                    case Common.Variable.FLAG_SET_DCHA_STATE_3:
                         mDchaService.setSetupStatus(3);
                         break;
-                    case FLAG_HIDE_NAVIGATION_BAR:
+                    case Common.Variable.FLAG_HIDE_NAVIGATION_BAR:
                         mDchaService.hideNavigationBar(true);
                         break;
-                    case FLAG_VIEW_NAVIGATION_BAR:
+                    case Common.Variable.FLAG_VIEW_NAVIGATION_BAR:
                         mDchaService.hideNavigationBar(false);
                         break;
-                    case FLAG_REBOOT:
+                    case Common.Variable.FLAG_REBOOT:
                         mDchaService.rebootPad(0, null);
                         break;
-                    case FLAG_TEST:
+                    case FLAG_SET_DCHA_SERVICE:
+                        mDchaService.getSetupStatus();
+                        break;
+                    case Common.Variable.FLAG_TEST:
                         break;
                 }
             } catch (RemoteException ignored) {
@@ -309,8 +337,12 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.pre_main);
-        findPreference("Android_Setting").setOnPreferenceClickListener(this);
+        instance = this;
 
+        mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        mComponentName = new ComponentName(getActivity(), AdministratorReceiver.class);
+
+        findPreference("Android_Setting").setOnPreferenceClickListener(this);
         resolver = getActivity().getContentResolver();
         switchDchaState = (SwitchPreference) findPreference("switch1");
         switchKeepDchaState = (SwitchPreference) findPreference("switch2");
@@ -323,13 +355,14 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         switchKeepHome = (SwitchPreference) findPreference("switch9");
         switchDeviceAdministrator = (SwitchPreference) findPreference("switch10");
         preferenceChangeHome = findPreference("Android_Home");
-        final Preference preferenceDchaService = findPreference("Dcha_Service");
-        final Preference preferenceOtherSettings = findPreference("Android_Setting");
-        final Preference preferenceReboot = findPreference("Android_Reboot");
-        final Preference preferenceRebootShortCut = findPreference("Android_Reboot_ShortCut");
-        final Preference preferenceEmergencyManual = findPreference("Emergency_Manual");
-        final Preference preferenceNormalManual = findPreference("Normal_Manual");
-        final Preference preferenceTEST = findPreference("TEST");
+        preferenceDchaService = findPreference("Dcha_Service");
+        preferenceOtherSettings = findPreference("Android_Setting");
+        preferenceReboot = findPreference("Android_Reboot");
+        preferenceRebootShortCut = findPreference("Android_Reboot_ShortCut");
+        preferenceEmergencyManual = findPreference("Emergency_Manual");
+        preferenceNormalManual = findPreference("Normal_Manual");
+        preferenceSilentInstall = findPreference("android_silent_install");
+        preferenceTEST = findPreference("TEST");
         /* final Preference preferenceResolutionSettings = findPreference("Android_resolution_Settings"); */
 
         try {
@@ -363,7 +396,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     } else {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
-                }else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
+                } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
                     if ((boolean) o) {
                         bindDchaService(FLAG_SET_DCHA_STATE_3);
                     } else {
@@ -380,7 +413,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     } else {
                         settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
                     }
-                }else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
+                } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
                     if ((boolean) o) {
                         bindDchaService(FLAG_HIDE_NAVIGATION_BAR);
                     } else {
@@ -430,7 +463,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     try {
                         Settings.Secure.putInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 1);
                         getActivity().startService(new Intent(getActivity(), KeepMarketAppService.class));
-                    }catch (SecurityException e){
+                    } catch (SecurityException e) {
                         e.printStackTrace();
                         if (null != toast) toast.cancel();
                         toast = Toast.makeText(getActivity(), R.string.toast_not_change, LENGTH_SHORT);
@@ -463,9 +496,16 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         }
                     }
                     try {
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_3);
+                        }
+                        Thread.sleep(100);
                         Settings.Global.putInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED, 1);
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_0);
+                        }
                         getActivity().startService(new Intent(getActivity(), KeepUsbDebugService.class));
-                    }catch (SecurityException e){
+                    } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
                         if (null != toast) toast.cancel();
                         toast = Toast.makeText(getActivity(), R.string.toast_not_change, LENGTH_SHORT);
@@ -521,7 +561,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                             return true;
                         }
                     }
-                    spe.putString(Common.Variable.KEY_SAVE_KEEP_HOME, getHome());
+                    spe.putString(Common.Variable.KEY_SAVE_KEEP_HOME, getLauncherPackage());
                     spe.apply();
                     getActivity().startService(new Intent(getActivity(), KeepHomeService.class));
                 } else {
@@ -571,8 +611,15 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
             switchUsbDebug.setOnPreferenceChangeListener((preference, o) -> {
                 if ((boolean) o) {
                     try {
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_3);
+                        }
+                        Thread.sleep(100);
                         settingsFlag(FLAG_USB_DEBUG_TRUE);
-                    } catch (SecurityException e) {
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_0);
+                        }
+                    } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
                         if (null != toast) toast.cancel();
                         toast = Toast.makeText(getActivity(), R.string.toast_not_change, LENGTH_SHORT);
@@ -606,10 +653,9 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     if (!mDevicePolicyManager.isAdminActive(mComponentName)) {
                         Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
                         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mComponentName);
-                        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "DchaServiceによってこのアプリがアンインストールされないようにするにはこの端末管理アプリを有効にしてください。");
                         startActivityForResult(intent, 1);
                     }
-                }else {
+                } else {
                     switchDeviceAdministrator.setChecked(true);
                     if (alertDialog != null && alertDialog.isShowing()) return false;
                     AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
@@ -692,9 +738,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                             .build();
                     ShortcutManager shortcutManager = getActivity().getSystemService(ShortcutManager.class);
                     shortcutManager.requestPinShortcut(shortcut, null);
-                    Toast.makeText(getActivity(), R.string.toast_common_success, LENGTH_SHORT).show();
-                }else {
-                    rebootShortCut();
+                } else {
+                    makeRebootShortcut();
                 }
                 return true;
             });
@@ -707,7 +752,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                             if (StartActivity.bindDchaService(getActivity(), dchaServiceConnection)) {
                                 Toast.makeText(getActivity(), R.string.toast_not_install_dcha, LENGTH_SHORT).show();
-                            }else {
+                            } else {
                                 Common.SET_DCHASERVICE_FLAG(USE_DCHASERVICE, getActivity());
                                 getActivity().finish();
                                 Intent intent = new Intent(getActivity(), StartActivity.class);
@@ -723,6 +768,16 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
             preferenceOtherSettings.setOnPreferenceClickListener(preference -> {
                 transitionFragment(new MainOtherFragment());
                 return false;
+            });
+
+            preferenceSilentInstall.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent("android.intent.action.GET_CONTENT");
+                    intent.setType("application/vnd.android.package-archive");
+                    startActivityForResult(intent, 0);
+                    return false;
+                }
             });
 
             preferenceTEST.setOnPreferenceClickListener(preference -> {
@@ -741,11 +796,18 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         } catch (Settings.SettingNotFoundException ignored) {
         }
 
-        preferenceChangeHome.setSummary(MessageFormat.format("ホーム:{0} ({1})", getHomeLabel(), getHome()));
+        preferenceChangeHome.setSummary(MessageFormat.format("ホーム：{0} ({1})", getLauncherName(), getLauncherPackage()));
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         preferenceScreen.removePreference(getPreferenceScreen().findPreference("TEST"));
 
+        if (Common.GET_MODEL_NAME(getActivity()) == 0) {
+            preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+            preferenceSilentInstall.setEnabled(false);
+        }
+
         if (Common.GET_MODEL_NAME(getActivity()) == 1) {
+            preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+            preferenceSilentInstall.setEnabled(false);
             switchDeviceAdministrator.setSummary(Build.MODEL + "ではこの機能は使用できません");
             switchDeviceAdministrator.setEnabled(false);
         }
@@ -757,26 +819,15 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
             switchKeepMarketApp.setEnabled(false);
         }
 
-        DevicePolicyManager dpm = (DevicePolicyManager)getActivity().getSystemService(DEVICE_POLICY_SERVICE);
+        DevicePolicyManager dpm = (DevicePolicyManager) getActivity().getSystemService(DEVICE_POLICY_SERVICE);
 
         if (dpm.isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("Device-Ownerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”Device-Ownerを無効”を押してください");
-        }
-
-        if (Common.Variable.USE_FLAG == 1) {
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("1"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("2"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("Android_Home"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("switch9"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("category_emergency"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("category_normal"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("category_other"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("Android_Setting"));
-            preferenceScreen.removePreference(getPreferenceScreen().findPreference("Dcha_Service"));
+            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”DeviceOwnerを無効”を押してください");
         }
 
         if (Common.GET_DCHASERVICE_FLAG(getActivity()) == USE_NOT_DCHASERVICE) {
+            preferenceScreen.removePreference(getPreferenceScreen().findPreference("android_silent_install"));
             preferenceScreen.removePreference(getPreferenceScreen().findPreference("Android_Home"));
             preferenceScreen.removePreference(getPreferenceScreen().findPreference("switch9"));
             preferenceScreen.removePreference(getPreferenceScreen().findPreference("category_emergency"));
@@ -790,37 +841,33 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         }
     }
 
-    private String getHome() {
-        Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
+    private String getLauncherPackage() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
         PackageManager pm = getActivity().getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
+        ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
         ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
         return activityInfo.packageName;
     }
 
-    private String getHomeLabel() {
-        Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
+    private String getLauncherName() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
         PackageManager pm = getActivity().getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
+        ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
         ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
         return activityInfo.loadLabel(pm).toString();
     }
 
-    public void rebootShortCut() {
+    public void makeRebootShortcut() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity");
-        makeRebootShortCut(intent);
-    }
-
-    public void makeRebootShortCut(Intent targetIntent) {
-        Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, targetIntent);
+        Intent intent2 = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        intent2.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent.setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity"));
         Parcelable icon = Intent.ShortcutIconResource.fromContext(getActivity(), R.drawable.reboot);
-        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, R.string.reboot);
-        getActivity().sendBroadcast(intent);
+        intent2.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+        intent2.putExtra(Intent.EXTRA_SHORTCUT_NAME, R.string.reboot);
+        getActivity().sendBroadcast(intent2);
         Toast.makeText(getActivity(), R.string.toast_common_success, LENGTH_SHORT).show();
     }
 
@@ -877,9 +924,16 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         switchKeepDchaState.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false));
         switchKeepUsbDebug.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false));
         switchKeepHome.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false));
-        preferenceChangeHome.setSummary(MessageFormat.format("ホーム:{0} ({1})", getHomeLabel(), getHome()));
+        preferenceChangeHome.setSummary(MessageFormat.format("ホーム：{0} ({1})", getLauncherName(), getLauncherPackage()));
+
+        if (Common.GET_MODEL_NAME(getActivity()) == 0) {
+            preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+            preferenceSilentInstall.setEnabled(false);
+        }
 
         if (Common.GET_MODEL_NAME(getActivity()) == 1) {
+            preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+            preferenceSilentInstall.setEnabled(false);
             switchDeviceAdministrator.setSummary(Build.MODEL + "ではこの機能は使用できません");
             switchDeviceAdministrator.setEnabled(false);
         }
@@ -891,19 +945,12 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
             switchKeepMarketApp.setEnabled(false);
         }
 
-        DevicePolicyManager dpm = (DevicePolicyManager)getActivity().getSystemService(DEVICE_POLICY_SERVICE);
+        DevicePolicyManager dpm = (DevicePolicyManager) getActivity().getSystemService(DEVICE_POLICY_SERVICE);
 
         if (dpm.isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("Device-Ownerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”Device-Ownerを無効”を押してください");
+            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”DeviceOwnerを無効”を押してください");
         }
-    }
-
-    private void bindDchaService(int FLAG) {
-        connectionFlag = FLAG;
-        Intent intent = new Intent(DCHA_SERVICE);
-        intent.setPackage(PACKAGE_DCHASERVICE);
-        getActivity().bindService(intent, dchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /* Preferenceタップ */
@@ -923,5 +970,96 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 .commit();
         ActionBar actionBar = getActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 0:
+                try {
+                    Common.Variable.installData = getInstallData(getActivity(), data.getData());
+                } catch (NullPointerException e) {
+                    StartActivity.getInstance().showDialog(2);
+                    return;
+                }
+                MainFragment.silentInstallTask silent = new MainFragment.silentInstallTask();
+                silent.setListener(StartActivity.getInstance().createListener());
+                silent.execute();
+                break;
+            case 1:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private String getInstallData(Context context, Uri uri) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            if ("com.android.externalstorage.documents".equals(uri.getAuthority())) {
+                String[] s1 = DocumentsContract.getDocumentId(uri).split(":");
+                String s2 = s1[0];
+                if ("primary".equalsIgnoreCase(s2)) {
+                    return Environment.getExternalStorageDirectory() + "/" + s1[1];
+                }
+                return "/storage/" + s2 + "/" + s1[1];
+            }
+        } else {
+            if ("file".equalsIgnoreCase(uri.getScheme())) {
+                return uri.getPath();
+            }
+        }
+        return null;
+    }
+
+    public static class silentInstallTask extends AsyncTask<Object, Void, Object> {
+
+        private Listener listener;
+
+        @Override
+        protected void onPreExecute() {
+            listener.onShow();
+        }
+
+        @Override
+        protected Object doInBackground(Object... value) {
+            if (MainFragment.getInstance().installApp(StartActivity.getInstance().mDchaService, installData, 1)) {
+                return new Object();
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            if (result != null) {
+                StartActivity.getInstance().mProgress.dismiss();
+                listener.onSuccess();
+            } else {
+                StartActivity.getInstance().mProgress.dismiss();
+                listener.onFailure();
+            }
+        }
+
+        public void setListener(Listener listener) {
+            this.listener = listener;
+        }
+
+        public interface Listener {
+            void onShow();
+
+            void onSuccess();
+
+            void onFailure();
+        }
+    }
+
+    /* サイレントインストール */
+    public boolean installApp(IDchaService mDchaService, String str, int i) {
+        try {
+            return mDchaService.installApp(str, i);
+        } catch (RemoteException | NullPointerException e) {
+            return false;
+        }
     }
 }

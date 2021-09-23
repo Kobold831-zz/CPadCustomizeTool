@@ -7,25 +7,34 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import jp.co.benesse.dcha.dchaservice.IDchaService;
-
 public final class Common {
 
     public static final class Variable {
 
         public static int START_FLAG, USE_FLAG;
 
+        public static final int FLAG_TEST = 0;
+        public static final int FLAG_SET_DCHA_STATE_0 = 1;
+        public static final int FLAG_SET_DCHA_STATE_3 = 2;
+        public static final int FLAG_HIDE_NAVIGATION_BAR = 3;
+        public static final int FLAG_VIEW_NAVIGATION_BAR = 4;
+        public static final int FLAG_REBOOT = 5;
+        public static final int FLAG_USB_DEBUG_TRUE = 6;
+        public static final int FLAG_USB_DEBUG_FALSE = 7;
+        public static final int FLAG_MARKET_APP_TRUE = 8;
+        public static final int FLAG_MARKET_APP_FALSE = 9;
+        public static final int FLAG_SET_DCHA_SERVICE = 10;
+
         public static String DOWNLOAD_FILE_URL;
         public static String UPDATE_CHECK_URL = "https://github.com/saradabar/Touch2_Custom_Tool/raw/master/Update.xml";
         public static String SUPPORT_CHECK_URL = "https://raw.githubusercontent.com/saradabar/Touch2_Custom_Tool/master/Support.xml";
+        public static String installData;
 
         public static Toast toast;
 
         public static DevicePolicyManager mDevicePolicyManager;
 
         public static ComponentName mComponentName;
-
-        public static IDchaService mDchaService;
 
         public static final int SETTINGS_NOT_COMPLETED = 0;
         public static final int USE_NOT_DCHASERVICE = 0;

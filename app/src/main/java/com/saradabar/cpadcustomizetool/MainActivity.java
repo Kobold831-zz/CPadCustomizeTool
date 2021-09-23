@@ -1,5 +1,13 @@
 package com.saradabar.cpadcustomizetool;
 
+import static com.saradabar.cpadcustomizetool.common.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.common.Common.GET_MODEL_NAME;
+import static com.saradabar.cpadcustomizetool.common.Common.GET_SETTINGS_FLAG;
+import static com.saradabar.cpadcustomizetool.common.Common.GET_UPDATE_FLAG;
+import static com.saradabar.cpadcustomizetool.common.Common.SET_CHANGE_SETTINGS_DCHA_FLAG;
+import static com.saradabar.cpadcustomizetool.common.Common.SET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.common.Common.SET_MODEL_NAME;
+import static com.saradabar.cpadcustomizetool.common.Common.SET_SETTINGS_FLAG;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_COMPLETED;
@@ -9,14 +17,6 @@ import static com.saradabar.cpadcustomizetool.common.Common.Variable.UPDATE_CHEC
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_DCHASERVICE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_MODEL_NAME;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_SETTINGS_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_UPDATE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_CHANGE_SETTINGS_DCHA_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_DCHASERVICE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_MODEL_NAME;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_SETTINGS_FLAG;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -32,7 +32,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -106,8 +105,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("通信エラーが発生しました。\nネットワークに接続してください。\n続行する場合機能が制限されます。")
+                .setIcon(R.drawable.alert)
+                .setMessage("通信エラーが発生しました\nネットワークに接続してください\n続行する場合機能が制限されます")
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     Common.Variable.USE_FLAG = 1;
@@ -179,8 +178,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
     public void onDownloadError() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_common_error)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("通信エラーが発生しました。\nネットワークに接続してください。")
+                .setIcon(R.drawable.alert)
+                .setMessage("通信エラーが発生しました\nネットワークに接続してください")
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
@@ -189,8 +188,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("アップデートがあります。アップデートしますか？\nアップデートをすることを推奨します。\n\n更新情報：\n" + d)
+                .setMessage("アップデートがあります\nアップデートしますか？\n\n更新情報：\n" + d)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                     progressHandler = new ProgressHandler();
                     initFileLoader();
@@ -214,12 +212,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void initFileLoader() {
-        File sdCard = Environment.getExternalStorageDirectory();
-        File directory = new File(sdCard.getAbsolutePath() + "/UpdateFolder");
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-        File outputFile = new File(directory, "UpdateFile.apk");
+        File outputFile = new File(new File(getExternalCacheDir(), "update.apk").getPath());
         asyncfiledownload = new AsyncFileDownload(this, Common.Variable.DOWNLOAD_FILE_URL, outputFile);
         asyncfiledownload.execute();
     }
@@ -236,7 +229,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
         if (id == 0) {
             progress = new ProgressDialog(this);
             progress.setTitle("アプリの更新");
-            progress.setMessage("アップデートファイルをサーバーからダウンロード中...");
+            progress.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
             progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progress.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog, which) -> {
                 cancelLoad();
@@ -250,8 +243,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("このアプリは現在使用できません。\n続行する場合機能が制限されます。")
+                .setIcon(R.drawable.alert)
+                .setMessage("このアプリは現在使用できません\n続行する場合機能が制限されます")
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     Common.Variable.USE_FLAG = 1;
@@ -267,7 +260,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void showLoadingDialog_Update() {
-        loading = ProgressDialog.show(this, "", "アプリの更新を確認中...", true);
+        loading = ProgressDialog.show(this, "", "アプリの更新を確認中・・・", true);
     }
 
     private void cancelLoadingDialog_Update(){
@@ -275,7 +268,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void showLoadingDialog_Xml() {
-        loading = ProgressDialog.show(this, "", "通信中です...", true);
+        loading = ProgressDialog.show(this, "", "通信中です・・・", true);
     }
 
     private void cancelLoadingDialog_Xml() {
@@ -468,7 +461,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     AlertDialog.Builder d = new AlertDialog.Builder(this);
                     d.setCancelable(false)
                             .setTitle(R.string.dialog_title_grant_permission)
-                            .setMessage("システム設定の変更が許可されていません。\n”設定”を押した後に表示されるスイッチを有効にし許可してください")
+                            .setMessage("システム設定の変更が許可されていません\n”設定”を押した後に表示されるスイッチを有効にし許可してください")
                             .setIcon(R.drawable.alert)
                             .setPositiveButton(R.string.dialog_common_settings, (dialog, which) -> {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

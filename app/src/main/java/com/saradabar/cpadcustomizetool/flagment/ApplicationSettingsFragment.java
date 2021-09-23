@@ -42,7 +42,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
 
         if (GET_DCHASERVICE_FLAG(getActivity()) == USE_NOT_DCHASERVICE) {
             SET_CHANGE_SETTINGS_DCHA_FLAG(0, getActivity());
-            changeSettingsDcha.setSummary("この機能を使用するには、”DchaServiceの機能を使用”を押して内容を確認してください。");
+            changeSettingsDcha.setSummary("この機能を使用するには、”DchaServiceの機能を使用”を押して内容を確認してください");
             changeSettingsDcha.setChecked(false);
             changeSettingsDcha.setEnabled(false);
         } else if (GET_DCHASERVICE_FLAG(getActivity()) == USE_DCHASERVICE) {

@@ -2,7 +2,6 @@ package com.saradabar.cpadcustomizetool.set;
 
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDchaService;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
 import android.annotation.SuppressLint;
@@ -40,6 +39,8 @@ import java.util.Objects;
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class SetLauncherActivity extends Activity {
+
+    private IDchaService mDchaService;
 
     private String setHomeApp, setHomeName;
 
@@ -109,7 +110,7 @@ public class SetLauncherActivity extends Activity {
             if (toast != null) {
                 toast.cancel();
             }
-            toast = Toast.makeText(getApplicationContext(), "ホームを" + setHomeName + "に変更しました。", Toast.LENGTH_SHORT);
+            toast = Toast.makeText(getApplicationContext(), "ホームを" + setHomeName + "に変更しました", Toast.LENGTH_SHORT);
             toast.show();
             /* ListViewの更新 */
             final ListView listView = findViewById(R.id.launcher_list);

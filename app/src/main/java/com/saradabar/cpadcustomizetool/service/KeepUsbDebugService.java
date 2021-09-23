@@ -1,5 +1,7 @@
 package com.saradabar.cpadcustomizetool.service;
 
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
+
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,11 +27,19 @@ public class KeepUsbDebugService extends Service {
             super.onChange(selfChange);
             try {
                 if (Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) == 0) {
+                    String dchaStateString = DCHA_STATE;
+                    if (Common.GET_MODEL_NAME(getApplicationContext()) == 2) {
+                        Settings.System.putInt(resolver, dchaStateString,3);
+                    }
+                    Thread.sleep(100);
                     Settings.Global.putInt(getContentResolver(), Settings.Global.ADB_ENABLED, 1);
+                    if (Common.GET_MODEL_NAME(getApplicationContext()) == 2) {
+                        Settings.System.putInt(resolver, dchaStateString,0);
+                    }
                 }
-            } catch (SecurityException | Settings.SettingNotFoundException e) {
+            } catch (SecurityException | Settings.SettingNotFoundException | InterruptedException e) {
                 e.printStackTrace();
-                toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください。", Toast.LENGTH_SHORT);
+                toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);
                 toast.show();
                 SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
                 SharedPreferences.Editor spe = sp.edit();

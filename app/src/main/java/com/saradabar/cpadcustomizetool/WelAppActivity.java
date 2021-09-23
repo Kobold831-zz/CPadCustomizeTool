@@ -19,8 +19,8 @@ public class WelAppActivity extends WelcomeActivity {
                 .bottomLayout(WelcomeConfiguration.BottomLayout.INDICATOR_ONLY)
                 .defaultBackgroundColor(R.color.white)
                 .page(new TitlePage(R.drawable.cpadmaterial, "CPad Customize Toolへようこそ！").titleColor(R.color.black))
-                .page(new BasicPage(R.drawable.navigationbar, "ナビゲーションバー常時表示", "学習中、それ以外の時でもナビゲーションバーを表示します。").descriptionColor(R.color.black).headerColor(R.color.black))
-                .page(new BasicPage(R.drawable.ex, "緊急モード", "瞬時に学習環境に変更します。").descriptionColor(R.color.black).headerColor(R.color.black))
+                .page(new BasicPage(R.drawable.navigationbar, "ナビゲーションバー常時表示", "学習中、それ以外の時でもナビゲーションバーを表示します").descriptionColor(R.color.black).headerColor(R.color.black))
+                .page(new BasicPage(R.drawable.ex, "緊急モード", "瞬時に学習環境に変更します").descriptionColor(R.color.black).headerColor(R.color.black))
                 .page(new FragmentWelcomePage() {
                     @Override
                     protected Fragment fragment() {

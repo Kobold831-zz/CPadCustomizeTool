@@ -3,13 +3,14 @@ package com.saradabar.cpadcustomizetool;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDchaService;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -37,10 +38,20 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class StartActivity extends Activity {
 
+    public IDchaService mDchaService;
+    public  ProgressDialog mProgress;
+
+    private static StartActivity instance = null;
+
+    public static StartActivity getInstance() {
+        return instance;
+    }
+
     /* 設定画面表示 */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
         mDevicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         mComponentName = new ComponentName(this, AdministratorReceiver.class);
@@ -59,7 +70,7 @@ public class StartActivity extends Activity {
                                 mDevicePolicyManager.clearDeviceOwnerApp(getPackageName());
                                 Toast.makeText(view.getContext(), R.string.toast_notice_disable_own, Toast.LENGTH_SHORT).show();
                             });
-                    b.setNeutralButton(R.string.dialog_common_no, null);
+                    b.setNegativeButton(R.string.dialog_common_no, null);
                     b.show();
                 });
                 button2.setOnClickListener(view -> {
@@ -106,7 +117,7 @@ public class StartActivity extends Activity {
                 startActivity(intent2);
                 return true;
             case R.id.app_info_3:
-                transitionFragment(new ApplicationSettingsFragment());
+                mTransitionFragment(new ApplicationSettingsFragment());
                 return true;
             case android.R.id.home:
                 transitionFragment(new MainFragment());
@@ -118,9 +129,17 @@ public class StartActivity extends Activity {
     private void transitionFragment(PreferenceFragment nextPreferenceFragment) {
             getFragmentManager()
                     .beginTransaction()
-                    .addToBackStack(null)
                     .replace(R.id.layout_main, nextPreferenceFragment)
                     .commit();
+        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void mTransitionFragment(PreferenceFragment nextPreferenceFragment) {
+        getFragmentManager()
+                .beginTransaction()
+                .addToBackStack(null)
+                .replace(R.id.layout_main, nextPreferenceFragment)
+                .commit();
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -142,6 +161,62 @@ public class StartActivity extends Activity {
             mDchaService = null;
         }
     };
+
+    public MainFragment.silentInstallTask.Listener createListener() {
+        return new MainFragment.silentInstallTask.Listener() {
+
+            /* プログレスバーの表示 */
+            @Override
+            public void onShow() {
+                showDialog(1);
+            }
+
+
+            /* 成功 */
+            @Override
+            public void onSuccess() {
+                AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
+                d.setMessage("サイレントインストールに成功しました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
+                d.create();
+                d.show();
+            }
+
+            /* 失敗 */
+            @Override
+            public void onFailure() {
+                AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
+                d.setMessage("サイレントインストールに失敗しました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
+                d.create();
+                d.show();
+            }
+        };
+    }
+
+    /* ダイアログの表示 */
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case 1:
+                mProgress = new ProgressDialog(StartActivity.this);
+                mProgress.setTitle("");
+                mProgress.setMessage("インストール中・・・");
+                mProgress.setCancelable(false);
+                mProgress.create();
+                mProgress.show();
+                return mProgress;
+            case 2:
+                AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
+                d.setMessage("サイレントインストールがキャンセルされました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
+                d.show();
+                return d.create();
+        }
+        return null;
+    }
 
     /* 再表示 */
     @Override

@@ -2,20 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:layout_gravity="center_vertical|center_horizontal">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_gravity="center_vertical|center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/un_button_disable"
             android:text="@string/un_text_1"
             android:layout_margin="8dp"
-            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="?android:button" />
 
@@ -23,9 +24,10 @@
             android:id="@+id/un_button_enable"
             android:text="@string/un_text_2"
             android:layout_margin="8dp"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            style="?android:attr/button" />
+            style="?android:button" />
     </LinearLayout>
 
     <ListView

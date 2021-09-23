@@ -54,24 +54,28 @@
             android:theme="@style/AppTheme"
             tools:ignore="InnerclassSeparator" />
         <activity
+            android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
             android:name=".mode.emergency.EmergencyActivity"
             android:label="@string/emergency_activity"
-            android:theme="@style/AppTheme"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert">
             tools:ignore="InnerclassSeparator">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
         <activity
+            android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
             android:name=".mode.normal.NormalActivity"
-            android:label="@string/normal_mode_activity">
+            android:label="@string/normal_mode_activity"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
         <activity
+            android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
             android:name=".RebootActivity"
             android:label="@string/reboot"

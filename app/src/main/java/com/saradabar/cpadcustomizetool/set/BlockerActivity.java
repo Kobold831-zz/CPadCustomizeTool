@@ -1,5 +1,7 @@
 package com.saradabar.cpadcustomizetool.set;
 
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
@@ -29,7 +31,6 @@ import java.util.List;
 
 public class BlockerActivity extends Activity {
 
-    private Switch unSwitch;
     private ComponentName administratorComponent;
 
     @SuppressLint("WrongConstant")
@@ -40,7 +41,7 @@ public class BlockerActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         administratorComponent = Common.getAdministratorComponent(this);
-        Common.Variable.mDevicePolicyManager = (DevicePolicyManager)this.getSystemService("device_policy");
+        mDevicePolicyManager = (DevicePolicyManager)this.getSystemService("device_policy");
 
         final PackageManager pm = getPackageManager();
         final List<ApplicationInfo> installedAppList = pm.getInstalledApplications(0);
@@ -64,10 +65,9 @@ public class BlockerActivity extends Activity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             AppData item = dataList.get(position);
             String selectPackage = Uri.fromParts("package", item.packName, null).toString();
-            unSwitch = findViewById(R.id.un_switch);
-            boolean bl = !unSwitch.isChecked();
-            Common.Variable.mDevicePolicyManager.setUninstallBlocked(administratorComponent, selectPackage.replace("package:", ""), bl);
-            unSwitch.setChecked(bl);
+            mDevicePolicyManager.setUninstallBlocked(administratorComponent, selectPackage.replace("package:", ""), !mDevicePolicyManager.isUninstallBlocked(administratorComponent, selectPackage.replace("package:", "")));
+            /* listviewの更新 */
+            listView.invalidateViews();
         });
 
         final AppListAdapter appListAdapter = new AppListAdapter(this, dataList);
@@ -76,7 +76,7 @@ public class BlockerActivity extends Activity {
         /* 無効 */
         unDisableButton.setOnClickListener(v -> {
             for (AppData appData : dataList) {
-                Common.Variable.mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, false);
+                mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, false);
             }
             ((Switch) AppListAdapter.view.findViewById(R.id.un_switch)).setChecked(false);
             /* listviewの更新 */
@@ -86,7 +86,7 @@ public class BlockerActivity extends Activity {
         /* 有効 */
         unEnableButton.setOnClickListener(v -> {
             for (AppData appData : dataList) {
-                Common.Variable.mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, true);
+                mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, true);
             }
             ((Switch) AppListAdapter.view.findViewById(R.id.un_switch)).setChecked(true);
             /* listviewの更新 */
@@ -140,7 +140,6 @@ public class BlockerActivity extends Activity {
             holder.imageIcon.setImageDrawable(data.icon);
 
             ((Switch)convertView.findViewById(R.id.un_switch)).setChecked(dpm.isUninstallBlocked(administratorComponent, data.packName));
-            ((Switch)convertView.findViewById(R.id.un_switch)).setOnCheckedChangeListener((buttonView, isChecked) -> dpm.setUninstallBlocked(administratorComponent, data.packName, isChecked));
 
             return convertView;
         }

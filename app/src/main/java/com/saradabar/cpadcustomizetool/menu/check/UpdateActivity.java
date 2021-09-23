@@ -1,5 +1,7 @@
 package com.saradabar.cpadcustomizetool.menu.check;
 
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -81,8 +83,8 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
     public void onDownloadError() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_common_error)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("通信エラーが発生しました。\nネットワークに接続してください。")
+                .setIcon(R.drawable.alert)
+                .setMessage("通信エラーが発生しました\nネットワークに接続してください")
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
@@ -90,8 +92,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
     private void showUpdateDialog(String d){
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_update)
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("アップデートがあります。アップデートしますか？\nアップデートをすることを推奨します。\n\n更新情報：\n" + d)
+                .setMessage("アップデートがあります\nアップデートしますか？\n\n更新情報：\n" + d)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                     initFileLoader();
                     showDialog(0);
@@ -103,8 +104,11 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
                         progressDialog.setProgress(0);
                         progressHandler.sendEmptyMessage(0);
                     }else{
-                        Toast ts = Toast.makeText(UpdateActivity.this, "NULLエラー", Toast.LENGTH_LONG);
-                        ts.show();
+                        if (toast != null) {
+                            toast.cancel();
+                        }
+                        toast = Toast.makeText(UpdateActivity.this, "エラーが発生しました", Toast.LENGTH_LONG);
+                        toast.show();
                     }
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finish())
@@ -115,7 +119,6 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
-                .setIcon(R.mipmap.ic_launcher)
                 .setMessage(R.string.dialog_no_update)
                 .setPositiveButton(R.string.dialog_common_ok,
                         (dialog, which) -> finish())
@@ -127,7 +130,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
         if (id == 0) {
             progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("アプリの更新");
-            progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中...");
+            progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog, which) -> {
                 cancelLoad();
@@ -152,7 +155,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
     }
 
     private void showLoadingDialog_Xml() {
-        loadingDialog = ProgressDialog.show(this, "", "アプリの更新を確認中...", true);
+        loadingDialog = ProgressDialog.show(this, "", "アプリの更新を確認中・・・", true);
     }
 
     private void cancelLoadingDialog_Xml(){

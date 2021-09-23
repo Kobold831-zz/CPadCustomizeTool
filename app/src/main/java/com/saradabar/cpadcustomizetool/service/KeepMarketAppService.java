@@ -29,7 +29,7 @@ public class KeepMarketAppService extends Service {
                 }
             } catch (SecurityException | Settings.SettingNotFoundException e) {
                 e.printStackTrace();
-                toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください。", Toast.LENGTH_SHORT);
+                toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);
                 toast.show();
                 SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
                 SharedPreferences.Editor spe = sp.edit();

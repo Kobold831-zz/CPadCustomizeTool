@@ -6,15 +6,21 @@
             android:key="intent_android_settings"
             android:title="設定を起動" />
         <Preference
+            android:key="intent_development_settings"
+            android:title="開発者向けオプションを開く" />
+        <Preference
             android:key="intent_sys_ui_adjustment"
             android:title="システムUI調整ツールを起動" />
         <Preference
             android:key="intent_block_to_uninstall_settings"
             android:title="ユーザーアプリのアンインストールを無効"
-            android:summary="Device-Ownerの権限を使用してユーザーアプリのアンインストールをブロックします。" />
+            android:summary="DeviceOwnerの権限を使用してユーザーアプリのアンインストールをブロックします" />
+        <SwitchPreference
+            android:key="permission_forced"
+            android:title="PERMISSION_GRANT_STATE" />
         <Preference
             android:key="disable_device_owner"
-            android:title="Device-Ownerを無効"
-            android:summary="Device-Ownerの権限を使用した機能は使用できなくなります\nアンインストールブロック機能によりブロック中のアプリは維持されます\nこの操作を行った後、デバイス管理者が無効になる場合があります"/>
+            android:title="DeviceOwnerを無効"
+            android:summary="DeviceOwnerの権限を使用した機能は使用できなくなります\nアンインストールブロック機能によりブロック中のアプリは維持されます\nこの操作を行った後、デバイス管理者が無効になる場合があります"/>
     </PreferenceCategory>
 </PreferenceScreen>
