@@ -142,7 +142,9 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
 
     private void initFileLoader()
     {
+        File mkdir = new File(getExternalCacheDir().getPath());
         File outputFile = new File(new File(getExternalCacheDir(), "update.apk").getPath());
+        mkdir.mkdir();
         asyncfiledownload = new AsyncFileDownload(this, Common.Variable.DOWNLOAD_FILE_URL, outputFile);
         asyncfiledownload.execute();
     }

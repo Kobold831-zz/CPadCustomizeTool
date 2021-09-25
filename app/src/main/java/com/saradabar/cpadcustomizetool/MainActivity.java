@@ -16,7 +16,6 @@ import static com.saradabar.cpadcustomizetool.common.Common.Variable.SUPPORT_CHE
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.UPDATE_CHECK_URL;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -212,7 +211,9 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void initFileLoader() {
+        File mkdir = new File(getExternalCacheDir().getPath());
         File outputFile = new File(new File(getExternalCacheDir(), "update.apk").getPath());
+        mkdir.mkdir();
         asyncfiledownload = new AsyncFileDownload(this, Common.Variable.DOWNLOAD_FILE_URL, outputFile);
         asyncfiledownload.execute();
     }
@@ -277,9 +278,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* 端末チェック */
     public void checkModel() {
-        if (null != toast) toast.cancel();
-        toast = Toast.makeText(this, R.string.start_check_model, Toast.LENGTH_SHORT);
-        toast.show();
         switch (Build.MODEL) {
             case "TAB-A03-BS":
             case "TAB-A03-BR":
@@ -298,9 +296,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* 端末チェックエラー */
     private void errorNotTab2Or3() {
-        if (null != toast) toast.cancel();
-        toast = Toast.makeText(this, R.string.start_check_common_error, Toast.LENGTH_SHORT);
-        toast.show();
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
@@ -312,15 +307,9 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* DchaService動作チェック */
     private void checkDcha() {
-        if (null != toast) toast.cancel();
-        toast = Toast.makeText(this, R.string.start_check_dchaservice, Toast.LENGTH_SHORT);
-        toast.show();
         /* DchaServiceの使用可否を確認 */
         if (GET_DCHASERVICE_FLAG(this) == USE_DCHASERVICE) {
             if (!bindDchaService(this, dchaServiceConnection)) {
-                if (null != toast) toast.cancel();
-                toast = Toast.makeText(this, R.string.start_check_common_error, Toast.LENGTH_SHORT);
-                toast.show();
                 AlertDialog.Builder d = new AlertDialog.Builder(this);
                 d.setCancelable(false)
                         .setTitle(R.string.dialog_title_common_error)
@@ -376,15 +365,9 @@ public class MainActivity extends Activity implements UpdateEventListener {
     /* Pad2起動設定チェック */
     private void checkSettingsTab2() {
         SET_MODEL_NAME(0, this);
-        if (null != toast) toast.cancel();
-        toast = Toast.makeText(this, R.string.start_check_permission, Toast.LENGTH_SHORT);
-        toast.show();
         if (GET_SETTINGS_FLAG(this) == SETTINGS_NOT_COMPLETED) {
             startCheck();
         } else {
-            if (null != toast) toast.cancel();
-            toast = Toast.makeText(this, R.string.start_starting_main, Toast.LENGTH_SHORT);
-            toast.show();
             Intent intent = new Intent(this, StartActivity.class);
             startActivity(intent);
             finish();
@@ -397,9 +380,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
         if (GET_SETTINGS_FLAG(this) == SETTINGS_NOT_COMPLETED) {
             startCheck();
         } else {
-            if (null != toast) toast.cancel();
-            toast = Toast.makeText(this, R.string.start_starting_main, Toast.LENGTH_SHORT);
-            toast.show();
             Intent intent = new Intent(this, StartActivity.class);
             startActivity(intent);
             finish();
@@ -412,9 +392,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
         if (GET_SETTINGS_FLAG(this) == SETTINGS_NOT_COMPLETED) {
             startCheck();
         } else {
-            if (null != toast) toast.cancel();
-            toast = Toast.makeText(this, R.string.start_starting_main, Toast.LENGTH_SHORT);
-            toast.show();
             Intent intent = new Intent(this, StartActivity.class);
             startActivity(intent);
             finish();
@@ -424,9 +401,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
     /* 初回起動お知らせ */
     public void startCheck() {
         SET_CHANGE_SETTINGS_DCHA_FLAG(0, this);
-        if (toast != null) toast.cancel();
-        toast = Toast.makeText(this, R.string.start_check_important_news, Toast.LENGTH_SHORT);
-        toast.show();
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setCancelable(false)
                 .setTitle(R.string.dialog_title_notice_start)
@@ -448,9 +422,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
         Intent intent = new Intent(this, StartActivity.class);
         switch (GET_MODEL_NAME(this)) {
             case 0:
-                if (null != toast) toast.cancel();
-                toast = Toast.makeText(this, R.string.start_starting_main, Toast.LENGTH_SHORT);
-                toast.show();
                 SET_SETTINGS_FLAG(SETTINGS_COMPLETED, this);
                 startActivity(intent);
                 finish();
@@ -470,9 +441,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
                             })
                             .setNeutralButton(R.string.dialog_common_exit, (dialogInterface, i) -> finishAndRemoveTask()).show();
                 } else {
-                    if (null != toast) toast.cancel();
-                    toast = Toast.makeText(this, R.string.start_starting_main, Toast.LENGTH_SHORT);
-                    toast.show();
                     SET_SETTINGS_FLAG(SETTINGS_COMPLETED, this);
                     startActivity(intent);
                     finish();

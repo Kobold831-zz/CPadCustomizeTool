@@ -1,7 +1,8 @@
 package com.saradabar.cpadcustomizetool;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.Fragment;
+
+import androidx.fragment.app.Fragment;
 
 import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.flagment.WelScrollFragment;

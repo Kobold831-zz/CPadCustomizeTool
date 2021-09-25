@@ -11,11 +11,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.widget.Toast;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.StartActivity;
@@ -25,9 +26,8 @@ import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 public class MainOtherFragment extends PreferenceFragment {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.pre_main_setting);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.pre_main_setting, rootKey);
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
 
@@ -108,7 +108,7 @@ public class MainOtherFragment extends PreferenceFragment {
                     toast.show();
                 }
             }
-            return false;
+            return true;
         });
 
         preferenceDisableDeviceOwner.setOnPreferenceClickListener(preference -> {

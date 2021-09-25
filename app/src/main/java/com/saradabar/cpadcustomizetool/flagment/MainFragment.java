@@ -24,7 +24,6 @@ import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentN
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
-import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -51,15 +50,16 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.preference.SwitchPreference;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
@@ -334,9 +334,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.pre_main);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.pre_main, rootKey);
         instance = this;
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -403,7 +402,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         bindDchaService(FLAG_SET_DCHA_STATE_0);
                     }
                 }
-                return true;
+                return false;
             });
 
             switchHideBar.setOnPreferenceChangeListener((preference, o) -> {
@@ -420,7 +419,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         bindDchaService(FLAG_VIEW_NAVIGATION_BAR);
                     }
                 }
-                return true;
+                return false;
             });
 
             switchEnableService.setOnPreferenceChangeListener((preference, o) -> {
@@ -507,6 +506,9 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         getActivity().startService(new Intent(getActivity(), KeepUsbDebugService.class));
                     } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_0);
+                        }
                         if (null != toast) toast.cancel();
                         toast = Toast.makeText(getActivity(), R.string.toast_not_change, LENGTH_SHORT);
                         toast.show();
@@ -621,6 +623,9 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         }
                     } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
+                        if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                            settingsFlag(FLAG_SET_DCHA_STATE_0);
+                        }
                         if (null != toast) toast.cancel();
                         toast = Toast.makeText(getActivity(), R.string.toast_not_change, LENGTH_SHORT);
                         toast.show();
@@ -690,7 +695,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
                 alertDialog = b.create();
                 alertDialog.show();
-                return true;
+                return false;
             });
 
             preferenceNormalManual.setOnPreferenceClickListener(preference -> {
@@ -707,7 +712,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
                 alertDialog = b.create();
                 alertDialog.show();
-                return true;
+                return false;
             });
 
             preferenceReboot.setOnPreferenceClickListener(preference -> {
@@ -722,7 +727,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss());
                 alertDialog = b.create();
                 alertDialog.show();
-                return true;
+                return false;
             });
 
             preferenceRebootShortCut.setOnPreferenceClickListener(preference -> {
@@ -741,7 +746,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 } else {
                     makeRebootShortcut();
                 }
-                return true;
+                return false;
             });
 
             preferenceDchaService.setOnPreferenceClickListener(preference -> {
@@ -762,7 +767,14 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss());
                 alertDialog = d.create();
                 alertDialog.show();
-                return true;
+                return false;
+            });
+
+            preferenceChangeHome.setOnPreferenceClickListener(preference -> {
+                preferenceChangeHome.setEnabled(false);
+                Intent intent = new Intent(getActivity(), com.saradabar.cpadcustomizetool.set.SetLauncherActivity.class);
+                startActivity(intent);
+                return false;
             });
 
             preferenceOtherSettings.setOnPreferenceClickListener(preference -> {
@@ -770,14 +782,12 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 return false;
             });
 
-            preferenceSilentInstall.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent("android.intent.action.GET_CONTENT");
-                    intent.setType("application/vnd.android.package-archive");
-                    startActivityForResult(intent, 0);
-                    return false;
-                }
+            preferenceSilentInstall.setOnPreferenceClickListener(preference -> {
+                preferenceSilentInstall.setEnabled(false);
+                Intent intent = new Intent("android.intent.action.GET_CONTENT");
+                intent.setType("application/vnd.android.package-archive");
+                startActivityForResult(intent, 1);
+                return false;
             });
 
             preferenceTEST.setOnPreferenceClickListener(preference -> {
@@ -796,7 +806,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         } catch (Settings.SettingNotFoundException ignored) {
         }
 
-        preferenceChangeHome.setSummary(MessageFormat.format("ホーム：{0} ({1})", getLauncherName(), getLauncherPackage()));
+        preferenceChangeHome.setSummary(getLauncherName());
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         preferenceScreen.removePreference(getPreferenceScreen().findPreference("TEST"));
 
@@ -897,8 +907,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     @Override
     public void onResume() {
         super.onResume();
-        ActionBar actionBar = getActivity().getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(false);
+        if (getActivity().getActionBar() != null) getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
+        if (!preferenceChangeHome.isEnabled()) preferenceChangeHome.setEnabled(true);
         /* オブザーバー有効 */
         isObserberStateEnable = true;
         resolver.registerContentObserver(contentDchaState, false, observerState);
@@ -924,7 +934,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
         switchKeepDchaState.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false));
         switchKeepUsbDebug.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false));
         switchKeepHome.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false));
-        preferenceChangeHome.setSummary(MessageFormat.format("ホーム：{0} ({1})", getLauncherName(), getLauncherPackage()));
+        preferenceChangeHome.setSummary(getLauncherName());
 
         if (Common.GET_MODEL_NAME(getActivity()) == 0) {
             preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
@@ -968,15 +978,15 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 .addToBackStack(null)
                 .replace(R.id.layout_main, nextPreferenceFragment)
                 .commit();
-        ActionBar actionBar = getActivity().getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 0:
+            case 1:
+                preferenceSilentInstall.setEnabled(true);
                 try {
                     Common.Variable.installData = getInstallData(getActivity(), data.getData());
                 } catch (NullPointerException e) {
@@ -987,7 +997,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 silent.setListener(StartActivity.getInstance().createListener());
                 silent.execute();
                 break;
-            case 1:
+            case 2:
                 break;
             default:
                 break;

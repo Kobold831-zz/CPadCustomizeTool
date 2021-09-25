@@ -19,12 +19,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.preference.PreferenceFragment;
 
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.common.Common;
@@ -53,6 +54,11 @@ public class StartActivity extends Activity {
         super.onCreate(savedInstanceState);
         instance = this;
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
+
+        if (Common.GET_MODEL_NAME(this) == 2) {
+            Common.SET_CHANGE_SETTINGS_DCHA_FLAG(1, this);
+        }
+
         mDevicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         mComponentName = new ComponentName(this, AdministratorReceiver.class);
         if (Common.Variable.USE_FLAG == 1) {
@@ -82,7 +88,7 @@ public class StartActivity extends Activity {
                 });
             }
         } else {
-            setContentView(R.layout.main_home);
+            setContentView(R.layout.main_layout);
             transitionFragment(new MainFragment());
         }
         if (Common.Variable.toast != null) {
@@ -127,11 +133,11 @@ public class StartActivity extends Activity {
     }
 
     private void transitionFragment(PreferenceFragment nextPreferenceFragment) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.layout_main, nextPreferenceFragment)
-                    .commit();
-        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.layout_main, nextPreferenceFragment)
+                .commit();
+        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     private void mTransitionFragment(PreferenceFragment nextPreferenceFragment) {

@@ -1,6 +1,13 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="AppTheme">
-        <item name="android:colorAccent">#DC143C</item>
+<resources>
+    <style name="StartTheme" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
+    <item name="android:colorAccent">@color/red</item>
+    </style>
+
+    <style name="MainTheme" parent="android:Theme.Material.Light">
+        <item name="android:colorAccent">@color/red</item>
+    </style>
+
+    <style name="MainPreference" parent="android:Theme.Material.Light">
+        <item name="android:colorAccent">@color/red</item>
     </style>
 </resources>

@@ -7,8 +7,8 @@ android {
         minSdkVersion 22
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 22
-        versionCode 24
-        versionName "1.4.1"
+        versionCode 25
+        versionName "1.4.2"
     }
 
     buildTypes {
@@ -18,13 +18,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
         }
     }
-
-    lintOptions {
-        checkReleaseBuilds false
-    }
 }
 
 dependencies {
     implementation files('libs/IDchaService.jar')
+    implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.stephentuso:welcome:1.4.1'
 }

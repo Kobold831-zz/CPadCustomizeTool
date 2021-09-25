@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress ALL -->
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="アプリ起動設定">
+    <PreferenceCategory android:title="アプリ起動設定">
 
         <SwitchPreference
             android:key="switch_auto_update_check"
             android:title="起動時のアップデートチェックを無効"
             android:summary="起動時のサポートチェックは有効です\nサポートチェックを無効にすることはできません"/>
+
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="アプリ設定">
+    <PreferenceCategory android:title="アプリ設定">
 
         <SwitchPreference
             android:key="switch_is_change_settings_use_dcha"
             android:title="DchaServiceを使用して設定変更"
             android:summary="有効にすると、システムUI,ナビゲーションバーの設定をDchaServiceを使用して変更します\n問題が発生した場合に使用してください"/>
+
     </PreferenceCategory>
+
 </PreferenceScreen>
