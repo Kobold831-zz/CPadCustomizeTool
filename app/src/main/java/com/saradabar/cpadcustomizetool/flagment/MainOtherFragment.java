@@ -90,22 +90,12 @@ public class MainOtherFragment extends PreferenceFragment {
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_GRANTED");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(getActivity(), "ポリシーをPERMISSION_GRANT_STATE_GRANTEDに設定しました", Toast.LENGTH_SHORT);
-                    toast.show();
                 }
             } else {
                 switchPreferencePermissionForced.setChecked(false);
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(getActivity(), "ポリシーをPERMISSION_GRANT_STATE_DEFAULTに設定しました", Toast.LENGTH_SHORT);
-                    toast.show();
                 }
             }
             return true;
@@ -116,7 +106,6 @@ public class MainOtherFragment extends PreferenceFragment {
                     .setTitle(R.string.dialog_question_device_owner)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                         mDevicePolicyManager.clearDeviceOwnerApp(getActivity().getPackageName());
-                        Toast.makeText(getActivity(), R.string.toast_notice_disable_own, Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(getActivity(), StartActivity.class);
                         getActivity().finish();
                         startActivity(intent);

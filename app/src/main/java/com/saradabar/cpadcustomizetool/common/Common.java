@@ -23,7 +23,10 @@ public final class Common {
         public static final int FLAG_USB_DEBUG_FALSE = 7;
         public static final int FLAG_MARKET_APP_TRUE = 8;
         public static final int FLAG_MARKET_APP_FALSE = 9;
-        public static final int FLAG_SET_DCHA_SERVICE = 10;
+
+        public static final int REQUEST_UPDATE = 0;
+        public static final int REQUEST_ADMIN = 1;
+        public static final int REQUEST_INSTALL = 2;
 
         public static String DOWNLOAD_FILE_URL;
         public static String UPDATE_CHECK_URL = "https://github.com/saradabar/Touch2_Custom_Tool/raw/master/Update.xml";
@@ -54,6 +57,7 @@ public final class Common {
         public static final String KEY_ENABLED_KEEP_USB_DEBUG = "enabled_keep_usb_debug";
         public static final String KEY_ENABLED_KEEP_HOME = "enabled_keep_home";
         public static final String KEY_SAVE_KEEP_HOME = "save_keep_home";
+        public static final String KEY_ENABLED_AUTO_USB_DEBUG = "enabled_auto_usb_debug";
     }
 
     public static ComponentName getAdministratorComponent(Context context) {

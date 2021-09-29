@@ -1,5 +1,6 @@
 package com.saradabar.cpadcustomizetool.menu.check;
 
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
 import android.app.ActionBar;
@@ -8,6 +9,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
@@ -82,15 +84,17 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
     @Override
     public void onDownloadError() {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_common_error)
+                .setCancelable(false)
+                .setTitle(R.string.dialog_title_update)
                 .setIcon(R.drawable.alert)
-                .setMessage("通信エラーが発生しました\nネットワークに接続してください")
+                .setMessage("エラーが発生しました")
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
 
     private void showUpdateDialog(String d){
         new AlertDialog.Builder(this)
+                .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setMessage("アップデートがあります\nアップデートしますか？\n\n更新情報：\n" + d)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
@@ -171,6 +175,14 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_UPDATE) {
+            finish();
+        }
     }
 
     @Override

@@ -3,11 +3,8 @@
     <string name="app_name">CPad Customize Tool</string>
     <string name="start_check_activity">カスタマイズツール</string>
     <string name="main_normal_settings_activity">設定</string>
-    <string name="service_keep_service">ナビゲーションバー維持サービス (停止しないでください)</string>
-    <string name="service_keep_market_app_service">提供元不明の許可維持サービス (停止しないでください)</string>
-    <string name="service_keep_dcha_state">システムUI通常用維持サービス (停止しないでください)</string>
-    <string name="service_keep_usb_debug">USBデバッグ維持サービス (停止しないでください)</string>
-    <string name="service_keep_home">ホーム維持サービス (停止しないでください)</string>
+    <string name="service_keep_service">維持サービス</string>
+    <string name="service_protect_keep_service">停止防御サービス</string>
     <string name="app_home_activity">ホーム</string>
     <string name="emergency_activity">緊急モード</string>
     <string name="normal_mode_activity">通常モード</string>
@@ -17,21 +14,11 @@
     <string name="reboot">再起動</string>
     <string name="block_to_uninstall">アンインストールブロック設定</string>
 
-    <!-- 起動チェック -->
-    <string name="start_check_common_error">エラーが発生しました</string>
-    <string name="start_check_model">端末を確認中・・・</string>
-    <string name="start_check_dchaservice">DchaServiceを確認中・・・</string>
-    <string name="start_check_permission">権限を確認中・・・</string>
-    <string name="start_check_important_news">重要なお知らせです\nよく読んでください</string>
-    <string name="start_check_settings_permissions">権限設定をするか選択してください</string>
-    <string name="start_grant_permission">権限設定中・・・</string>
-    <string name="start_starting_main">メイン画面を起動しています・・・</string>
-    <string name="start_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、https://ctabwiki.nerrog.net/の許諾契約およびこの規約に同意するものとし、\n開発者は一切の問題において責任を負わないものとします</string>
-
     <!-- welcome -->
     <string name="wel_title">利用規約</string>
     <string name="wel_not_agree">同意しない</string>
     <string name="wel_agree">同意する</string>
+    <string name="wel_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、https://ctabwiki.nerrog.net/の許諾契約およびこの規約に同意するものとし、\n開発者は一切の問題において責任を負わないものとします</string>
 
     <!-- メイン設定 -->
     <string name="main_pre_category_system_ui">システムUI設定</string>
@@ -46,10 +33,10 @@
     <string name="main_pre_title_keep_non_market">提供元不明のアプリの許可を維持</string>
     <string name="main_pre_title_change_home">ホームを変更</string>
     <string name="main_pre_title_keep_home">ホームを維持</string>
-    <string name="main_pre_sum_keep_home">スイッチをオンにする前まで設定していたホームランチャーをおよそ2秒周期で維持します</string>
+    <string name="main_pre_sum_keep_home">設定中のホームランチャーを維持します</string>
     <string name="main_pre_title_other_settings">その他の設定</string>
     <string name="main_pre_category_emergency_mode">緊急モード</string>
-    <string name="main_pre_title_select_course">受講中の講座名を選択</string>
+    <string name="main_pre_title_select_course">受講中の講座を選択</string>
     <string name="main_pre_title_change_settings">緊急モード実行時に変更する設定を変更</string>
     <string name="main_pre_sum_change_settings">デフォルトではすべての設定が変更されます</string>
     <string name="main_pre_title_manual">緊急モードの説明</string>
@@ -60,16 +47,15 @@
     <string name="main_pre_category_other_settings">その他のオプション</string>
     <string name="main_pre_title_reboot">再起動</string>
     <string name="main_pre_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
-    <string name="main_pre_sum_reboot">再起動しています・・・</string>
-    <string name="main_pre_sum_not_use">この機能は使用できません</string>
     <string name="main_pre_title_silent_install">サイレントインストール</string>
     <string name="main_pre_title_resolution">解像度設定</string>
 
     <!-- メイン設定エラー -->
-    <string name="main_error_message_enable_own">このアプリは現在使用できません\n\nDeviceOwnerを解除する場合は、\"DeviceOwnerを解除\"を押してください\n\nアンインストールブロックを解除する場合は、\"アンインストールブロックを開く\"を押してください</string>
-    <string name="main_error_message_disable_own">このアプリは現在使用できません</string>
+    <string name="main_error_message_enable_own">このアプリは現在使用できません\n\nDeviceOwnerを解除する場合は、\"DeviceOwnerを解除\"を押してください\n\nアンインストールブロックを解除する場合は、\"アンインストールブロックを開く\"を押してください\n\n\"デフォルト設定に戻す\"を押すと実行中の維持サービスが停止し、今まで操作した設定がデフォルト状態にクリアされます</string>
+    <string name="main_error_message_disable_own">このアプリは現在使用できません\n\n\"デフォルト設定に戻す\"を押すと実行中の維持サービスが停止し、今まで操作した設定がデフォルト状態にクリアされます</string>
     <string name="main_error_button_1">DeviceOwnerを解除</string>
     <string name="main_error_button_2">アンインストールブロックを開く</string>
+    <string name="main_error_button_3">デフォルト設定に戻す</string>
 
     <!-- その他の設定 -->
     <string name="un_text_1">すべて無効</string>
@@ -97,7 +83,7 @@
     <string name="dialog_notice_start">このアプリはアンチウイルスソフトに”不審なプログラム”として”誤検知”される場合があります\n質問がある場合は、CTabLaboに所属している”開発者”にお問い合わせしてください\nこのダイアログは次回起動以降表示しません</string>
     <string name="dialog_title_grant_permission">権限設定</string>
     <string name="dialog_no_update">アップデートはありません</string>
-    <string name="dialog_emergency_select_course">受講中の講座名を選択してください</string>
+    <string name="dialog_emergency_select_course">受講中の講座を選択してください</string>
     <string name="dialog_mode_select_settings">実行時に変更する設定を選択してください\n設定変更後は”OK”を押してください</string>
     <string name="dialog_title_dcha_service">以下の内容を確認してください</string>
     <string name="dialog_dcha_service">DchaServiceを使用すると、使用者自身に危険性があることを十分に理解する必要があります\nこの機能を使用したことによる全ての責任は自己責任であり、開発者は一切責任を負いません\nDchaServiceの機能を使用しますか？</string>
@@ -106,23 +92,20 @@
     <string name="dialog_emergency_manual_red">\nシステムUIを変更するためOneToucher等のアクティビティや他のアプリを起動させるアプリをインストールしておかないと初期化以外に勉強ホームから抜け出すことができなくなります\nアプリ履歴を全消去はナビゲーションバーの□ボタンを押すと表示されるアプリ履歴のアプリを終了するだけであり、バックグランド上で動いているOneToucher等のアプリは停止しません</string>
     <string name="dialog_title_normal_manual">通常モードの説明</string>
     <string name="dialog_normal_manual">この機能はアクティビティを呼び出して使用します\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します\n\n使用する場合ホームランチャーから”.mode.normal.NormalActivity”を追加し、タップしてください\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします\n\n＊ナビゲーションバーを表示＊\n\n＊ホームをNovaLauncherに変更＊\n\n＊システムUIを通常用に変更＊\n\n＊NovaLauncherを起動＊</string>
-    <string name="dialog_normal_manual_red">\nホームの起動,変更はNovaLauncherのみ対応しています\nNovaLauncherがインストールされていない状態で実行時にNovaLauncherを起動,ホームをNovaLauncherに変更が選択されていた場合スルーされます</string>
+    <string name="dialog_normal_manual_red">\nホームの起動、変更はNovaLauncherのみ対応しています\nNovaLauncherがインストールされていない状態で実行時にNovaLauncherを起動,ホームをNovaLauncherに変更が選択されていた場合スルーされます</string>
     <string name="dialog_error_not_grant_permission">システム設定の変更が許可されていません\n”設定”を押した後に表示されるスイッチを有効にし許可してください</string>
     <string name="dialog_question_device_owner">DeviceOwnerを無効にしますか？</string>
     <string name="dialog_question_device_admin">デバイス管理者を無効にしますか？\nこの操作を行うとDchaServiceによってアプリがアンインストールされる可能性があります</string>
+    <string name="dialog_question_are_you_sure">本当によろしいですか？</string>
 
     <!-- トースト -->
     <string name="toast_common_success">成功しました</string>
     <string name="toast_execution">実行しました</string>
-    <string name="toast_reboot">再起動しています・・・</string>
-    <string name="toast_not_course">選択された講座はこの端末上に存在しません</string>
-    <string name="toast_not_install_nova">"NovaLauncherがインストールされていない為ホームの起動,変更は行いません"</string>
-    <string name="toast_not_install_dcha">DchaServiceが機能していないためこの機能は使用できません</string>
+    <string name="toast_not_course">選択された講座は存在しません</string>
+    <string name="toast_not_install_nova">"ホームランチャーが存在しないためホームの起動、変更は実行しません"</string>
     <string name="toast_use_not_dcha">DchaServiceの機能を使用するための確認が取れていないため起動できません</string>
     <string name="toast_not_completed_settings">初期設定が完了していないため起動できません</string>
     <string name="toast_not_change">権限を付与してから再試行してください</string>
-    <string name="toast_error_not_use">この機能は使用できません</string>
-    <string name="toast_notice_disable_own">Device-Ownerは無効になりました</string>
     <string name="toast_unknown_activity">ブラウザを開けませんでした</string>
 
     <!-- アプリ情報 -->
@@ -131,6 +114,6 @@
     <string name="info_text_3">一部のコード及び画像は”よびばいと”さんのを使用しています</string>
     <string name="info_text_4">使用している外部ライブラリー\n\nwelcome-android\nCopyright 2015\-2017 Stephen Tuso</string>
     <string name="info_button">サイトに飛ぶ</string>
-    <string name="info_app_state_not_use">アプリの状態:このアプリは現在使用できません / このアプリは開発者により使用制限が行われているか、開発が停止した可能性があります</string>
-    <string name="info_app_state_use">アプリの状態:リリースバージョン / このアプリは現在サポートされており、使用可能です</string>
+    <string name="info_app_state_not_use">アプリの状態：このアプリは現在使用できません / このアプリは開発者により使用制限が行われているか、開発が停止した可能性があります</string>
+    <string name="info_app_state_use">アプリの状態：リリースバージョン / このアプリは現在サポートされており、使用可能です</string>
 </resources>

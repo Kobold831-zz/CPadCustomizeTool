@@ -1,5 +1,7 @@
 package com.saradabar.cpadcustomizetool.menu.check;
 
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -117,7 +119,7 @@ public class Updater {
         Uri dataUri = Uri.fromFile(directory);
         intent.setDataAndType(dataUri, "application/vnd.android.package-archive");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        activity.startActivity(intent);
+        activity.startActivityForResult(intent, REQUEST_UPDATE);
     }
 
     private HashMap<String, String> parseUpdateXml(String url) throws Exception {

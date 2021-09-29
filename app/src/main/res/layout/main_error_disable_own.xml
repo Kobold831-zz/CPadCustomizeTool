@@ -7,8 +7,26 @@
     android:layout_gravity="center_vertical|center_horizontal">
 
     <TextView
+        android:layout_margin="8dp"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/main_error_message_disable_own"
         android:textSize="20sp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_margin="8dp"
+            android:id="@+id/main_error_button_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_error_button_3"
+            style="?android:attr/button" />
+
+    </LinearLayout>
+
 </LinearLayout>

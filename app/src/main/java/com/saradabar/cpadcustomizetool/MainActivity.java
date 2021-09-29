@@ -10,6 +10,7 @@ import static com.saradabar.cpadcustomizetool.common.Common.SET_MODEL_NAME;
 import static com.saradabar.cpadcustomizetool.common.Common.SET_SETTINGS_FLAG;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_COMPLETED;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_NOT_COMPLETED;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.SUPPORT_CHECK_URL;
@@ -34,7 +35,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.menu.check.AsyncFileDownload;
@@ -83,7 +83,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
             /* アップデートチェックの可否を確認 */
             if (GET_UPDATE_FLAG(this) == 0) {
                 autoUpdateCheck();
-            }else {
+            } else {
                 checkSupport();
             }
         } else {
@@ -122,11 +122,11 @@ public class MainActivity extends Activity implements UpdateEventListener {
     private void autoUpdateCheck() {
         updater = new Updater(this, UPDATE_CHECK_URL, 1);
         updater.updateCheck();
-        showLoadingDialog_Update();
+        showLoadingDialog(1);
     }
 
     private void checkSupport() {
-        showLoadingDialog_Xml();
+        showLoadingDialog(2);
         Checker checker = new Checker(this, SUPPORT_CHECK_URL);
         checker.supportCheck();
     }
@@ -146,12 +146,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     public void onSupportAvailable() {
-        cancelLoadingDialog_Xml();
+        cancelLoadingDialog();
         showSupportDialog();
     }
 
     public void onSupportUnavailable() {
-        cancelLoadingDialog_Xml();
+        cancelLoadingDialog();
         if (GET_SETTINGS_FLAG(this) == SETTINGS_NOT_COMPLETED) {
             welcomeScreen = new WelcomeHelper(
                     this, WelAppActivity.class);
@@ -163,22 +163,22 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     @Override
     public void onUpdateAvailable1(String d) {
-        cancelLoadingDialog_Update();
+        cancelLoadingDialog();
         showUpdateDialog(d);
     }
 
     @Override
     public void onUpdateUnavailable1() {
-        cancelLoadingDialog_Update();
         checkSupport();
     }
 
     @Override
     public void onDownloadError() {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_common_error)
+                .setCancelable(false)
+                .setTitle(R.string.dialog_title_update)
                 .setIcon(R.drawable.alert)
-                .setMessage("通信エラーが発生しました\nネットワークに接続してください")
+                .setMessage("エラーが発生しました")
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
@@ -202,6 +202,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> {
                     if (isNetWork()) {
+                        showLoadingDialog(1);
                         checkSupport();
                     } else {
                         netWorkError();
@@ -218,15 +219,14 @@ public class MainActivity extends Activity implements UpdateEventListener {
         asyncfiledownload.execute();
     }
 
-    private void cancelLoad()
-    {
-        if(asyncfiledownload != null){
+    private void cancelLoad() {
+        if (asyncfiledownload != null) {
             asyncfiledownload.cancel(true);
         }
     }
 
     @Override
-    protected Dialog onCreateDialog(int id){
+    protected Dialog onCreateDialog(int id) {
         if (id == 0) {
             progress = new ProgressDialog(this);
             progress.setTitle("アプリの更新");
@@ -234,7 +234,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
             progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progress.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog, which) -> {
                 cancelLoad();
-                checkSupport();
+                if (isNetWork()) {
+                    showLoadingDialog(1);
+                    checkSupport();
+                } else {
+                    netWorkError();
+                }
             });
         }
         return progress;
@@ -260,19 +265,15 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .show();
     }
 
-    private void showLoadingDialog_Update() {
-        loading = ProgressDialog.show(this, "", "アプリの更新を確認中・・・", true);
+    private void showLoadingDialog(int code) {
+        if (code == 1) {
+            loading = ProgressDialog.show(this, "", "通信中です・・・", true);
+        } else if (GET_UPDATE_FLAG(this) == 1 && code == 2) {
+            loading = ProgressDialog.show(this, "", "通信中です・・・", true);
+        }
     }
 
-    private void cancelLoadingDialog_Update(){
-        if(loading!=null) loading.cancel();
-    }
-
-    private void showLoadingDialog_Xml() {
-        loading = ProgressDialog.show(this, "", "通信中です・・・", true);
-    }
-
-    private void cancelLoadingDialog_Xml() {
+    private void cancelLoadingDialog() {
         if (loading != null) loading.cancel();
     }
 
@@ -450,6 +451,19 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_UPDATE) {
+            if (isNetWork()) {
+                showLoadingDialog(1);
+                checkSupport();
+            } else {
+                netWorkError();
+            }
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         try {
@@ -465,7 +479,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
         switch (Common.Variable.START_FLAG) {
             case 1:
             case 3:
-                cancelLoadingDialog_Xml();
+                cancelLoadingDialog();
                 finish();
                 break;
             case 2:

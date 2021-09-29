@@ -2,7 +2,6 @@ package com.saradabar.cpadcustomizetool.set;
 
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -28,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
 
@@ -38,15 +36,15 @@ import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
-public class SetLauncherActivity extends Activity {
+public class HomeLauncherActivity extends Activity {
 
     private IDchaService mDchaService;
 
-    private String setHomeApp, setHomeName;
+    private String setHomeApp;
 
-    private static SetLauncherActivity instance = null;
+    private static HomeLauncherActivity instance = null;
 
-    public static SetLauncherActivity getInstance() {
+    public static HomeLauncherActivity getInstance() {
         return instance;
     }
 
@@ -77,7 +75,6 @@ public class SetLauncherActivity extends Activity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             ResolveInfo app = installedAppList.get(position);
             setHomeApp = Uri.fromParts("package", app.activityInfo.packageName, null).toString().replace("package:", "");
-            setHomeName = app.loadLabel(pm).toString();
             bindDchaService();
         });
     }
@@ -107,11 +104,6 @@ public class SetLauncherActivity extends Activity {
                 mDchaService.setDefaultPreferredHomeApp(setHomeApp);
             } catch (RemoteException ignored) {
             }
-            if (toast != null) {
-                toast.cancel();
-            }
-            toast = Toast.makeText(getApplicationContext(), "ホームを" + setHomeName + "に変更しました", Toast.LENGTH_SHORT);
-            toast.show();
             /* ListViewの更新 */
             final ListView listView = findViewById(R.id.launcher_list);
             listView.invalidateViews();
@@ -176,7 +168,7 @@ public class SetLauncherActivity extends Activity {
         private boolean isLauncher(String s1) {
             Intent home = new Intent(Intent.ACTION_MAIN);
             home.addCategory(Intent.CATEGORY_HOME);
-            PackageManager pm = SetLauncherActivity.getInstance().getPackageManager();
+            PackageManager pm = HomeLauncherActivity.getInstance().getPackageManager();
             ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
             ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
             return Objects.equals(s1, activityInfo.packageName);

@@ -8,7 +8,6 @@ import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_HIDE_N
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_MARKET_APP_FALSE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_MARKET_APP_TRUE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_REBOOT;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_STATE_0;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_SET_DCHA_STATE_3;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_TEST;
@@ -17,6 +16,8 @@ import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_USB_DE
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.FLAG_VIEW_NAVIGATION_BAR;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_ADMIN;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_INSTALL;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.installData;
@@ -65,13 +66,9 @@ import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.StartActivity;
 import com.saradabar.cpadcustomizetool.common.Common;
-import com.saradabar.cpadcustomizetool.service.KeepDchaService;
-import com.saradabar.cpadcustomizetool.service.KeepHomeService;
-import com.saradabar.cpadcustomizetool.service.KeepMarketAppService;
-import com.saradabar.cpadcustomizetool.service.KeepNavigationBarService;
-import com.saradabar.cpadcustomizetool.service.KeepUsbDebugService;
+import com.saradabar.cpadcustomizetool.service.KeepService;
+import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Set;
 
@@ -286,9 +283,6 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     case Common.Variable.FLAG_REBOOT:
                         mDchaService.rebootPad(0, null);
                         break;
-                    case FLAG_SET_DCHA_SERVICE:
-                        mDchaService.getSetupStatus();
-                        break;
                     case Common.Variable.FLAG_TEST:
                         break;
                 }
@@ -429,17 +423,20 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 spe.apply();
                 ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
                 if ((boolean) o) {
+                    settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
+                    getActivity().startService(new Intent(getActivity(), KeepService.class));
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepNavigationBarService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            return true;
+                        if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            try {
+                                KeepService.getInstance().startService();
+                            }catch (NullPointerException ignored) {
+                            }
                         }
                     }
-                    settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
-                    getActivity().startService(new Intent(getActivity(), KeepNavigationBarService.class));
                 } else {
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepNavigationBarService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            getActivity().stopService(new Intent(getActivity(), KeepNavigationBarService.class));
+                        if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            KeepService.getInstance().stopService(1);
                             return true;
                         }
                     }
@@ -454,14 +451,17 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 spe.apply();
                 ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
                 if ((boolean) o) {
-                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepMarketAppService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            return true;
-                        }
-                    }
                     try {
                         Settings.Secure.putInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 1);
-                        getActivity().startService(new Intent(getActivity(), KeepMarketAppService.class));
+                        getActivity().startService(new Intent(getActivity(), KeepService.class));
+                        for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                            if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                                try {
+                                    KeepService.getInstance().startService();
+                                }catch (NullPointerException ignored) {
+                                }
+                            }
+                        }
                     } catch (SecurityException e) {
                         e.printStackTrace();
                         if (null != toast) toast.cancel();
@@ -473,8 +473,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     }
                 } else {
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepMarketAppService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            getActivity().stopService(new Intent(getActivity(), KeepMarketAppService.class));
+                        if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            KeepService.getInstance().stopService(3);
                             return true;
                         }
                     }
@@ -489,11 +489,6 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 spe.apply();
                 ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
                 if ((boolean) o) {
-                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepUsbDebugService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            return true;
-                        }
-                    }
                     try {
                         if (Common.GET_MODEL_NAME(getActivity()) == 2) {
                             settingsFlag(FLAG_SET_DCHA_STATE_3);
@@ -503,7 +498,15 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         if (Common.GET_MODEL_NAME(getActivity()) == 2) {
                             settingsFlag(FLAG_SET_DCHA_STATE_0);
                         }
-                        getActivity().startService(new Intent(getActivity(), KeepUsbDebugService.class));
+                        getActivity().startService(new Intent(getActivity(), KeepService.class));
+                        for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                            if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                                try {
+                                    KeepService.getInstance().startService();
+                                }catch (NullPointerException ignored) {
+                                }
+                            }
+                        }
                     } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
                         if (Common.GET_MODEL_NAME(getActivity()) == 2) {
@@ -518,8 +521,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     }
                 } else {
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE))
-                        if (KeepUsbDebugService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            getActivity().stopService(new Intent(getActivity(), KeepUsbDebugService.class));
+                        if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            KeepService.getInstance().stopService(4);
                             return true;
                         }
                 }
@@ -533,17 +536,20 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 spe.apply();
                 ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
                 if ((boolean) o) {
+                    settingsFlag(FLAG_SET_DCHA_STATE_0);
+                    getActivity().startService(new Intent(getActivity(), KeepService.class));
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepDchaService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            return true;
+                        if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            try {
+                                KeepService.getInstance().startService();
+                            }catch (NullPointerException ignored) {
+                            }
                         }
                     }
-                    settingsFlag(FLAG_SET_DCHA_STATE_0);
-                    getActivity().startService(new Intent(getActivity(), KeepDchaService.class));
                 } else {
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepDchaService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            getActivity().stopService(new Intent(getActivity(), KeepDchaService.class));
+                        if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            KeepService.getInstance().stopService(2);
                             return true;
                         }
                     }
@@ -558,18 +564,21 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 spe.apply();
                 ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
                 if ((boolean) o) {
-                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepHomeService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            return true;
-                        }
-                    }
                     spe.putString(Common.Variable.KEY_SAVE_KEEP_HOME, getLauncherPackage());
                     spe.apply();
-                    getActivity().startService(new Intent(getActivity(), KeepHomeService.class));
+                    getActivity().startService(new Intent(getActivity(), KeepService.class));
+                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                        if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            try {
+                                KeepService.getInstance().startService();
+                            }catch (NullPointerException ignored) {
+                            }
+                        }
+                    }
                 } else {
                     for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
-                        if (KeepHomeService.class.getName().equals(serviceInfo.service.getClassName())) {
-                            getActivity().stopService(new Intent(getActivity(), KeepHomeService.class));
+                        if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                            KeepService.getInstance().stopService(5);
                             return true;
                         }
                     }
@@ -658,7 +667,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                     if (!mDevicePolicyManager.isAdminActive(mComponentName)) {
                         Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
                         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mComponentName);
-                        startActivityForResult(intent, 1);
+                        startActivityForResult(intent, REQUEST_ADMIN);
                     }
                 } else {
                     switchDeviceAdministrator.setChecked(true);
@@ -720,7 +729,6 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
                 b.setTitle(R.string.dialog_title_reboot)
                         .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                            preferenceReboot.setSummary(R.string.main_pre_sum_reboot);
                             bindDchaService(FLAG_REBOOT);
                         })
 
@@ -756,7 +764,10 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                         .setMessage(R.string.dialog_dcha_service)
                         .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                             if (StartActivity.bindDchaService(getActivity(), dchaServiceConnection)) {
-                                Toast.makeText(getActivity(), R.string.toast_not_install_dcha, LENGTH_SHORT).show();
+                                new AlertDialog.Builder(getActivity())
+                                        .setMessage("DchaServiceが機能していないためこの機能は使用できません")
+                                        .setPositiveButton(R.string.dialog_common_ok, null)
+                                        .show();
                             } else {
                                 Common.SET_DCHASERVICE_FLAG(USE_DCHASERVICE, getActivity());
                                 getActivity().finish();
@@ -772,7 +783,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
 
             preferenceChangeHome.setOnPreferenceClickListener(preference -> {
                 preferenceChangeHome.setEnabled(false);
-                Intent intent = new Intent(getActivity(), com.saradabar.cpadcustomizetool.set.SetLauncherActivity.class);
+                Intent intent = new Intent(getActivity(), HomeLauncherActivity.class);
                 startActivity(intent);
                 return false;
             });
@@ -786,7 +797,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
                 preferenceSilentInstall.setEnabled(false);
                 Intent intent = new Intent("android.intent.action.GET_CONTENT");
                 intent.setType("application/vnd.android.package-archive");
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, REQUEST_INSTALL);
                 return false;
             });
 
@@ -833,7 +844,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
 
         if (dpm.isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”DeviceOwnerを無効”を押してください");
+            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
 
         if (Common.GET_DCHASERVICE_FLAG(getActivity()) == USE_NOT_DCHASERVICE) {
@@ -907,7 +918,8 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity().getActionBar() != null) getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
+        if (getActivity().getActionBar() != null)
+            getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         if (!preferenceChangeHome.isEnabled()) preferenceChangeHome.setEnabled(true);
         /* オブザーバー有効 */
         isObserberStateEnable = true;
@@ -959,7 +971,7 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
 
         if (dpm.isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません\nこの機能を使用するにはその他の設定から”DeviceOwnerを無効”を押してください");
+            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
     }
 
@@ -985,19 +997,18 @@ public class MainFragment extends PreferenceFragment implements Preference.OnPre
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 1:
+            case REQUEST_INSTALL:
                 preferenceSilentInstall.setEnabled(true);
                 try {
                     Common.Variable.installData = getInstallData(getActivity(), data.getData());
-                } catch (NullPointerException e) {
-                    StartActivity.getInstance().showDialog(2);
+                } catch (NullPointerException ignored) {
                     return;
                 }
                 MainFragment.silentInstallTask silent = new MainFragment.silentInstallTask();
                 silent.setListener(StartActivity.getInstance().createListener());
                 silent.execute();
                 break;
-            case 2:
+            case 3:
                 break;
             default:
                 break;

@@ -1,29 +1,39 @@
 package com.saradabar.cpadcustomizetool;
 
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
 import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
+import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.preference.PreferenceFragment;
 
@@ -33,7 +43,10 @@ import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 import com.saradabar.cpadcustomizetool.menu.check.UpdateActivity;
+import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
+
+import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
@@ -41,6 +54,9 @@ public class StartActivity extends Activity {
 
     public IDchaService mDchaService;
     public  ProgressDialog mProgress;
+    private final String dchaStateString = DCHA_STATE;
+    private final String hideNavigationBarString = HIDE_NAVIGATION_BAR;
+    private ContentResolver resolver;
 
     private static StartActivity instance = null;
 
@@ -55,6 +71,7 @@ public class StartActivity extends Activity {
         instance = this;
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
 
+        /* NEOでの一時的な措置 */
         if (Common.GET_MODEL_NAME(this) == 2) {
             Common.SET_CHANGE_SETTINGS_DCHA_FLAG(1, this);
         }
@@ -64,17 +81,69 @@ public class StartActivity extends Activity {
         if (Common.Variable.USE_FLAG == 1) {
             if (!mDevicePolicyManager.isDeviceOwnerApp(getPackageName())) {
                 setContentView(R.layout.main_error_disable_own);
+                Button button4 = findViewById(R.id.main_error_button_4);
+                button4.setOnClickListener(view -> {
+                    AlertDialog.Builder b = new AlertDialog.Builder(view.getContext());
+                    b.setTitle(R.string.dialog_question_are_you_sure)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                                /* 全サービスの停止 */
+                                SharedPreferences sp1 = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                                SharedPreferences.Editor spe = sp1.edit();
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false);
+                                spe.apply();
+                                ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                                    if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                                        KeepService.getInstance().stopService(6);
+                                    }
+                                }
+                                /* 設定リセット */
+                                Common.SET_UPDATE_FLAG(0, this);
+                                Common.SET_DCHASERVICE_FLAG(USE_NOT_DCHASERVICE, this);
+                                resolver = getContentResolver();
+                                Settings.System.putInt(resolver, dchaStateString, 0);
+                                Settings.System.putInt(resolver, hideNavigationBarString, 0);
+                                Intent intent = new Intent(DCHA_SERVICE);
+                                intent.setPackage(PACKAGE_DCHASERVICE);
+                                bindService(intent, new ServiceConnection() {
+                                    @Override
+                                    public void onServiceConnected(ComponentName name, IBinder service) {
+                                        mDchaService = IDchaService.Stub.asInterface(service);
+                                        try {
+                                            mDchaService.clearDefaultPreferredApp(getLauncherPackage());
+                                        } catch (RemoteException ignored) {
+                                        }
+                                        unbindService(this);
+                                    }
+
+                                    @Override
+                                    public void onServiceDisconnected(ComponentName name) {
+                                        unbindService(this);
+                                    }
+                                }, Context.BIND_AUTO_CREATE);
+                            });
+                    b.setNegativeButton(R.string.dialog_common_no, null);
+                    b.show();
+                });
             } else {
                 setContentView(R.layout.main_error_enable_own);
                 Button button1 = findViewById(R.id.main_error_button_1);
                 Button button2 = findViewById(R.id.main_error_button_2);
+                Button button3 = findViewById(R.id.main_error_button_3);
                 button1.setOnClickListener(view -> {
                     AlertDialog.Builder b = new AlertDialog.Builder(view.getContext());
                     b.setTitle(R.string.dialog_question_device_owner)
                             .setCancelable(false)
                             .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                                 mDevicePolicyManager.clearDeviceOwnerApp(getPackageName());
-                                Toast.makeText(view.getContext(), R.string.toast_notice_disable_own, Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(this, StartActivity.class);
+                                finish();
+                                startActivity(intent);
                             });
                     b.setNegativeButton(R.string.dialog_common_no, null);
                     b.show();
@@ -86,6 +155,54 @@ public class StartActivity extends Activity {
                     }catch (ActivityNotFoundException ignored) {
                     }
                 });
+                button3.setOnClickListener(view -> {
+                    AlertDialog.Builder b = new AlertDialog.Builder(view.getContext());
+                    b.setTitle(R.string.dialog_question_are_you_sure)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                                /* 全サービスの停止 */
+                                SharedPreferences sp1 = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                                SharedPreferences.Editor spe = sp1.edit();
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false);
+                                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false);
+                                spe.apply();
+                                ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                                    if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                                        KeepService.getInstance().stopService(6);
+                                    }
+                                }
+                                /* 設定リセット */
+                                Common.SET_UPDATE_FLAG(0, this);
+                                Common.SET_DCHASERVICE_FLAG(USE_NOT_DCHASERVICE, this);
+                                resolver = getContentResolver();
+                                Settings.System.putInt(resolver, dchaStateString, 0);
+                                Settings.System.putInt(resolver, hideNavigationBarString, 0);
+                                Intent intent = new Intent(DCHA_SERVICE);
+                                intent.setPackage(PACKAGE_DCHASERVICE);
+                                bindService(intent, new ServiceConnection() {
+                                    @Override
+                                    public void onServiceConnected(ComponentName name, IBinder service) {
+                                        mDchaService = IDchaService.Stub.asInterface(service);
+                                        try {
+                                            mDchaService.clearDefaultPreferredApp(getLauncherPackage());
+                                        } catch (RemoteException ignored) {
+                                        }
+                                        unbindService(this);
+                                    }
+
+                                    @Override
+                                    public void onServiceDisconnected(ComponentName name) {
+                                        unbindService(this);
+                                    }
+                                }, Context.BIND_AUTO_CREATE);
+                            });
+                    b.setNegativeButton(R.string.dialog_common_no, null);
+                    b.show();
+                });
             }
         } else {
             setContentView(R.layout.main_layout);
@@ -94,6 +211,15 @@ public class StartActivity extends Activity {
         if (Common.Variable.toast != null) {
             Common.Variable.toast.cancel();
         }
+    }
+
+    private String getLauncherPackage() {
+        Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        PackageManager pm = getPackageManager();
+        ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
+        ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
+        return activityInfo.packageName;
     }
 
     /* メニュー表示 */
@@ -204,22 +330,14 @@ public class StartActivity extends Activity {
 
     /* ダイアログの表示 */
     protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case 1:
-                mProgress = new ProgressDialog(StartActivity.this);
-                mProgress.setTitle("");
-                mProgress.setMessage("インストール中・・・");
-                mProgress.setCancelable(false);
-                mProgress.create();
-                mProgress.show();
-                return mProgress;
-            case 2:
-                AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
-                d.setMessage("サイレントインストールがキャンセルされました")
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
-                d.show();
-                return d.create();
+        if (id == 1) {
+            mProgress = new ProgressDialog(StartActivity.this);
+            mProgress.setTitle("");
+            mProgress.setMessage("インストール中・・・");
+            mProgress.setCancelable(false);
+            mProgress.create();
+            mProgress.show();
+            return mProgress;
         }
         return null;
     }

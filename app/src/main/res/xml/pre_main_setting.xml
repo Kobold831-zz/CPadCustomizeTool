@@ -1,33 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="その他の設定">
+    <PreferenceCategory app:iconSpaceReserved="false" android:title="その他の設定">
 
         <Preference
+            app:iconSpaceReserved="false"
             android:key="intent_android_settings"
             android:title="設定を起動" />
 
         <Preference
+            app:iconSpaceReserved="false"
             android:key="intent_development_settings"
             android:title="開発者向けオプションを開く" />
 
         <Preference
+            app:iconSpaceReserved="false"
             android:key="intent_sys_ui_adjustment"
             android:title="システムUI調整ツールを起動" />
 
         <Preference
+            app:iconSpaceReserved="false"
             android:key="intent_block_to_uninstall_settings"
             android:title="ユーザーアプリのアンインストールを無効"
             android:summary="DeviceOwnerの権限を使用してユーザーアプリのアンインストールをブロックします" />
 
         <SwitchPreference
+            app:iconSpaceReserved="false"
             android:key="permission_forced"
             android:title="PERMISSION_GRANT_STATE" />
 
         <Preference
+            app:iconSpaceReserved="false"
             android:key="disable_device_owner"
             android:title="DeviceOwnerを無効"
-            android:summary="DeviceOwnerの権限を使用した機能は使用できなくなります\nアンインストールブロック機能によりブロック中のアプリは維持されます\nこの操作を行った後、デバイス管理者が無効になる場合があります"/>
+            android:summary="DeviceOwnerの機能は使用できなくなります\nアンインストールブロックをしているアプリは維持されます"/>
 
     </PreferenceCategory>
 

@@ -26,7 +26,7 @@ public class WelScrollFragment extends Fragment implements WelcomePage.OnChangeL
         wel_no = view.findViewById(R.id.wel_no);
         wel_yes = view.findViewById(R.id.wel_yes);
 
-        titleView.setText(R.string.start_terms_of_service);
+        titleView.setText(R.string.wel_terms_of_service);
 
         wel_no.setOnClickListener(v -> {
             Common.Variable.START_FLAG = 1;

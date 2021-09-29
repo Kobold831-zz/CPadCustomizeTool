@@ -36,5 +36,16 @@
             android:layout_height="wrap_content"
             android:text="@string/main_error_button_2"
             style="?android:attr/button" />
+
+        <Button
+            android:layout_margin="8dp"
+            android:id="@+id/main_error_button_3"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_error_button_3"
+            style="?android:attr/button" />
+
     </LinearLayout>
+
 </LinearLayout>

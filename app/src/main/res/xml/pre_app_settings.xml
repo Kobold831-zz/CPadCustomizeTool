@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="アプリ起動設定">
+    <PreferenceCategory app:iconSpaceReserved="false" android:title="起動設定">
 
         <SwitchPreference
+            app:iconSpaceReserved="false"
             android:key="switch_auto_update_check"
-            android:title="起動時のアップデートチェックを無効"
-            android:summary="起動時のサポートチェックは有効です\nサポートチェックを無効にすることはできません"/>
+            android:title="起動時のアップデートチェックを無効" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="アプリ設定">
+    <PreferenceCategory app:iconSpaceReserved="false" android:title="アプリ設定">
 
         <SwitchPreference
+            app:iconSpaceReserved="false"
             android:key="switch_is_change_settings_use_dcha"
             android:title="DchaServiceを使用して設定変更"
-            android:summary="有効にすると、システムUI,ナビゲーションバーの設定をDchaServiceを使用して変更します\n問題が発生した場合に使用してください"/>
+            android:summary="有効にすると、システムUIやナビゲーションバーをDchaServiceを使用して設定変更します\n問題が発生した場合に使用してください" />
+
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:key="switch_auto_usb_debug"
+            android:title="デバイス起動時のUSBデバッグを有効"
+            android:summary="有効にすると、デバイス起動時にUSBデバッグが自動的に無効にされるのを防ぎます" />
 
     </PreferenceCategory>
 

@@ -40,9 +40,9 @@ public class RebootActivity extends Activity {
     }
 
     private void startReboot() {
-        AlertDialog.Builder d = new AlertDialog.Builder(this);
-        d.setTitle(R.string.dialog_title_reboot)
+        new AlertDialog.Builder(this)
                 .setCancelable(false)
+                .setTitle(R.string.dialog_title_reboot)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                     Intent intent = new Intent(DCHA_SERVICE);
                     intent.setPackage(PACKAGE_DCHASERVICE);
@@ -50,20 +50,16 @@ public class RebootActivity extends Activity {
                         @Override
                         public void onServiceConnected(ComponentName name, IBinder service) {
                             mDchaService = IDchaService.Stub.asInterface(service);
-                            if (toast != null) {
-                                toast.cancel();
-                            }
-                            toast = Toast.makeText(getApplicationContext(), R.string.toast_reboot, Toast.LENGTH_SHORT);
-                            toast.show();
                             try {
                                 mDchaService.rebootPad(0, null);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
+                            } catch (RemoteException ignored) {
                             }
+                            unbindService(this);
                         }
 
                         @Override
                         public void onServiceDisconnected(ComponentName name) {
+                            unbindService(this);
                         }
                     }, Context.BIND_AUTO_CREATE);
                 })
