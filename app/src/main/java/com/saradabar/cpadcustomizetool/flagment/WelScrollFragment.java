@@ -1,7 +1,6 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +9,13 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
 import com.stephentuso.welcome.WelcomePage;
 
 public class WelScrollFragment extends Fragment implements WelcomePage.OnChangeListener {
 
-    Button wel_no;
-    Button wel_yes;
+    Button wel_no, wel_yes;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,12 +27,11 @@ public class WelScrollFragment extends Fragment implements WelcomePage.OnChangeL
         titleView.setText(R.string.wel_terms_of_service);
 
         wel_no.setOnClickListener(v -> {
-            Common.Variable.START_FLAG = 1;
-            getActivity().finish();
+            getActivity().finishAffinity();
         });
 
         wel_yes.setOnClickListener(v -> {
-            Common.Variable.START_FLAG = 2;
+            Common.Variable.START_FLAG = 1;
             getActivity().finish();
         });
 

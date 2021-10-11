@@ -1,13 +1,6 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -27,6 +20,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -35,14 +29,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
-import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 import com.saradabar.cpadcustomizetool.menu.InformationActivity;
-import com.saradabar.cpadcustomizetool.menu.check.UpdateActivity;
+import com.saradabar.cpadcustomizetool.check.UpdateActivity;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
@@ -53,10 +47,12 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 public class StartActivity extends Activity {
 
     public IDchaService mDchaService;
-    public  ProgressDialog mProgress;
+    public ProgressDialog mProgress;
     private final String dchaStateString = DCHA_STATE;
     private final String hideNavigationBarString = HIDE_NAVIGATION_BAR;
     private ContentResolver resolver;
+    private int i;
+    private Menu mMenu;
 
     private static StartActivity instance = null;
 
@@ -68,16 +64,12 @@ public class StartActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        instance = this;
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
 
-        /* NEOでの一時的な措置 */
-        if (Common.GET_MODEL_NAME(this) == 2) {
-            Common.SET_CHANGE_SETTINGS_DCHA_FLAG(1, this);
-        }
-
+        instance = this;
         mDevicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         mComponentName = new ComponentName(this, AdministratorReceiver.class);
+
         if (Common.Variable.USE_FLAG == 1) {
             if (!mDevicePolicyManager.isDeviceOwnerApp(getPackageName())) {
                 setContentView(R.layout.main_error_disable_own);
@@ -152,7 +144,7 @@ public class StartActivity extends Activity {
                     try {
                         Intent intent = new Intent(view.getContext(), BlockerActivity.class);
                         startActivity(intent);
-                    }catch (ActivityNotFoundException ignored) {
+                    } catch (ActivityNotFoundException ignored) {
                     }
                 });
                 button3.setOnClickListener(view -> {
@@ -225,10 +217,11 @@ public class StartActivity extends Activity {
     /* メニュー表示 */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
         if (Common.Variable.USE_FLAG != 1) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.main, menu);
-        }else {
+        } else {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.sub, menu);
         }
@@ -249,13 +242,23 @@ public class StartActivity extends Activity {
                 startActivity(intent2);
                 return true;
             case R.id.app_info_3:
+                mMenu.findItem(R.id.app_info_3).setVisible(false);
                 mTransitionFragment(new ApplicationSettingsFragment());
                 return true;
             case android.R.id.home:
+                mMenu.findItem(R.id.app_info_3).setVisible(true);
+                getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 transitionFragment(new MainFragment());
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed(){
+        mMenu.findItem(R.id.app_info_3).setVisible(true);
+        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        transitionFragment(new MainFragment());
     }
 
     private void transitionFragment(PreferenceFragment nextPreferenceFragment) {
@@ -324,6 +327,55 @@ public class StartActivity extends Activity {
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
                 d.create();
                 d.show();
+            }
+        };
+    }
+
+    public MainFragment.setResolutionTask.Listener mCreateListener() {
+        return new MainFragment.setResolutionTask.Listener() {
+            private Handler mHandler;
+            private Runnable mRunnable;
+
+            /* 成功 */
+            @Override
+            public void onSuccess() {
+                /* 設定変更カウントダウンダイアログ表示 */
+                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(StartActivity.getInstance());
+                mAlertDialog.setTitle("解像度の設定")
+                        .setCancelable(false)
+                        .setMessage("")
+                        .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> {
+                            mHandler.removeCallbacks(mRunnable);
+                        })
+                        .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
+                            mHandler.removeCallbacks(mRunnable);
+                            MainFragment.getInstance().resetResolution();
+                        });
+                AlertDialog AlertDialog = mAlertDialog.create();
+                AlertDialog.show();
+                /* カウント開始 */
+                i = 10;
+                mHandler = new Handler();
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.setMessage("変更を適用しますか？\n" + i + "秒後に元の設定に戻ります");
+                        mHandler.postDelayed(this, 1000);
+                        if (i <= 0) {
+                            AlertDialog.dismiss();
+                            mHandler.removeCallbacks(this);
+                            MainFragment.getInstance().resetResolution();
+                        }
+                        i--;
+                    }
+                };
+                mHandler.post(mRunnable);
+            }
+
+            /* 失敗 */
+            @Override
+            public void onFailure() {
+                MainFragment.getInstance().resetResolution();
             }
         };
     }

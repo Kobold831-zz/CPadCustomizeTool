@@ -1,7 +1,7 @@
-package com.saradabar.cpadcustomizetool.menu.check;
+package com.saradabar.cpadcustomizetool.check;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_UPDATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -16,8 +16,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
-import com.saradabar.cpadcustomizetool.menu.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
 
 import java.io.File;
 import java.util.Objects;

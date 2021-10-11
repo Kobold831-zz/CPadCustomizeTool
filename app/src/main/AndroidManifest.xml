@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.saradabar.cpadcustomizetool">
 
+    <permission
+        android:name="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
@@ -17,6 +21,7 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="jp.co.benesse.dcha.permission.ACCESS_SYSTEM" />
+    <uses-permission android:name="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -46,7 +51,7 @@
             android:theme="@style/MainPreference" />
 
         <activity
-            android:name=".menu.check.UpdateActivity"
+            android:name=".check.UpdateActivity"
             android:label="@string/app_update_activity"
             android:theme="@style/MainTheme"
             tools:ignore="InnerclassSeparator" />

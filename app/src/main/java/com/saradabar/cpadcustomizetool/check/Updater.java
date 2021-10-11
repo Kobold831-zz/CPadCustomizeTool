@@ -1,6 +1,6 @@
-package com.saradabar.cpadcustomizetool.menu.check;
+package com.saradabar.cpadcustomizetool.check;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_UPDATE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -11,9 +11,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.saradabar.cpadcustomizetool.common.Common;
-import com.saradabar.cpadcustomizetool.menu.check.event.UpdateEventListener;
-import com.saradabar.cpadcustomizetool.menu.check.event.UpdateEventListenerList;
+import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.check.event.UpdateEventListenerList;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

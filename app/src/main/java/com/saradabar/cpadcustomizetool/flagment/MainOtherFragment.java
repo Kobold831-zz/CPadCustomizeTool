@@ -1,8 +1,8 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mComponentName;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.mComponentName;
+import static com.saradabar.cpadcustomizetool.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -20,7 +20,7 @@ import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.StartActivity;
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
 public class MainOtherFragment extends PreferenceFragment {

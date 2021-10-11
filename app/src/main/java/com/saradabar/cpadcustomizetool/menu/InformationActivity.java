@@ -1,6 +1,6 @@
 package com.saradabar.cpadcustomizetool.menu;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 
 public class InformationActivity extends Activity {
 

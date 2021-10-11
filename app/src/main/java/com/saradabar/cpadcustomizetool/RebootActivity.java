@@ -1,9 +1,9 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.USE_NOT_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -15,8 +15,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.Toast;
-
-import com.saradabar.cpadcustomizetool.common.Common;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 

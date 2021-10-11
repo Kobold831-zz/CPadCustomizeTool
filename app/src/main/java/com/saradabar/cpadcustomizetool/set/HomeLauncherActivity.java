@@ -1,7 +1,7 @@
 package com.saradabar.cpadcustomizetool.set;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

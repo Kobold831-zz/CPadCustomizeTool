@@ -1,12 +1,7 @@
 package com.saradabar.cpadcustomizetool.mode.normal;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_NOT_COMPLETED;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
+import static com.saradabar.cpadcustomizetool.Common.*;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -25,7 +20,7 @@ import android.provider.Settings;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -54,7 +49,7 @@ public class NormalActivity extends Activity {
             if (resolveInfo != null) {
                 activityInfo = resolveInfo.activityInfo;
             }
-            if (MainFragment.isNormalModeSettings_Change_Activity(this)) {
+            if (isNormalModeSettings_Change_Activity(this)) {
                 try {
                     Intent intent = new Intent();
                     intent.setClassName("com.teslacoilsw.launcher", "com.teslacoilsw.launcher.NovaLauncher");
@@ -67,10 +62,10 @@ public class NormalActivity extends Activity {
                     toast.show();
                 }
             }
-            if (MainFragment.isNormalModeSettings_Dcha_State(this)) {
+            if (isNormalModeSettings_Dcha_State(this)) {
                 Settings.System.putInt(resolver, DCHA_STATE, 0);
             }
-            if (MainFragment.isNormalModeSettings_Hide_NavigationBar(this)) {
+            if (isNormalModeSettings_Hide_NavigationBar(this)) {
                 Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 0);
             }
 
@@ -79,7 +74,7 @@ public class NormalActivity extends Activity {
             bindService(intent, new ServiceConnection() {
                 public void onServiceConnected(ComponentName name, IBinder service) {
                     IDchaService mDchaService = IDchaService.Stub.asInterface(service);
-                    if (MainFragment.isNormalModeSettings_Change_Home(getApplicationContext())) {
+                    if (isNormalModeSettings_Change_Home(getApplicationContext())) {
                         if (Common.GET_DCHASERVICE_FLAG(getApplicationContext()) == USE_DCHASERVICE) {
                             try {
                                 mDchaService.clearDefaultPreferredApp(activityInfo.packageName);

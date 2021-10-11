@@ -48,7 +48,8 @@
     <string name="main_pre_title_reboot">再起動</string>
     <string name="main_pre_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
     <string name="main_pre_title_silent_install">サイレントインストール</string>
-    <string name="main_pre_title_resolution">解像度設定</string>
+    <string name="main_pre_title_resolution">解像度を変更</string>
+    <string name="main_pre_title_resolution_reset">解像度をリセット</string>
 
     <!-- メイン設定エラー -->
     <string name="main_error_message_enable_own">このアプリは現在使用できません\n\nDeviceOwnerを解除する場合は、\"DeviceOwnerを解除\"を押してください\n\nアンインストールブロックを解除する場合は、\"アンインストールブロックを開く\"を押してください\n\n\"デフォルト設定に戻す\"を押すと実行中の維持サービスが停止し、今まで操作した設定がデフォルト状態にクリアされます</string>

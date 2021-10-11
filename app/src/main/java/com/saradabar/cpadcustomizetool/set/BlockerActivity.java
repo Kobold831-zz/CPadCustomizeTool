@@ -1,6 +1,6 @@
 package com.saradabar.cpadcustomizetool.set;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.Common.Variable.mDevicePolicyManager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,7 +24,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 
 import java.util.ArrayList;
 import java.util.List;

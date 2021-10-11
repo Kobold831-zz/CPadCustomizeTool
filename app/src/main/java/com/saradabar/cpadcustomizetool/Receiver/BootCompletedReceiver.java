@@ -1,7 +1,7 @@
 package com.saradabar.cpadcustomizetool.Receiver;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.provider.Settings;
 
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 
 public class BootCompletedReceiver extends BroadcastReceiver {

@@ -1,9 +1,9 @@
 package com.saradabar.cpadcustomizetool.service;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -24,7 +24,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 
 import java.util.Objects;
 

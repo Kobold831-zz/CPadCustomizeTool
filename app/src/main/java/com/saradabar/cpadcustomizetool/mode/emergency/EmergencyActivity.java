@@ -1,12 +1,7 @@
 package com.saradabar.cpadcustomizetool.mode.emergency;
 
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_NOT_COMPLETED;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
+import static com.saradabar.cpadcustomizetool.Common.*;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -27,7 +22,7 @@ import android.provider.Settings;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -50,7 +45,7 @@ public class EmergencyActivity extends Activity {
         }else {
             ContentResolver resolver = getContentResolver();
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            final String whatCourse = sp.getString("kinkyu_Mode", "");
+            final String whatCourse = sp.getString("emergency_mode", "");
             Intent clearPackageName = new Intent(Intent.ACTION_MAIN);
             clearPackageName.addCategory(Intent.CATEGORY_HOME);
             PackageManager pm = getPackageManager();
@@ -70,10 +65,10 @@ public class EmergencyActivity extends Activity {
                     toast = Toast.makeText(this, R.string.toast_not_course, Toast.LENGTH_SHORT);
                     toast.show();
                 }
-                if (MainFragment.isEmergencySettings_Dcha_State(this)) {
+                if (isEmergencySettings_Dcha_State(this)) {
                     Settings.System.putInt(resolver, DCHA_STATE, 3);
                 }
-                if (MainFragment.isEmergencySettings_Hide_NavigationBar(this)) {
+                if (isEmergencySettings_Hide_NavigationBar(this)) {
                     Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 1);
                 }
             }
@@ -89,10 +84,10 @@ public class EmergencyActivity extends Activity {
                     toast = Toast.makeText(getApplicationContext(), R.string.toast_not_course, Toast.LENGTH_SHORT);
                     toast.show();
                 }
-                if (MainFragment.isEmergencySettings_Dcha_State(this)) {
+                if (isEmergencySettings_Dcha_State(this)) {
                     Settings.System.putInt(resolver, DCHA_STATE, 3);
                 }
-                if (MainFragment.isEmergencySettings_Hide_NavigationBar(this)) {
+                if (isEmergencySettings_Hide_NavigationBar(this)) {
                     Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 1);
                 }
             }
@@ -104,28 +99,28 @@ public class EmergencyActivity extends Activity {
                     IDchaService mDchaService = IDchaService.Stub.asInterface(service);
                     if (Common.GET_DCHASERVICE_FLAG(getApplicationContext()) == USE_DCHASERVICE) {
                         if (whatCourse.contains("1")) {
-                            if (MainFragment.isEmergencySettings_Change_Home(getApplicationContext())) {
+                            if (isEmergencySettings_Change_Home(getApplicationContext())) {
                                 try {
                                     mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
                                     mDchaService.setDefaultPreferredHomeApp("jp.co.benesse.touch.allgrade.b003.touchhomelauncher");
                                 } catch (RemoteException ignored) {
                                 }
                             }
-                            if (MainFragment.isEmergencySettings_Remove_Task(getApplicationContext())) {
+                            if (isEmergencySettings_Remove_Task(getApplicationContext())) {
                                 try {
                                     mDchaService.removeTask(null);
                                 } catch (RemoteException ignored) {
                                 }
                             }
                         } else if (whatCourse.contains("2")) {
-                            if (MainFragment.isEmergencySettings_Change_Home(getApplicationContext())) {
+                            if (isEmergencySettings_Change_Home(getApplicationContext())) {
                                 try {
                                     mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
                                     mDchaService.setDefaultPreferredHomeApp("jp.co.benesse.touch.home");
                                 } catch (RemoteException ignored) {
                                 }
                             }
-                            if (MainFragment.isEmergencySettings_Remove_Task(getApplicationContext())) {
+                            if (isEmergencySettings_Remove_Task(getApplicationContext())) {
                                 try {
                                     mDchaService.removeTask(null);
                                 } catch (RemoteException ignored) {

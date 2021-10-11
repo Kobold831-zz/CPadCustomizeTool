@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.menu.check.event;
+package com.saradabar.cpadcustomizetool.check.event;
 
 import java.util.HashSet;
 import java.util.Set;

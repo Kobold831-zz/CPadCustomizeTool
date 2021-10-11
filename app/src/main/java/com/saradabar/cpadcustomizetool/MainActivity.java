@@ -1,22 +1,7 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.common.Common.GET_DCHASERVICE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_MODEL_NAME;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_SETTINGS_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.GET_UPDATE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_CHANGE_SETTINGS_DCHA_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_DCHASERVICE_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_MODEL_NAME;
-import static com.saradabar.cpadcustomizetool.common.Common.SET_SETTINGS_FLAG;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.REQUEST_UPDATE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_COMPLETED;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.SETTINGS_NOT_COMPLETED;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.SUPPORT_CHECK_URL;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.UPDATE_CHECK_URL;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.common.Common.Variable.USE_NOT_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.*;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,12 +21,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 
-import com.saradabar.cpadcustomizetool.common.Common;
-import com.saradabar.cpadcustomizetool.menu.check.AsyncFileDownload;
-import com.saradabar.cpadcustomizetool.menu.check.Checker;
-import com.saradabar.cpadcustomizetool.menu.check.ProgressHandler;
-import com.saradabar.cpadcustomizetool.menu.check.Updater;
-import com.saradabar.cpadcustomizetool.menu.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.check.AsyncFileDownload;
+import com.saradabar.cpadcustomizetool.check.Checker;
+import com.saradabar.cpadcustomizetool.check.ProgressHandler;
+import com.saradabar.cpadcustomizetool.check.Updater;
+import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
 import com.stephentuso.welcome.WelcomeHelper;
 
 import java.io.File;
@@ -476,15 +460,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
     @Override
     public void onResume() {
         super.onResume();
-        switch (Common.Variable.START_FLAG) {
-            case 1:
-            case 3:
-                cancelLoadingDialog();
-                finish();
-                break;
-            case 2:
-                checkModel();
-                break;
+        if (Common.Variable.START_FLAG == 1) {
+            checkModel();
         }
     }
 }

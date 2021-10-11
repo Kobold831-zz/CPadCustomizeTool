@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.saradabar.cpadcustomizetool.common.Common;
+import com.saradabar.cpadcustomizetool.Common;
 
 public class ProtectKeepService extends Service {
 

@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.common;
+package com.saradabar.cpadcustomizetool;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
+
+import java.util.Set;
 
 public final class Common {
 
@@ -24,9 +26,14 @@ public final class Common {
         public static final int FLAG_MARKET_APP_TRUE = 8;
         public static final int FLAG_MARKET_APP_FALSE = 9;
 
+        public static final int FLAG_RESOLUTION = 20;
+
         public static final int REQUEST_UPDATE = 0;
         public static final int REQUEST_ADMIN = 1;
         public static final int REQUEST_INSTALL = 2;
+
+        public static final int DCHA_MODE = 1;
+        public static final int DCHA_UTIL_MODE = 2;
 
         public static String DOWNLOAD_FILE_URL;
         public static String UPDATE_CHECK_URL = "https://github.com/saradabar/Touch2_Custom_Tool/raw/master/Update.xml";
@@ -46,10 +53,12 @@ public final class Common {
 
         public static final String DCHA_SERVICE = "jp.co.benesse.dcha.dchaservice.DchaService";
         public static final String PACKAGE_DCHASERVICE = "jp.co.benesse.dcha.dchaservice";
+        public static final String DCHA_UTIL_SERVICE = "jp.co.benesse.dcha.dchautilservice.DchaUtilService";
+        public static final String PACKAGE_DCHA_UTIL_SERVICE = "jp.co.benesse.dcha.dchautilservice";
         public static final String DCHA_STATE = "dcha_state";
         public static final String HIDE_NAVIGATION_BAR = "hide_navigation_bar";
-        public static final String KEY_EMERGENCY_SETTINGS = "Emergency_Settings";
-        public static final String KEY_NORMAL_MODE_SETTINGS = "Normal_Mode_Settings";
+        public static final String KEY_EMERGENCY_SETTINGS = "emergency_settings";
+        public static final String KEY_NORMAL_SETTINGS = "normal_settings";
         public static final String SHARED_PREFERENCE_KEY = "CustomizeTool";
         public static final String KEY_ENABLED_KEEP_SERVICE = "enabled_keep_service";
         public static final String KEY_ENABLED_KEEP_MARKET_APP_SERVICE = "enabled_keep_market_app_service";
@@ -62,6 +71,90 @@ public final class Common {
 
     public static ComponentName getAdministratorComponent(Context context) {
         return new ComponentName(context, com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver.class);
+    }
+
+
+    /* マルチリストのデータ取得 */
+    private static Set<String> getEmergencySettings(Context context) {
+        SharedPreferences preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getStringSet(Common.Variable.KEY_EMERGENCY_SETTINGS, null);
+    }
+
+    public static boolean isEmergencySettings_Dcha_State(Context context) {
+        final String value = "1";
+        Set<String> Emergency_Settings = getEmergencySettings(context);
+        if (Emergency_Settings != null) {
+            return Emergency_Settings.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isEmergencySettings_Hide_NavigationBar(Context context) {
+        final String value = "2";
+        Set<String> Emergency_Settings_Hide_NavigationBar = getEmergencySettings(context);
+        if (Emergency_Settings_Hide_NavigationBar != null) {
+            return Emergency_Settings_Hide_NavigationBar.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isEmergencySettings_Change_Home(Context context) {
+        final String value = "3";
+        Set<String> Emergency_Settings_Change_Home = getEmergencySettings(context);
+        if (Emergency_Settings_Change_Home != null) {
+            return Emergency_Settings_Change_Home.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isEmergencySettings_Remove_Task(Context context) {
+        final String value = "4";
+        Set<String> Emergency_Settings_Remove_Task = getEmergencySettings(context);
+        if (Emergency_Settings_Remove_Task != null) {
+            return Emergency_Settings_Remove_Task.contains(value);
+        }
+        return false;
+    }
+
+    private static Set<String> getNormalModeSettings(Context context) {
+        SharedPreferences preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getStringSet(Common.Variable.KEY_NORMAL_SETTINGS, null);
+    }
+
+    public static boolean isNormalModeSettings_Dcha_State(Context context) {
+        final String value = "1";
+        Set<String> NormalModeSettings_DchaState = getNormalModeSettings(context);
+        if (NormalModeSettings_DchaState != null) {
+            return NormalModeSettings_DchaState.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isNormalModeSettings_Hide_NavigationBar(Context context) {
+        final String value = "2";
+        Set<String> NormalModeSettings_HideNavigationBar = getNormalModeSettings(context);
+        if (NormalModeSettings_HideNavigationBar != null) {
+            return NormalModeSettings_HideNavigationBar.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isNormalModeSettings_Change_Home(Context context) {
+        final String value = "3";
+        Set<String> NormalModeSettings_ChangeHome = getNormalModeSettings(context);
+        if (NormalModeSettings_ChangeHome != null) {
+            return NormalModeSettings_ChangeHome.contains(value);
+        }
+        return false;
+    }
+
+    public static boolean isNormalModeSettings_Change_Activity(Context context) {
+        final String value = "4";
+        Set<String> NormalModeSettings_ChangeActivity = getNormalModeSettings(context);
+        if (NormalModeSettings_ChangeActivity != null) {
+            return NormalModeSettings_ChangeActivity.contains(value);
+        }
+        return false;
     }
 
     /* データ管理 */

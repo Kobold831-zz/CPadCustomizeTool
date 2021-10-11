@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 
 import androidx.fragment.app.Fragment;
 
-import com.saradabar.cpadcustomizetool.common.Common;
 import com.saradabar.cpadcustomizetool.flagment.WelScrollFragment;
 import com.stephentuso.welcome.BasicPage;
 import com.stephentuso.welcome.FragmentWelcomePage;
@@ -30,13 +29,5 @@ public class WelAppActivity extends WelcomeActivity {
                 })
                 .swipeToDismiss(false)
                 .build();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (!(Common.Variable.START_FLAG == 1 || Common.Variable.START_FLAG == 2)) {
-            Common.Variable.START_FLAG = 3;
-        }
     }
 }
