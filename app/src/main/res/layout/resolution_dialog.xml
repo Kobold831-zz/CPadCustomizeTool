@@ -13,13 +13,13 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="横の解像度"
+        android:hint="@string/layout_resolution_width"
         android:inputType="number" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="x" />
+        android:text="@string/layout_resolution_x" />
 
     <EditText
         android:id="@+id/edit_text_2"
@@ -28,7 +28,7 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="縦の解像度"
+        android:hint="@string/layout_resolution_height"
         android:inputType="number" />
 
 </LinearLayout>

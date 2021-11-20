@@ -9,116 +9,114 @@ import com.saradabar.cpadcustomizetool.check.event.UpdateEventListenerList;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class AsyncFileDownload extends AsyncTask<String, Void, Boolean> {
+
 	private final UpdateEventListenerList updateListeners;
-
 	@SuppressLint("StaticFieldLeak")
-	public Activity owner;
+	public Activity activity;
 	private final int BUFFER_SIZE = 1024;
-
-	private final String urlString;
+	private final String url;
 	private final File outputFile;
 	private FileOutputStream fileOutputStream;
 	private BufferedInputStream bufferedInputStream;
-
-	private int totalByte = 0;
-	private int currentByte = 0;
-
+	private int totalByte = 0, currentByte = 0;
 	private final byte[] buffer = new byte[BUFFER_SIZE];
 
-	public AsyncFileDownload(Activity activity, String url, File oFile) {
+	public AsyncFileDownload(Activity mActivity, String mString, File oFile) {
 		updateListeners = new UpdateEventListenerList();
-		updateListeners.addEventListener((UpdateEventListener) activity);
-		owner = activity;
-		urlString = url;
+		updateListeners.addEventListener((UpdateEventListener) mActivity);
+		activity = mActivity;
+		url = mString;
 		outputFile = oFile;
 	}
 
 	@Override
-	protected Boolean doInBackground(String... url) {
-		try{
-			connect();
-		}catch(IOException e){
+	protected Boolean doInBackground(String... mString) {
+
+		try {
+			HttpURLConnection mHttpURLConnection;
+
+			mHttpURLConnection = (HttpURLConnection) new URL(url).openConnection();
+			mHttpURLConnection.setReadTimeout(5000);
+			mHttpURLConnection.setConnectTimeout(5000);
+			InputStream mInputStream = mHttpURLConnection.getInputStream();
+			bufferedInputStream = new BufferedInputStream(mInputStream, BUFFER_SIZE);
+			fileOutputStream = new FileOutputStream(outputFile);
+			totalByte = mHttpURLConnection.getContentLength();
+			currentByte = 0;
+		} catch (SocketTimeoutException | MalformedURLException ignored) {
+			return false;
+		} catch (FileNotFoundException ignored) {
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 
-		if(isCancelled()){
+		if (isCancelled()) {
 			return false;
 		}
-		if (bufferedInputStream !=  null){
-			try{
+
+		if (bufferedInputStream != null) {
+			try {
 				int len;
-				while((len = bufferedInputStream.read(buffer)) != -1){
+				while ((len = bufferedInputStream.read(buffer)) != -1) {
 					fileOutputStream.write(buffer, 0, len);
 					currentByte += len;
-					if(isCancelled()){
+					if (isCancelled()) {
 						break;
 					}
 				}
-			}catch(IOException e){
+			} catch (IOException e) {
 				return false;
 			}
 		}
 
-		try{
+		try {
 			close();
-		}catch(IOException ignored){
+		} catch (IOException ignored) {
 		}
 		return true;
 	}
 
 	@Override
-	protected void onPreExecute(){
+	protected void onPreExecute() {
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result){
+	protected void onPostExecute(Boolean result) {
 		if (result != null) {
-			updateListeners.downloadCompleteNotify();
-		}else {
+			if (result) {
+				updateListeners.downloadCompleteNotify();
+			} else updateListeners.connectionErrorNotify();
+		} else {
 			updateListeners.downloadErrorNotify();
 		}
 	}
 
 	@Override
-	protected void onProgressUpdate(Void... progress){
+	protected void onProgressUpdate(Void... progress) {
 	}
 
-	private void connect() throws IOException
-	{
-		URL url = new URL(urlString);
-		URLConnection urlConnection = url.openConnection();
-		int TIMEOUT_READ = 5000;
-		urlConnection.setReadTimeout(TIMEOUT_READ);
-		int TIMEOUT_CONNECT = 30000;
-		urlConnection.setConnectTimeout(TIMEOUT_CONNECT);
-		InputStream inputStream = urlConnection.getInputStream();
-		bufferedInputStream = new BufferedInputStream(inputStream, BUFFER_SIZE);
-		fileOutputStream = new FileOutputStream(outputFile);
-
-		totalByte = urlConnection.getContentLength();
-		currentByte = 0;
-	}
-
-	private void close() throws IOException
-	{
+	private void close() throws IOException {
 		fileOutputStream.flush();
 		fileOutputStream.close();
 		bufferedInputStream.close();
 	}
 
-	public int getLoadedBytePercent()
-	{
-		if(totalByte <= 0){
+	public int getLoadedBytePercent() {
+		if (totalByte <= 0) {
 			return 0;
 		}
-		return (int)Math.floor(100 * currentByte/totalByte);
+		return (int) Math.floor(100 * currentByte / totalByte);
 	}
-
 }

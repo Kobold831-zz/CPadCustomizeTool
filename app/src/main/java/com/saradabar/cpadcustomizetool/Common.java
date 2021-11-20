@@ -25,6 +25,7 @@ public final class Common {
         public static final int FLAG_USB_DEBUG_FALSE = 7;
         public static final int FLAG_MARKET_APP_TRUE = 8;
         public static final int FLAG_MARKET_APP_FALSE = 9;
+        public static final int FLAG_SET_LAUNCHER = 10;
 
         public static final int FLAG_RESOLUTION = 20;
 
@@ -36,8 +37,11 @@ public final class Common {
         public static final int DCHA_UTIL_MODE = 2;
 
         public static String DOWNLOAD_FILE_URL;
-        public static String UPDATE_CHECK_URL = "https://github.com/saradabar/Touch2_Custom_Tool/raw/master/Update.xml";
-        public static String SUPPORT_CHECK_URL = "https://raw.githubusercontent.com/saradabar/Touch2_Custom_Tool/master/Support.xml";
+        public static String UPDATE_CHECK_URL = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Update.xml";
+        public static String SUPPORT_CHECK_URL = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Support.xml";
+        public static String UPDATE_INFO_URL = "https://docs.google.com/document/d/1uh-FrHM5o84uh7zXw3W_FRIDuzJo8NcVnUD8Rrw4CMQ/";
+        public static String UPDATE_URL = "https://is.gd/W5XR2Z";
+        public static String WIKI_URL = "https://ctabwiki.nerrog.net/";
         public static String installData;
 
         public static Toast toast;
@@ -216,6 +220,18 @@ public final class Common {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         CHANGE_SETTINGS_DCHA_FLAG = sp.getInt("CHANGE_SETTINGS_DCHA_FLAG", 0);
         return CHANGE_SETTINGS_DCHA_FLAG;
+    }
+
+    public static void SET_NORMAL_LAUNCHER(String mString, Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString("NORMAL_LAUNCHER", mString).apply();
+    }
+
+    public static String GET_NORMAL_LAUNCHER(Context context) {
+        String NORMAL_LAUNCHER;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        NORMAL_LAUNCHER = sp.getString("NORMAL_LAUNCHER", null);
+        return NORMAL_LAUNCHER;
     }
 }
 

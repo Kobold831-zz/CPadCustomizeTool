@@ -12,7 +12,7 @@
         tools:ignore="UselessParent">
 
     <ListView
-        android:id="@+id/launcher_list"
+        android:id="@+id/normal_launcher_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -1,6 +1,6 @@
 package com.saradabar.cpadcustomizetool.menu;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -35,8 +35,7 @@ public class InformationActivity extends Activity {
         Button button1 = findViewById(R.id.info_button);
         showInformation();
         button1.setOnClickListener(view -> {
-            Uri uri = Uri.parse("https://ctabwiki.nerrog.net/");
-            Intent i = new Intent(Intent.ACTION_VIEW, uri);
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(WIKI_URL));
             try {
                 startActivity(i);
             } catch (ActivityNotFoundException ignored) {

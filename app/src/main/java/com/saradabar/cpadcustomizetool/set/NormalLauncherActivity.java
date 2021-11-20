@@ -1,7 +1,6 @@
 package com.saradabar.cpadcustomizetool.set;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -16,13 +15,16 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.StartActivity;
+import com.saradabar.cpadcustomizetool.flagment.MainFragment;
+import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 
 import java.util.List;
 import java.util.Objects;
 
-public class HomeLauncherActivity extends Activity {
+public class NormalLauncherActivity {
 
     public static class AppData {
         public String label;
@@ -47,7 +49,6 @@ public class HomeLauncherActivity extends Activity {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             ViewHolder holder = new ViewHolder();
-
 
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.launcher_item, parent, false);
@@ -74,16 +75,15 @@ public class HomeLauncherActivity extends Activity {
 
         /* ランチャーに設定されているかの確認 */
         private boolean isLauncher(String s1) {
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            PackageManager pm = StartActivity.getInstance().getPackageManager();
-            ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
-            ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-            return Objects.equals(s1, activityInfo.packageName);
+            try {
+                return Objects.equals(s1, Common.GET_NORMAL_LAUNCHER(StartActivity.getInstance()));
+            } catch (NullPointerException ignored) {
+                return false;
+            }
         }
     }
 
-    public static class ViewHolder {
+    private static class ViewHolder {
         TextView textLabel;
         ImageView imageIcon;
     }

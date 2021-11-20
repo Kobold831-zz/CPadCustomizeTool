@@ -59,7 +59,7 @@ public class MainOtherFragment extends PreferenceFragment {
                 if (toast != null) {
                     toast.cancel();
                 }
-                toast = Toast.makeText(getActivity(), "開発者向けオプションは有効になっていません", Toast.LENGTH_SHORT);
+                toast = Toast.makeText(getActivity(), R.string.toast_no_development_option, Toast.LENGTH_SHORT);
                 toast.show();
             }
             return false;

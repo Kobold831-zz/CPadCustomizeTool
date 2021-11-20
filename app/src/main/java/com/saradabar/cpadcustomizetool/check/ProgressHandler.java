@@ -5,21 +5,24 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
+import androidx.annotation.NonNull;
+
 public class ProgressHandler extends Handler {
 
     public ProgressDialog progressDialog;
     public AsyncFileDownload asyncfiledownload;
 
     @Override
-    public void handleMessage(Message msg){
+    public void handleMessage(@NonNull Message msg) {
         super.handleMessage(msg);
-        if(asyncfiledownload.isCancelled()){
+
+        if (asyncfiledownload.isCancelled()) {
             progressDialog.dismiss();
-        }else if(asyncfiledownload.getStatus() == AsyncTask.Status.FINISHED){
+        } else if (asyncfiledownload.getStatus() == AsyncTask.Status.FINISHED) {
             progressDialog.dismiss();
-        }else{
+        } else {
             progressDialog.setProgress(asyncfiledownload.getLoadedBytePercent());
-            this.sendEmptyMessageDelayed(0, 100);
+            sendEmptyMessageDelayed(0, 100);
         }
     }
 }

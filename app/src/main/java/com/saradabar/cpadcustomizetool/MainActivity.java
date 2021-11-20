@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +21,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.check.AsyncFileDownload;
 import com.saradabar.cpadcustomizetool.check.Checker;
@@ -37,7 +43,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     private Updater updater;
     private ProgressHandler progressHandler;
     private AsyncFileDownload asyncfiledownload;
-    private ProgressDialog progress, loading;
+    private ProgressDialog progressDialog, loadingDialog;
 
     private static boolean bindDchaService(Context context, ServiceConnection dchaServiceConnection) {
         Intent intent = new Intent(DCHA_SERVICE);
@@ -49,18 +55,20 @@ public class MainActivity extends Activity implements UpdateEventListener {
     private final ServiceConnection dchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            unbindService(this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            unbindService(this);
         }
     };
 
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Common.Variable.START_FLAG = 0;
-        Common.Variable.USE_FLAG = 0;
+        START_FLAG = 0;
+        USE_FLAG = 0;
         handler = new Handler();
         /* ネットワークチェック */
         if (isNetWork()) {
@@ -77,8 +85,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* ネットワークの接続を確認 */
     private boolean isNetWork() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }
@@ -89,7 +96,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
                 .setIcon(R.drawable.alert)
-                .setMessage("通信エラーが発生しました\nネットワークに接続してください\n続行する場合機能が制限されます")
+                .setMessage(R.string.dialog_wifi_error)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     Common.Variable.USE_FLAG = 1;
@@ -121,7 +128,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     @Override
-    public void onUpdateAvailable(String d) {
+    public void onUpdateAvailable(String mString) {
     }
 
     @Override
@@ -146,9 +153,9 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     @Override
-    public void onUpdateAvailable1(String d) {
+    public void onUpdateAvailable1(String mString) {
         cancelLoadingDialog();
-        showUpdateDialog(d);
+        showUpdateDialog(mString);
     }
 
     @Override
@@ -162,26 +169,77 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setIcon(R.drawable.alert)
-                .setMessage("エラーが発生しました")
+                .setMessage(R.string.dialog_error)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
 
-    private void showUpdateDialog(String d) {
+    @Override
+    public void onConnectionError() {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
-                .setTitle(R.string.dialog_title_update)
-                .setMessage("アップデートがあります\nアップデートしますか？\n\n更新情報：\n" + d)
-                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    progressHandler = new ProgressHandler();
-                    initFileLoader();
-                    showDialog(0);
-                    progressHandler.progressDialog = progress;
-                    progressHandler.asyncfiledownload = asyncfiledownload;
+                .setTitle(R.string.dialog_title_common_error)
+                .setIcon(R.drawable.alert)
+                .setMessage(R.string.dialog_connection_error)
+                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
+                .show();
+    }
 
-                    if (progress != null && asyncfiledownload != null) {
-                        progress.setProgress(0);
-                        progressHandler.sendEmptyMessage(0);
+    private void showUpdateDialog(String mString) {
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.update_dialog, null);
+        TextView mTextView = view.findViewById(R.id.update_information);
+        mTextView.setText(mString);
+        Button button = view.findViewById(R.id.update_info_button);
+        button.setOnClickListener(v -> {
+            Intent mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(UPDATE_INFO_URL));
+            try {
+                startActivity(mIntent);
+            } catch (ActivityNotFoundException ignored) {
+                if (toast != null) {
+                    toast.cancel();
+                }
+                toast = Toast.makeText(this, R.string.toast_unknown_activity, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+        new AlertDialog.Builder(this)
+                .setView(view)
+                .setCancelable(false)
+                .setTitle(R.string.dialog_title_update)
+                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                    if (GET_MODEL_NAME(this) != 2) {
+                        initFileLoader();
+                        showDialog(0);
+                        progressHandler = new ProgressHandler();
+                        progressHandler.progressDialog = progressDialog;
+                        progressHandler.asyncfiledownload = asyncfiledownload;
+
+                        if (progressDialog != null && asyncfiledownload != null) {
+                            progressDialog.setProgress(0);
+                            progressHandler.sendEmptyMessage(0);
+                        } else {
+                            if (asyncfiledownload != null) asyncfiledownload.cancel(true);
+                            if (progressDialog != null) progressDialog.dismiss();
+                            onDownloadError();
+                        }
+                    } else {
+                        Intent mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(UPDATE_URL));
+                        try {
+                            startActivity(mIntent);
+                        } catch (ActivityNotFoundException ignored) {
+                            if (toast != null) {
+                                toast.cancel();
+                            }
+                            toast = Toast.makeText(this, R.string.toast_unknown_activity, Toast.LENGTH_SHORT);
+                            toast.show();
+                            if (isNetWork()) {
+                                showLoadingDialog(1);
+                                checkSupport();
+                            } else {
+                                netWorkError();
+                            }
+                        }
                     }
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> {
@@ -196,28 +254,24 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void initFileLoader() {
-        File mkdir = new File(getExternalCacheDir().getPath());
-        File outputFile = new File(new File(getExternalCacheDir(), "update.apk").getPath());
-        mkdir.mkdir();
-        asyncfiledownload = new AsyncFileDownload(this, Common.Variable.DOWNLOAD_FILE_URL, outputFile);
+        File mFile = new File(new File(getExternalCacheDir(), "update.apk").getPath());
+        asyncfiledownload = new AsyncFileDownload(this, Common.Variable.DOWNLOAD_FILE_URL, mFile);
         asyncfiledownload.execute();
     }
 
-    private void cancelLoad() {
-        if (asyncfiledownload != null) {
-            asyncfiledownload.cancel(true);
-        }
+    private void cancelDownload() {
+        if (asyncfiledownload != null) asyncfiledownload.cancel(true);
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
         if (id == 0) {
-            progress = new ProgressDialog(this);
-            progress.setTitle("アプリの更新");
-            progress.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
-            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progress.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog, which) -> {
-                cancelLoad();
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle(R.string.dialog_title_update);
+            progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog, which) -> {
+                cancelDownload();
                 if (isNetWork()) {
                     showLoadingDialog(1);
                     checkSupport();
@@ -226,7 +280,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 }
             });
         }
-        return progress;
+        return progressDialog;
     }
 
     private void showSupportDialog() {
@@ -234,7 +288,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
                 .setIcon(R.drawable.alert)
-                .setMessage("このアプリは現在使用できません\n続行する場合機能が制限されます")
+                .setMessage(R.string.dialog_not_use)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     Common.Variable.USE_FLAG = 1;
@@ -251,14 +305,14 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     private void showLoadingDialog(int code) {
         if (code == 1) {
-            loading = ProgressDialog.show(this, "", "通信中です・・・", true);
+            loadingDialog = ProgressDialog.show(this, "", "通信中です・・・", true);
         } else if (GET_UPDATE_FLAG(this) == 1 && code == 2) {
-            loading = ProgressDialog.show(this, "", "通信中です・・・", true);
+            loadingDialog = ProgressDialog.show(this, "", "通信中です・・・", true);
         }
     }
 
     private void cancelLoadingDialog() {
-        if (loading != null) loading.cancel();
+        if (loadingDialog != null) loadingDialog.cancel();
     }
 
     /* 端末チェック */
@@ -417,7 +471,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     AlertDialog.Builder d = new AlertDialog.Builder(this);
                     d.setCancelable(false)
                             .setTitle(R.string.dialog_title_grant_permission)
-                            .setMessage("システム設定の変更が許可されていません\n”設定”を押した後に表示されるスイッチを有効にし許可してください")
+                            .setMessage(R.string.dialog_no_permission)
                             .setIcon(R.drawable.alert)
                             .setPositiveButton(R.string.dialog_common_settings, (dialog, which) -> {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

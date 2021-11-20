@@ -21,7 +21,8 @@ import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.flagment.MainFragment;
+
+import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
@@ -40,7 +41,7 @@ public class NormalActivity extends Activity {
             toast = Toast.makeText(this, R.string.toast_not_completed_settings, Toast.LENGTH_SHORT);
             toast.show();
             finishAndRemoveTask();
-        }else {
+        } else {
             ContentResolver resolver = getContentResolver();
             Intent clearPackageName = new Intent(Intent.ACTION_MAIN);
             clearPackageName.addCategory(Intent.CATEGORY_HOME);
@@ -49,60 +50,68 @@ public class NormalActivity extends Activity {
             if (resolveInfo != null) {
                 activityInfo = resolveInfo.activityInfo;
             }
-            if (isNormalModeSettings_Change_Activity(this)) {
-                try {
-                    Intent intent = new Intent();
-                    intent.setClassName("com.teslacoilsw.launcher", "com.teslacoilsw.launcher.NovaLauncher");
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(this, R.string.toast_not_install_nova, Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            }
             if (isNormalModeSettings_Dcha_State(this)) {
                 Settings.System.putInt(resolver, DCHA_STATE, 0);
             }
             if (isNormalModeSettings_Hide_NavigationBar(this)) {
                 Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 0);
             }
+            if (isNormalModeSettings_Change_Activity(this)) {
+                if (!Objects.equals(GET_NORMAL_LAUNCHER(this), null)) {
+                    try {
+                        Intent intent = pm.getLaunchIntentForPackage(Common.GET_NORMAL_LAUNCHER(this));
+                        startActivity(intent);
+                        intent = new Intent(DCHA_SERVICE);
+                        intent.setPackage(PACKAGE_DCHASERVICE);
+                        bindService(intent, new ServiceConnection() {
+                            public void onServiceConnected(ComponentName name, IBinder service) {
+                                IDchaService mDchaService = IDchaService.Stub.asInterface(service);
+                                if (isNormalModeSettings_Change_Home(getApplicationContext())) {
+                                    if (Common.GET_DCHASERVICE_FLAG(getApplicationContext()) == USE_DCHASERVICE) {
+                                        try {
+                                            mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
+                                            mDchaService.setDefaultPreferredHomeApp(Common.GET_NORMAL_LAUNCHER(getApplicationContext()));
+                                        } catch (RemoteException ignored) {
+                                        }
+                                    } else {
+                                        if (toast != null) {
+                                            toast.cancel();
+                                        }
+                                        toast = Toast.makeText(getApplicationContext(), R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
+                                        toast.show();
+                                    }
+                                }
+                                if (toast != null) {
+                                    toast.cancel();
+                                }
+                                toast = Toast.makeText(getApplicationContext(), R.string.toast_execution, Toast.LENGTH_SHORT);
+                                toast.show();
+                                unbindService(this);
+                                finishAndRemoveTask();
+                            }
 
-            final Intent intent = new Intent(DCHA_SERVICE);
-            intent.setPackage(PACKAGE_DCHASERVICE);
-            bindService(intent, new ServiceConnection() {
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    IDchaService mDchaService = IDchaService.Stub.asInterface(service);
-                    if (isNormalModeSettings_Change_Home(getApplicationContext())) {
-                        if (Common.GET_DCHASERVICE_FLAG(getApplicationContext()) == USE_DCHASERVICE) {
-                            try {
-                                mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
-                                mDchaService.setDefaultPreferredHomeApp("com.teslacoilsw.launcher");
-                            } catch (RemoteException ignored) {
+                            @Override
+                            public void onServiceDisconnected(ComponentName name) {
+                                unbindService(this);
                             }
-                        } else {
-                            if (toast != null) {
-                                toast.cancel();
-                            }
-                            toast = Toast.makeText(getApplicationContext(), R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
-                            toast.show();
+                        }, Context.BIND_AUTO_CREATE);
+                    } catch (ActivityNotFoundException ignored) {
+                        if (toast != null) {
+                            toast.cancel();
                         }
+                        toast = Toast.makeText(this, R.string.toast_not_install_launcher, Toast.LENGTH_SHORT);
+                        toast.show();
+                        finishAndRemoveTask();
                     }
+                } else {
                     if (toast != null) {
                         toast.cancel();
                     }
-                    toast = Toast.makeText(getApplicationContext(), R.string.toast_execution, Toast.LENGTH_SHORT);
+                    toast = Toast.makeText(this, R.string.toast_not_install_launcher, Toast.LENGTH_SHORT);
                     toast.show();
-                    unbindService(this);
                     finishAndRemoveTask();
                 }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    unbindService(this);
-                }
-            }, Context.BIND_AUTO_CREATE);
+            }
         }
     }
 }

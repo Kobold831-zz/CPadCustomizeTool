@@ -69,8 +69,8 @@
     <Preference
         app:iconSpaceReserved="false"
         android:key="dcha_service"
-        android:title="DchaServiceを使用"
-        android:summary="この機能を使用するには、\n表示されるダイアログの内容を確認してください" />
+        android:title="@string/main_pre_title_use_dcha"
+        android:summary="@string/main_pre_sum_use_dcha" />
 
     <PreferenceCategory app:iconSpaceReserved="false" android:title="@string/main_pre_category_emergency_mode" android:key="category_emergency">
 
@@ -114,6 +114,11 @@
 
         <Preference
             app:iconSpaceReserved="false"
+            android:key="normal_mode_launcher"
+            android:title="@string/main_pre_title_launcher" />
+
+        <Preference
+            app:iconSpaceReserved="false"
             android:key="normal_manual"
             android:title="@string/main_pre_title_normal_mode_manual" />
 
@@ -144,7 +149,7 @@
 
     <SwitchPreference app:iconSpaceReserved="false"
         android:key="switch10"
-        android:title="デバイス管理者を有効にする"
-        android:summary="このアプリがアンインストールされないようにします" />
+        android:title="@string/main_pre_title_device_admin"
+        android:summary="@string/main_pre_sum_device_admin" />
 
 </PreferenceScreen>

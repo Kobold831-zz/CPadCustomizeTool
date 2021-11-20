@@ -34,8 +34,8 @@
     <string-array name="normal_mode_text" >
         <item>システムUIを通常用に変更</item>
         <item>ナビゲーションバーを表示</item>
-        <item>ホームをNovaLauncherに変更</item>
-        <item>実行時にNovaLauncherを起動</item>
+        <item>ホームを変更</item>
+        <item>実行時にホームを起動</item>
     </string-array>
 
     <string-array name="normal_mode_value" >

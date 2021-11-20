@@ -3,8 +3,8 @@ package com.saradabar.cpadcustomizetool.check.event;
 import java.util.HashSet;
 import java.util.Set;
 
-
 public class UpdateEventListenerList {
+
 	private final Set<UpdateEventListener> listeners = new HashSet<>();
 
 	public void addEventListener(UpdateEventListener l) {
@@ -17,9 +17,9 @@ public class UpdateEventListenerList {
 		}
 	}
 
-	public void updateAvailableNotify(String d) {
+	public void updateAvailableNotify(String mString) {
 		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateAvailable(d);
+			listener.onUpdateAvailable(mString);
 		}
 	}
 
@@ -29,9 +29,9 @@ public class UpdateEventListenerList {
 		}
 	}
 
-	public void updateAvailableNotify1(String d) {
+	public void updateAvailableNotify1(String mString) {
 		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateAvailable1(d);
+			listener.onUpdateAvailable1(mString);
 		}
 	}
 
@@ -56,6 +56,12 @@ public class UpdateEventListenerList {
 	public void supportUnavailableNotify() {
 		for (UpdateEventListener listener : listeners) {
 			listener.onSupportUnavailable();
+		}
+	}
+
+	public void connectionErrorNotify() {
+		for (UpdateEventListener listener : listeners) {
+			listener.onConnectionError();
 		}
 	}
 }

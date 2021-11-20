@@ -16,13 +16,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -100,24 +96,6 @@ public class StartActivity extends Activity {
                                 resolver = getContentResolver();
                                 Settings.System.putInt(resolver, dchaStateString, 0);
                                 Settings.System.putInt(resolver, hideNavigationBarString, 0);
-                                Intent intent = new Intent(DCHA_SERVICE);
-                                intent.setPackage(PACKAGE_DCHASERVICE);
-                                bindService(intent, new ServiceConnection() {
-                                    @Override
-                                    public void onServiceConnected(ComponentName name, IBinder service) {
-                                        mDchaService = IDchaService.Stub.asInterface(service);
-                                        try {
-                                            mDchaService.clearDefaultPreferredApp(getLauncherPackage());
-                                        } catch (RemoteException ignored) {
-                                        }
-                                        unbindService(this);
-                                    }
-
-                                    @Override
-                                    public void onServiceDisconnected(ComponentName name) {
-                                        unbindService(this);
-                                    }
-                                }, Context.BIND_AUTO_CREATE);
                             });
                     b.setNegativeButton(R.string.dialog_common_no, null);
                     b.show();
@@ -173,24 +151,6 @@ public class StartActivity extends Activity {
                                 resolver = getContentResolver();
                                 Settings.System.putInt(resolver, dchaStateString, 0);
                                 Settings.System.putInt(resolver, hideNavigationBarString, 0);
-                                Intent intent = new Intent(DCHA_SERVICE);
-                                intent.setPackage(PACKAGE_DCHASERVICE);
-                                bindService(intent, new ServiceConnection() {
-                                    @Override
-                                    public void onServiceConnected(ComponentName name, IBinder service) {
-                                        mDchaService = IDchaService.Stub.asInterface(service);
-                                        try {
-                                            mDchaService.clearDefaultPreferredApp(getLauncherPackage());
-                                        } catch (RemoteException ignored) {
-                                        }
-                                        unbindService(this);
-                                    }
-
-                                    @Override
-                                    public void onServiceDisconnected(ComponentName name) {
-                                        unbindService(this);
-                                    }
-                                }, Context.BIND_AUTO_CREATE);
                             });
                     b.setNegativeButton(R.string.dialog_common_no, null);
                     b.show();
@@ -203,15 +163,6 @@ public class StartActivity extends Activity {
         if (Common.Variable.toast != null) {
             Common.Variable.toast.cancel();
         }
-    }
-
-    private String getLauncherPackage() {
-        Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
-        PackageManager pm = getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
-        ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-        return activityInfo.packageName;
     }
 
     /* メニュー表示 */
@@ -311,7 +262,7 @@ public class StartActivity extends Activity {
             @Override
             public void onSuccess() {
                 AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
-                d.setMessage("サイレントインストールに成功しました")
+                d.setMessage(R.string.dialog_success_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
                 d.create();
@@ -322,7 +273,7 @@ public class StartActivity extends Activity {
             @Override
             public void onFailure() {
                 AlertDialog.Builder d = new AlertDialog.Builder(StartActivity.this);
-                d.setMessage("サイレントインストールに失敗しました")
+                d.setMessage(R.string.dialog_failure_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss());
                 d.create();
@@ -341,7 +292,7 @@ public class StartActivity extends Activity {
             public void onSuccess() {
                 /* 設定変更カウントダウンダイアログ表示 */
                 AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(StartActivity.getInstance());
-                mAlertDialog.setTitle("解像度の設定")
+                mAlertDialog.setTitle(R.string.dialog_title_resolution)
                         .setCancelable(false)
                         .setMessage("")
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> {
