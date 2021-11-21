@@ -312,7 +312,10 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void cancelLoadingDialog() {
-        if (loadingDialog != null) loadingDialog.cancel();
+        try {
+            if (loadingDialog != null) loadingDialog.cancel();
+        } catch (Exception ignored) {
+        }
     }
 
     /* 端末チェック */
