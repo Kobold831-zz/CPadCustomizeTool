@@ -58,11 +58,8 @@ public class Updater {
 
             if (latestVersionCode == -99) return -1;
 
-            if (currentVersionCode < latestVersionCode) {
-                return 1;
-            }else {
-                return 0;
-            }
+            if (currentVersionCode < latestVersionCode) return 1;
+            else return 0;
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
@@ -81,9 +78,7 @@ public class Updater {
             latestVersionCode = Integer.parseInt(map.get("versionCode"));
             DOWNLOAD_FILE_URL = map.get("url");
             latestDescription = map.get("description");
-        } else {
-            latestVersionCode = -99;
-        }
+        } else latestVersionCode = -99;
     }
 
     public void updateCheck() {

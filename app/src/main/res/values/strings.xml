@@ -87,14 +87,14 @@
     <string name="dialog_title_reboot">再起動しますか？</string>
     <string name="dialog_error_not_pad2">この端末は”チャレンジパッド2・3・NEO”ではありません\nこのアプリは使用できません</string>
     <string name="dialog_error_not_dchaservice">”DchaService”が動作していません\nこのアプリは使用できません\n\n”DchaService”を使用しない場合、”続行”を押してください</string>
-    <string name="dialog_title_notice_start">＊重要なお知らせ＊</string>
-    <string name="dialog_notice_start">このアプリはアンチウイルスソフトに”不審なプログラム”として”誤検知”される場合があります\n質問がある場合は、CTabLaboに所属している”開発者”にお問い合わせしてください\nこのダイアログは次回起動以降表示しません</string>
+    <string name="dialog_title_notice_start">お知らせ</string>
+    <string name="dialog_notice_start">このアプリはアンチウイルスソフトに不審なプログラムとして誤検知される場合があります\n詳しくは、CTabLaboに所属している開発者に問い合わせてください\nこのダイアログは次回起動以降表示しません</string>
     <string name="dialog_title_grant_permission">権限設定</string>
     <string name="dialog_no_update">アップデートはありません</string>
     <string name="dialog_emergency_select_course">受講中の講座を選択してください</string>
     <string name="dialog_mode_select_settings">実行時に変更する設定を選択してください\n設定変更後は”OK”を押してください</string>
     <string name="dialog_title_dcha_service">以下の内容を確認してください</string>
-    <string name="dialog_dcha_service">DchaServiceを使用すると、使用者自身に危険性があることを十分に理解する必要があります\nこの機能を使用したことによる全ての責任は自己責任であり、開発者は一切責任を負いません\nDchaServiceの機能を使用しますか？</string>
+    <string name="dialog_dcha_service">この機能を使用したことによるすべての問題を開発者は一切責任を負いません\nDchaServiceの機能を使用しますか?</string>
     <string name="dialog_title_emergency_manual">緊急モードの説明</string>
     <string name="dialog_emergency_manual">\nこの機能はアクティビティを呼び出して使用します\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します\n\n使用する場合ホームランチャーなどから”.mode.emergency.EmergencyActivity”を追加し、タップしてください\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします\n\n＊ナビゲーションバーを隠す＊\n\n＊アプリ履歴を全消去＊\n\n＊ホームを勉強ホームに変更＊\n\n＊システムUIを学習用に変更＊</string>
     <string name="dialog_emergency_manual_red">\nシステムUIを変更するためOneToucher等のアクティビティや他のアプリを起動させるアプリをインストールしておかないと初期化以外に勉強ホームから抜け出すことができなくなります\n\nアプリ履歴を全消去はナビゲーションバーの□ボタンを押すと表示されるアプリ履歴のアプリを終了するだけであり、バックグランド上で動いているOneToucher等のアプリは停止しません</string>
@@ -115,14 +115,16 @@
     <string name="dialog_illegal_value">不正な値です</string>
     <string name="dialog_title_launcher">ランチャーを選択</string>
     <string name="dialog_error_no_work_dcha">DchaServiceが動作していないためこの機能は使用できません</string>
+    <string name="dialog_error_no_work_dcha_util">DchaUtilServiceが動作していないためこの機能は使用できません</string>
+    <string name="dialog_update_caution">ご利用のデバイスではコンピュータ経由でアップデートする必要があります\n遷移先のページより新しいバージョンのapkファイルをダウンロードしてadbでインストールしてください</string>
 
     <!-- トースト -->
     <string name="toast_common_success">成功しました</string>
     <string name="toast_execution">実行しました</string>
-    <string name="toast_not_course">選択された講座は存在しません</string>
-    <string name="toast_not_install_launcher">"ホームランチャーが存在しないためホームの起動、変更は実行しません"</string>
-    <string name="toast_use_not_dcha">DchaServiceの機能を使用するための確認が取れていないため起動できません</string>
-    <string name="toast_not_completed_settings">初期設定が完了していないため起動できません</string>
+    <string name="toast_not_course">講座が存在しません</string>
+    <string name="toast_not_install_launcher">"ホームランチャーが存在しません"</string>
+    <string name="toast_use_not_dcha">DchaServiceを使用するための確認が完了していません</string>
+    <string name="toast_not_completed_settings">初期設定が完了していません</string>
     <string name="toast_not_change">権限を付与してから再試行してください</string>
     <string name="toast_unknown_activity">ブラウザを開けませんでした</string>
     <string name="toast_no_development_option">開発者向けオプションは有効になっていません</string>

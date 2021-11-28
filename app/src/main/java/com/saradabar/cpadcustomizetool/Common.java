@@ -12,10 +12,8 @@ import java.util.Set;
 public final class Common {
 
     public static final class Variable {
-
-        public static int START_FLAG, USE_FLAG;
-
-        public static final int FLAG_TEST = 0;
+        public static final int FLAG_TEST = -1;
+        public static final int FLAG_CHECK = 0;
         public static final int FLAG_SET_DCHA_STATE_0 = 1;
         public static final int FLAG_SET_DCHA_STATE_3 = 2;
         public static final int FLAG_HIDE_NAVIGATION_BAR = 3;
@@ -26,12 +24,12 @@ public final class Common {
         public static final int FLAG_MARKET_APP_TRUE = 8;
         public static final int FLAG_MARKET_APP_FALSE = 9;
         public static final int FLAG_SET_LAUNCHER = 10;
-
         public static final int FLAG_RESOLUTION = 20;
 
         public static final int REQUEST_UPDATE = 0;
         public static final int REQUEST_ADMIN = 1;
         public static final int REQUEST_INSTALL = 2;
+        public static final int REQUEST_PERMISSION = 3;
 
         public static final int DCHA_MODE = 1;
         public static final int DCHA_UTIL_MODE = 2;
@@ -49,11 +47,6 @@ public final class Common {
         public static DevicePolicyManager mDevicePolicyManager;
 
         public static ComponentName mComponentName;
-
-        public static final int SETTINGS_NOT_COMPLETED = 0;
-        public static final int USE_NOT_DCHASERVICE = 0;
-        public static final int SETTINGS_COMPLETED = 1;
-        public static final int USE_DCHASERVICE = 1;
 
         public static final String DCHA_SERVICE = "jp.co.benesse.dcha.dchaservice.DchaService";
         public static final String PACKAGE_DCHASERVICE = "jp.co.benesse.dcha.dchaservice";
@@ -76,7 +69,6 @@ public final class Common {
     public static ComponentName getAdministratorComponent(Context context) {
         return new ComponentName(context, com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver.class);
     }
-
 
     /* マルチリストのデータ取得 */
     private static Set<String> getEmergencySettings(Context context) {
@@ -162,76 +154,76 @@ public final class Common {
     }
 
     /* データ管理 */
-    public static void SET_UPDATE_FLAG(int FLAG, Context context) {
+    public static void SET_UPDATE_FLAG(boolean FLAG, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt("UPDATE_FLAG", FLAG).apply();
+        sp.edit().putBoolean("update", FLAG).apply();
     }
 
-    public static int GET_UPDATE_FLAG(Context context) {
-        int UPDATE_FLAG;
+    public static boolean GET_UPDATE_FLAG(Context context) {
+        boolean bl;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        UPDATE_FLAG = sp.getInt("UPDATE_FLAG", 0);
-        return UPDATE_FLAG;
+        bl = sp.getBoolean("update", true);
+        return bl;
     }
 
-    public static void SET_SETTINGS_FLAG(int FLAG, Context context) {
+    public static void SET_SETTINGS_FLAG(boolean FLAG, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt("SETTINGS_FLAG", FLAG).apply();
+        sp.edit().putBoolean("settings", FLAG).apply();
     }
 
-    public static int GET_SETTINGS_FLAG(Context context) {
-        int SETTINGS_FLAG;
+    public static boolean GET_SETTINGS_FLAG(Context context) {
+        boolean bl;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        SETTINGS_FLAG = sp.getInt("SETTINGS_FLAG", 0);
-        return SETTINGS_FLAG;
+        bl = sp.getBoolean("settings", false);
+        return bl;
     }
 
-    public static void SET_MODEL_NAME(int ID, Context context) {
+    public static void SET_MODEL_ID(int MODEL_ID, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt("MODEL_NAME", ID).apply();
+        sp.edit().putInt("model_name", MODEL_ID).apply();
     }
 
-    public static int GET_MODEL_NAME(Context context) {
-        int MODEL_NAME;
+    public static int GET_MODEL_ID(Context context) {
+        int id;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        MODEL_NAME = sp.getInt("MODEL_NAME", 0);
-        return MODEL_NAME;
+        id = sp.getInt("model_name", 0);
+        return id;
     }
 
-    public static void SET_DCHASERVICE_FLAG(int FLAG, Context context) {
+    public static void SET_DCHASERVICE_FLAG(boolean FLAG, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt("DCHASERVICE_FLAG", FLAG).apply();
+        sp.edit().putBoolean("dcha_service", FLAG).apply();
     }
 
-    public static int GET_DCHASERVICE_FLAG(Context context) {
-        int DCHASERVICE_FLAG;
+    public static boolean GET_DCHASERVICE_FLAG(Context context) {
+        boolean bl;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        DCHASERVICE_FLAG = sp.getInt("DCHASERVICE_FLAG", 0);
-        return DCHASERVICE_FLAG;
+        bl = sp.getBoolean("dcha_service", false);
+        return bl;
     }
 
-    public static void SET_CHANGE_SETTINGS_DCHA_FLAG(int FLAG, Context context) {
+    public static void SET_CHANGE_SETTINGS_DCHA_FLAG(boolean FLAG, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putInt("CHANGE_SETTINGS_DCHA_FLAG", FLAG).apply();
+        sp.edit().putBoolean("settings_dcha", FLAG).apply();
     }
 
-    public static int GET_CHANGE_SETTINGS_DCHA_FLAG(Context context) {
-        int CHANGE_SETTINGS_DCHA_FLAG;
+    public static boolean GET_CHANGE_SETTINGS_DCHA_FLAG(Context context) {
+        boolean bl;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        CHANGE_SETTINGS_DCHA_FLAG = sp.getInt("CHANGE_SETTINGS_DCHA_FLAG", 0);
-        return CHANGE_SETTINGS_DCHA_FLAG;
+        bl = sp.getBoolean("settings_dcha", false);
+        return bl;
     }
 
-    public static void SET_NORMAL_LAUNCHER(String mString, Context context) {
+    public static void SET_NORMAL_LAUNCHER(String string, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString("NORMAL_LAUNCHER", mString).apply();
+        sp.edit().putString("normal_launcher", string).apply();
     }
 
     public static String GET_NORMAL_LAUNCHER(Context context) {
-        String NORMAL_LAUNCHER;
+        String string;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        NORMAL_LAUNCHER = sp.getString("NORMAL_LAUNCHER", null);
-        return NORMAL_LAUNCHER;
+        string = sp.getString("normal_launcher", null);
+        return string;
     }
 }
 

@@ -30,4 +30,8 @@ public class WelAppActivity extends WelcomeActivity {
                 .swipeToDismiss(false)
                 .build();
     }
+
+    @Override
+    public void onBackPressed() {
+    }
 }

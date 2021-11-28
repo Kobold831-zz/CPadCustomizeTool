@@ -19,7 +19,6 @@ import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.StartActivity;
 import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
@@ -36,13 +35,11 @@ public class MainOtherFragment extends PreferenceFragment {
         final Preference preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
         final Preference preferenceDisableDeviceOwner = findPreference("disable_device_owner");
         final Preference preferenceDevelopmentSettings = findPreference("intent_development_settings");
-        final SwitchPreference switchPreferencePermissionForced = (SwitchPreference) findPreference("permission_forced");
+        final SwitchPreference switchPreferencePermissionForced = findPreference("permission_forced");
 
         preferenceOtherSettings.setOnPreferenceClickListener(preference -> {
             try {
-                Intent intent = new Intent();
-                intent.setClassName("com.android.settings", "com.android.settings.Settings");
-                startActivity(intent);
+                startActivity(new Intent().setClassName("com.android.settings", "com.android.settings.Settings").addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
             } catch (ActivityNotFoundException ignored) {
             }
             return false;
@@ -50,15 +47,12 @@ public class MainOtherFragment extends PreferenceFragment {
 
         preferenceDevelopmentSettings.setOnPreferenceClickListener(preference -> {
             if (Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
                 try {
-                    startActivity(intent);
+                    startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 } catch (ActivityNotFoundException ignored) {
                 }
             } else {
-                if (toast != null) {
-                    toast.cancel();
-                }
+                if (toast != null) toast.cancel();
                 toast = Toast.makeText(getActivity(), R.string.toast_no_development_option, Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -67,9 +61,7 @@ public class MainOtherFragment extends PreferenceFragment {
 
         preferenceSysUiAdjustment.setOnPreferenceClickListener(preference -> {
             try {
-                Intent intent = new Intent();
-                intent.setClassName("com.android.systemui", "com.android.systemui.DemoMode");
-                startActivity(intent);
+                startActivity(new Intent().setClassName("com.android.systemui", "com.android.systemui.DemoMode").addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
             } catch (ActivityNotFoundException ignored) {
             }
             return false;
@@ -77,8 +69,7 @@ public class MainOtherFragment extends PreferenceFragment {
 
         preferenceBlockToUninstallSettings.setOnPreferenceClickListener(preference -> {
             try {
-                Intent intent = new Intent(getActivity(), BlockerActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(getActivity(), BlockerActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
             } catch (ActivityNotFoundException ignored) {
             }
             return false;
@@ -88,15 +79,11 @@ public class MainOtherFragment extends PreferenceFragment {
             if ((boolean) o) {
                 switchPreferencePermissionForced.setChecked(true);
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_GRANTED");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
-                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
             } else {
                 switchPreferencePermissionForced.setChecked(false);
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
-                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
             }
             return true;
         });
@@ -106,26 +93,26 @@ public class MainOtherFragment extends PreferenceFragment {
                     .setTitle(R.string.dialog_question_device_owner)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                         mDevicePolicyManager.clearDeviceOwnerApp(getActivity().getPackageName());
-                        Intent intent = new Intent(getActivity(), StartActivity.class);
                         getActivity().finish();
-                        startActivity(intent);
+                        getActivity().overridePendingTransition(0, 0);
+                        startActivity(getActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
                     })
                     .setNegativeButton(R.string.dialog_common_no, null)
                     .show();
             return false;
         });
 
-        if (Common.GET_MODEL_NAME(getActivity()) == 0) {
+        if (Common.GET_MODEL_ID(getActivity()) == 0) {
             switchPreferencePermissionForced.setEnabled(false);
             switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
         }
 
-        if (Common.GET_MODEL_NAME(getActivity()) != 2) {
+        if (Common.GET_MODEL_ID(getActivity()) != 2) {
             preferenceSysUiAdjustment.setEnabled(false);
             preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
         }
 
-        if (Common.GET_MODEL_NAME(getActivity()) == 1) {
+        if (Common.GET_MODEL_ID(getActivity()) == 1) {
             preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
             preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
             preferenceBlockToUninstallSettings.setEnabled(false);
@@ -162,15 +149,15 @@ public class MainOtherFragment extends PreferenceFragment {
 
         Common.Variable.mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
 
-        final SwitchPreference switchPreferencePermissionForced = (SwitchPreference) findPreference("permission_forced");
+        final SwitchPreference switchPreferencePermissionForced = findPreference("permission_forced");
         final Preference preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
         final Preference preferenceDisableDeviceOwner = findPreference("disable_device_owner");
 
-        if (Common.GET_MODEL_NAME(getActivity()) == 0) {
+        if (Common.GET_MODEL_ID(getActivity()) == 0) {
             switchPreferencePermissionForced.setEnabled(false);
             switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
         }
-        if (Common.GET_MODEL_NAME(getActivity()) == 1) {
+        if (Common.GET_MODEL_ID(getActivity()) == 1) {
             preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
             preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
             preferenceBlockToUninstallSettings.setEnabled(false);

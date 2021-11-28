@@ -1,9 +1,7 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.Common.Variable.USE_NOT_DCHASERVICE;
-import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,17 +18,13 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class RebootActivity extends Activity {
 
-    private IDchaService mDchaService;
-
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Common.GET_DCHASERVICE_FLAG(this) != USE_NOT_DCHASERVICE) {
+        if (GET_DCHASERVICE_FLAG(this)) {
             startReboot();
         } else {
-            if (toast != null) {
-                toast.cancel();
-            }
+            if (toast != null) toast.cancel();
             toast = Toast.makeText(this, R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
             toast.show();
             finishAndRemoveTask();
@@ -42,12 +36,10 @@ public class RebootActivity extends Activity {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_reboot)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    Intent intent = new Intent(DCHA_SERVICE);
-                    intent.setPackage(PACKAGE_DCHASERVICE);
-                    bindService(intent, new ServiceConnection() {
+                    bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
                         @Override
                         public void onServiceConnected(ComponentName name, IBinder service) {
-                            mDchaService = IDchaService.Stub.asInterface(service);
+                            IDchaService mDchaService = IDchaService.Stub.asInterface(service);
                             try {
                                 mDchaService.rebootPad(0, null);
                             } catch (RemoteException ignored) {

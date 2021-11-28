@@ -1,6 +1,7 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.*;
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.app.ActivityManager;
@@ -69,7 +70,7 @@ public class MainFragment extends PreferenceFragment {
     private SharedPreferences sp;
     private ContentResolver resolver;
 
-    private int connectionFlag, dchaFlag, width, height;
+    private int width, height;
 
     private IDchaService mDchaService;
     private IDchaUtilService mIDchaUtilService;
@@ -161,75 +162,71 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
-    public void bindDchaService(int flagDcha, int flagMode) {
-        Intent intent = null;
-        dchaFlag = flagMode;
-        connectionFlag = flagDcha;
-        if (dchaFlag == DCHA_MODE) {
+    public boolean bindDchaService(int flag, int dchaMode) {
+        Intent intent = new Intent();
+        if (dchaMode == DCHA_MODE) {
             intent = new Intent(DCHA_SERVICE);
             intent.setPackage(PACKAGE_DCHASERVICE);
-        } else if (dchaFlag == DCHA_UTIL_MODE) {
+        } else if (dchaMode == DCHA_UTIL_MODE) {
             intent = new Intent(DCHA_UTIL_SERVICE);
             intent.setPackage(PACKAGE_DCHA_UTIL_SERVICE);
         }
-        getActivity().bindService(intent, dchaServiceConnection, Context.BIND_AUTO_CREATE);
+        return !getActivity().bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder iBinder) {
+                if (dchaMode == DCHA_MODE) {
+                    mDchaService = IDchaService.Stub.asInterface(iBinder);
+                    try {
+                        switch (flag) {
+                            case FLAG_SET_DCHA_STATE_0:
+                                mDchaService.setSetupStatus(0);
+                                break;
+                            case FLAG_SET_DCHA_STATE_3:
+                                mDchaService.setSetupStatus(3);
+                                break;
+                            case FLAG_HIDE_NAVIGATION_BAR:
+                                mDchaService.hideNavigationBar(true);
+                                break;
+                            case FLAG_VIEW_NAVIGATION_BAR:
+                                mDchaService.hideNavigationBar(false);
+                                break;
+                            case FLAG_REBOOT:
+                                mDchaService.rebootPad(0, null);
+                                break;
+                            case FLAG_SET_LAUNCHER:
+                                mDchaService.clearDefaultPreferredApp(getLauncherPackage());
+                                mDchaService.setDefaultPreferredHomeApp(setLauncherPackage);
+                                /* listviewの更新 */
+                                mListView.invalidateViews();
+                                setCheckedSwitch();
+                                break;
+                            case FLAG_TEST:
+                                break;
+                        }
+                    } catch (RemoteException ignored) {
+                    }
+                } else if (dchaMode == DCHA_UTIL_MODE) {
+                    mIDchaUtilService = IDchaUtilService.Stub.asInterface(iBinder);
+                    try {
+                        switch (flag) {
+                            case FLAG_CHECK:
+                                break;
+                            case FLAG_RESOLUTION:
+                                mIDchaUtilService.setForcedDisplaySize(width, height);
+                                break;
+                        }
+                    } catch (RemoteException ignored) {
+                    }
+                }
+                getActivity().unbindService(this);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                getActivity().unbindService(this);
+            }
+        }, Context.BIND_AUTO_CREATE);
     }
-
-    public ServiceConnection dchaServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            if (dchaFlag == DCHA_MODE) {
-                mDchaService = IDchaService.Stub.asInterface(iBinder);
-                try {
-                    switch (connectionFlag) {
-                        case FLAG_SET_DCHA_STATE_0:
-                            mDchaService.setSetupStatus(0);
-                            break;
-                        case FLAG_SET_DCHA_STATE_3:
-                            mDchaService.setSetupStatus(3);
-                            break;
-                        case FLAG_HIDE_NAVIGATION_BAR:
-                            mDchaService.hideNavigationBar(true);
-                            break;
-                        case FLAG_VIEW_NAVIGATION_BAR:
-                            mDchaService.hideNavigationBar(false);
-                            break;
-                        case FLAG_REBOOT:
-                            mDchaService.rebootPad(0, null);
-                            break;
-                        case FLAG_SET_LAUNCHER:
-                            mDchaService.clearDefaultPreferredApp(getLauncherPackage());
-                            mDchaService.setDefaultPreferredHomeApp(setLauncherPackage);
-                            /* listviewの更新 */
-                            mListView.invalidateViews();
-                            setCheckedSwitch();
-                            break;
-                        case Common.Variable.FLAG_TEST:
-                            break;
-                    }
-                } catch (RemoteException ignored) {
-                }
-            } else if (dchaFlag == DCHA_UTIL_MODE) {
-                mIDchaUtilService = IDchaUtilService.Stub.asInterface(iBinder);
-                try {
-                    if (connectionFlag == FLAG_RESOLUTION) {
-                        mIDchaUtilService.setForcedDisplaySize(width, height);
-                    }
-                } catch (RemoteException ignored) {
-                }
-            }
-            getActivity().unbindService(this);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            if (dchaFlag == DCHA_MODE) {
-                mDchaService = null;
-            } else if (dchaFlag == DCHA_UTIL_MODE) {
-                mIDchaUtilService = null;
-            }
-        }
-    };
 
     /* 設定変更 */
     private void settingsFlag(int flag) {
@@ -308,13 +305,13 @@ public class MainFragment extends PreferenceFragment {
 
         /* リスナーを有効化 */
         switchDchaState.setOnPreferenceChangeListener((preference, o) -> {
-            if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 0) {
+            if (!Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     settingsFlag(FLAG_SET_DCHA_STATE_3);
                 } else {
                     settingsFlag(FLAG_SET_DCHA_STATE_0);
                 }
-            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
+            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     bindDchaService(FLAG_SET_DCHA_STATE_3, DCHA_MODE);
                 } else {
@@ -325,13 +322,13 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchHideBar.setOnPreferenceChangeListener((preference, o) -> {
-            if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 0) {
+            if (!Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     settingsFlag(FLAG_HIDE_NAVIGATION_BAR);
                 } else {
                     settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
                 }
-            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()) == 1) {
+            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     bindDchaService(FLAG_HIDE_NAVIGATION_BAR, DCHA_MODE);
                 } else {
@@ -415,12 +412,12 @@ public class MainFragment extends PreferenceFragment {
             ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
             if ((boolean) o) {
                 try {
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_3);
                     }
                     Thread.sleep(100);
                     Settings.Global.putInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED, 1);
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     getActivity().startService(new Intent(getActivity(), KeepService.class));
@@ -434,7 +431,7 @@ public class MainFragment extends PreferenceFragment {
                     }
                 } catch (SecurityException | InterruptedException e) {
                     e.printStackTrace();
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     if (null != toast) toast.cancel();
@@ -547,17 +544,17 @@ public class MainFragment extends PreferenceFragment {
         switchUsbDebug.setOnPreferenceChangeListener((preference, o) -> {
             if ((boolean) o) {
                 try {
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_3);
                     }
                     Thread.sleep(100);
                     settingsFlag(FLAG_USB_DEBUG_TRUE);
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                 } catch (SecurityException | InterruptedException e) {
                     e.printStackTrace();
-                    if (Common.GET_MODEL_NAME(getActivity()) == 2) {
+                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     if (null != toast) toast.cancel();
@@ -710,16 +707,16 @@ public class MainFragment extends PreferenceFragment {
                     .setTitle(R.string.dialog_title_dcha_service)
                     .setMessage(R.string.dialog_dcha_service)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        if (StartActivity.bindDchaService(getActivity(), dchaServiceConnection)) {
+                        if (StartActivity.getInstance().bindDchaService()) {
                             new AlertDialog.Builder(getActivity())
                                     .setMessage(R.string.dialog_error_no_work_dcha)
                                     .setPositiveButton(R.string.dialog_common_ok, null)
                                     .show();
                         } else {
-                            Common.SET_DCHASERVICE_FLAG(USE_DCHASERVICE, getActivity());
+                            SET_DCHASERVICE_FLAG(true, getActivity());
                             getActivity().finish();
-                            Intent intent = new Intent(getActivity(), StartActivity.class);
-                            startActivity(intent);
+                            getActivity().overridePendingTransition(0, 0);
+                            startActivity(getActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
                         }
                     })
 
@@ -777,6 +774,15 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceResolution.setOnPreferenceClickListener(preference -> {
+            /* DchaUtilServiceが機能しているか */
+            if (bindDchaService(FLAG_CHECK, DCHA_UTIL_MODE)) {
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.dialog_error_no_work_dcha_util)
+                        .setPositiveButton(R.string.dialog_common_ok, null)
+                        .show();
+                return false;
+            }
+
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View view = inflater.inflate(R.layout.resolution_dialog, null);
             new AlertDialog.Builder(getActivity())
@@ -819,7 +825,7 @@ public class MainFragment extends PreferenceFragment {
             return false;
         });
 
-        switch (Common.GET_MODEL_NAME(getActivity())) {
+        switch (GET_MODEL_ID(getActivity())) {
             case 0:
                 preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceSilentInstall.setEnabled(false);
@@ -843,7 +849,7 @@ public class MainFragment extends PreferenceFragment {
             switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
 
-        if (Common.GET_DCHASERVICE_FLAG(getActivity()) == USE_NOT_DCHASERVICE) {
+        if (!GET_DCHASERVICE_FLAG(getActivity())) {
             getPreferenceScreen().removePreference(findPreference("android_silent_install"));
             getPreferenceScreen().removePreference(findPreference("android_home"));
             getPreferenceScreen().removePreference(findPreference("switch9"));
@@ -854,7 +860,7 @@ public class MainFragment extends PreferenceFragment {
             getPreferenceScreen().removePreference(findPreference("android_resolution"));
             getPreferenceScreen().removePreference(findPreference("android_resolution_reset"));
         } else {
-            if (Common.GET_DCHASERVICE_FLAG(getActivity()) == USE_DCHASERVICE) {
+            if (Common.GET_DCHASERVICE_FLAG(getActivity())) {
                 getPreferenceScreen().removePreference(findPreference("dcha_service"));
             }
         }
@@ -958,7 +964,7 @@ public class MainFragment extends PreferenceFragment {
         /* 一括変更 */
         setCheckedSwitch();
 
-        switch (Common.GET_MODEL_NAME(getActivity())) {
+        switch (Common.GET_MODEL_ID(getActivity())) {
             case 0:
                 preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceSilentInstall.setEnabled(false);
@@ -1035,11 +1041,11 @@ public class MainFragment extends PreferenceFragment {
 
     public static class silentInstallTask extends AsyncTask<Object, Void, Object> {
 
-        private Listener listener;
+        private Listener mListener;
 
         @Override
         protected void onPreExecute() {
-            listener.onShow();
+            mListener.onShow();
         }
 
         @Override
@@ -1054,38 +1060,31 @@ public class MainFragment extends PreferenceFragment {
         @Override
         protected void onPostExecute(Object result) {
             if (result != null) {
-                StartActivity.getInstance().mProgress.dismiss();
-                listener.onSuccess();
-            } else {
-                StartActivity.getInstance().mProgress.dismiss();
-                listener.onFailure();
-            }
+                mListener.onSuccess();
+            } else mListener.onFailure();
         }
 
         public void setListener(Listener listener) {
-            this.listener = listener;
+            mListener = listener;
         }
 
         public interface Listener {
             void onShow();
-
             void onSuccess();
-
             void onFailure();
         }
     }
 
     public static class setResolutionTask extends AsyncTask<Object, Void, Object> {
 
-        private Listener listener;
+        private Listener mListener;
 
         @Override
         protected Object doInBackground(Object... value) {
             getInstance().setResolution(MainFragment.getInstance().width, MainFragment.getInstance().height);
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException ignored) {
             }
             return new Object();
         }
@@ -1093,19 +1092,16 @@ public class MainFragment extends PreferenceFragment {
         @Override
         protected void onPostExecute(Object result) {
             if (result != null) {
-                listener.onSuccess();
-            } else {
-                listener.onFailure();
-            }
+                mListener.onSuccess();
+            } else mListener.onFailure();
         }
 
         public void setListener(Listener listener) {
-            this.listener = listener;
+            mListener = listener;
         }
 
         public interface Listener {
             void onSuccess();
-
             void onFailure();
         }
     }
@@ -1114,7 +1110,7 @@ public class MainFragment extends PreferenceFragment {
     public boolean installApp(IDchaService mDchaService, String str, int i) {
         try {
             return mDchaService.installApp(str, i);
-        } catch (RemoteException | NullPointerException e) {
+        } catch (RemoteException | NullPointerException ignored) {
             return false;
         }
     }
@@ -1128,17 +1124,27 @@ public class MainFragment extends PreferenceFragment {
 
     /* 解像度のリセット */
     public void resetResolution() {
-        switch (Common.GET_MODEL_NAME(getActivity())) {
+        switch (GET_MODEL_ID(getActivity())) {
             case 0:
             case 1:
                 width = 1280;
                 height = 800;
-                bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE);
+                if (bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE)) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.dialog_error_no_work_dcha_util)
+                            .setPositiveButton(R.string.dialog_common_ok, null)
+                            .show();
+                }
                 break;
             case 2:
                 width = 1920;
                 height = 1200;
-                bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE);
+                if (bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE)) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.dialog_error_no_work_dcha_util)
+                            .setPositiveButton(R.string.dialog_common_ok, null)
+                            .show();
+                }
                 break;
         }
     }

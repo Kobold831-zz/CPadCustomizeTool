@@ -26,17 +26,17 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                 if (sp.getBoolean(Common.Variable.KEY_ENABLED_AUTO_USB_DEBUG, false)) {
                     String dchaStateString = DCHA_STATE;
                     try {
-                        if (Common.GET_MODEL_NAME(context) == 2) {
+                        if (Common.GET_MODEL_ID(context) == 2) {
                             Settings.System.putInt(resolver, dchaStateString, 3);
                         }
                         Thread.sleep(100);
                         Settings.Global.putInt(resolver, Settings.Global.ADB_ENABLED, 1);
-                        if (Common.GET_MODEL_NAME(context) == 2) {
+                        if (Common.GET_MODEL_ID(context) == 2) {
                             Settings.System.putInt(resolver, dchaStateString, 0);
                         }
                     } catch (SecurityException | InterruptedException e) {
                         e.printStackTrace();
-                        if (Common.GET_MODEL_NAME(context) == 2) {
+                        if (Common.GET_MODEL_ID(context) == 2) {
                             Settings.System.putInt(resolver, dchaStateString, 0);
                         }
                         /* 権限が付与されていないなら機能を無効 */

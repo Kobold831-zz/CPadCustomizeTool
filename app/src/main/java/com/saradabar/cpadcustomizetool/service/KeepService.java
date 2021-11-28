@@ -166,18 +166,18 @@ public class KeepService extends Service {
             super.onChange(selfChange);
             try {
                 if (Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) == 0) {
-                    if (Common.GET_MODEL_NAME(getApplicationContext()) == 2) {
+                    if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
                         Settings.System.putInt(resolver, dchaStateString, 3);
                     }
                     Thread.sleep(100);
                     Settings.Global.putInt(resolver, Settings.Global.ADB_ENABLED, 1);
-                    if (Common.GET_MODEL_NAME(getApplicationContext()) == 2) {
+                    if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
                         Settings.System.putInt(resolver, dchaStateString, 0);
                     }
                 }
             } catch (SecurityException | Settings.SettingNotFoundException | InterruptedException e) {
                 e.printStackTrace();
-                if (Common.GET_MODEL_NAME(getApplicationContext()) == 2) {
+                if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
                     Settings.System.putInt(resolver, dchaStateString, 0);
                 }
                 Common.Variable.toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);

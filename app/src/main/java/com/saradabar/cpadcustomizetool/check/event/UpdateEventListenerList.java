@@ -12,56 +12,38 @@ public class UpdateEventListenerList {
 	}
 
 	public void downloadCompleteNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateApkDownloadComplete();
-		}
+		for (UpdateEventListener listener : listeners) listener.onUpdateApkDownloadComplete();
 	}
 
 	public void updateAvailableNotify(String mString) {
-		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateAvailable(mString);
-		}
+		for (UpdateEventListener listener : listeners) listener.onUpdateAvailable(mString);
 	}
 
 	public void updateUnavailableNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateUnavailable();
-		}
+		for (UpdateEventListener listener : listeners) listener.onUpdateUnavailable();
 	}
 
 	public void updateAvailableNotify1(String mString) {
-		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateAvailable1(mString);
-		}
+		for (UpdateEventListener listener : listeners) listener.onUpdateAvailable1(mString);
 	}
 
 	public void updateUnavailableNotify1() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onUpdateUnavailable1();
-		}
+		for (UpdateEventListener listener : listeners) listener.onUpdateUnavailable1();
 	}
 
 	public void downloadErrorNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onDownloadError();
-		}
+		for (UpdateEventListener listener : listeners) listener.onDownloadError();
 	}
 
 	public void supportAvailableNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onSupportAvailable();
-		}
+		for (UpdateEventListener listener : listeners) listener.onSupportAvailable();
 	}
 
 	public void supportUnavailableNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onSupportUnavailable();
-		}
+		for (UpdateEventListener listener : listeners) listener.onSupportUnavailable();
 	}
 
 	public void connectionErrorNotify() {
-		for (UpdateEventListener listener : listeners) {
-			listener.onConnectionError();
-		}
+		for (UpdateEventListener listener : listeners) listener.onConnectionError();
 	}
 }

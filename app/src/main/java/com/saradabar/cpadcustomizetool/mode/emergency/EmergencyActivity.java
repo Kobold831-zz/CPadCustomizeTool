@@ -31,56 +31,56 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class EmergencyActivity extends Activity {
 
-    private ActivityInfo activityInfo;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String whatCourse = PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "");
+        String Course = PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "");
 
         if (!startCheck()) {
+            if (toast != null) toast.cancel();
+            toast = Toast.makeText(this, R.string.toast_not_completed_settings, Toast.LENGTH_SHORT);
+            toast.show();
             finishAndRemoveTask();
+            return;
         }
 
         if (!setSystemSettings(true)) {
+            if (toast != null) toast.cancel();
+            toast = Toast.makeText(this, R.string.toast_not_change, Toast.LENGTH_SHORT);
+            toast.show();
             finishAndRemoveTask();
+            return;
         }
 
-        if (whatCourse.contains("1")) {
-            if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) {
-                finishAndRemoveTask();
-            } else {
-                finishAndRemoveTask();
-            }
+        if (Course.contains("1")) {
+            if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) finishAndRemoveTask();
+            else finishAndRemoveTask();
+            return;
         }
 
-        if (whatCourse.contains("2")) {
-            if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) {
-                finishAndRemoveTask();
-            } else {
-                finishAndRemoveTask();
-            }
+        if (Course.contains("2")) {
+            if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) finishAndRemoveTask();
+            else finishAndRemoveTask();
+            return;
         }
+
+        if (toast != null) toast.cancel();
+        toast = Toast.makeText(getApplicationContext(), R.string.toast_execution, Toast.LENGTH_SHORT);
+        toast.show();
+        finishAndRemoveTask();
     }
 
     private boolean startCheck() {
-        if (Common.GET_SETTINGS_FLAG(this) == SETTINGS_NOT_COMPLETED) {
-            if (toast != null) {
-                toast.cancel();
-            }
-            toast = Toast.makeText(this, R.string.toast_not_completed_settings, Toast.LENGTH_SHORT);
-            toast.show();
-            return false;
-        } else return true;
+        return Common.GET_SETTINGS_FLAG(this);
     }
 
     private boolean setSystemSettings(boolean study) {
-
         ContentResolver resolver = getContentResolver();
 
         if (study) {
             SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+
             if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
                 SharedPreferences.Editor spe = sp.edit();
                 spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false);
@@ -99,24 +99,18 @@ public class EmergencyActivity extends Activity {
             }
 
             try {
-                if (isEmergencySettings_Dcha_State(this)) {
-                    Settings.System.putInt(resolver, DCHA_STATE, 3);
-                }
-                if (isEmergencySettings_Hide_NavigationBar(this)) {
-                    Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 1);
-                }
+                if (isEmergencySettings_Dcha_State(this)) Settings.System.putInt(resolver, DCHA_STATE, 3);
+
+                if (isEmergencySettings_Hide_NavigationBar(this)) Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 1);
                 return true;
             } catch (SecurityException ignored) {
                 return false;
             }
         } else {
             try {
-                if (isEmergencySettings_Dcha_State(this)) {
-                    Settings.System.putInt(resolver, DCHA_STATE, 0);
-                }
-                if (isEmergencySettings_Hide_NavigationBar(this)) {
-                    Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 0);
-                }
+                if (isEmergencySettings_Dcha_State(this)) Settings.System.putInt(resolver, DCHA_STATE, 0);
+
+                if (isEmergencySettings_Hide_NavigationBar(this)) Settings.System.putInt(resolver, HIDE_NAVIGATION_BAR, 0);
                 return true;
             } catch (SecurityException ignored) {
                 return false;
@@ -125,23 +119,12 @@ public class EmergencyActivity extends Activity {
     }
 
     private boolean setDchaSettings(String packageName, String className) {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        PackageManager pm = getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-
-        if (resolveInfo != null) {
-            activityInfo = resolveInfo.activityInfo;
-        }
+        ResolveInfo resolveInfo = getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
 
         try {
-            intent = new Intent();
-            intent.setClassName(packageName, className);
-            startActivity(intent);
+            startActivity(new Intent().setClassName(packageName, className));
         } catch (Exception e) {
-            if (toast != null) {
-                toast.cancel();
-            }
+            if (toast != null) toast.cancel();
             toast = Toast.makeText(this, R.string.toast_not_course, Toast.LENGTH_SHORT);
             toast.show();
             setSystemSettings(false);
@@ -151,40 +134,43 @@ public class EmergencyActivity extends Activity {
         if (!isEmergencySettings_Change_Home(this) && !isEmergencySettings_Remove_Task(this))
             return true;
 
-        intent = new Intent(DCHA_SERVICE);
-        intent.setPackage(PACKAGE_DCHASERVICE);
-        bindService(intent, new ServiceConnection() {
+        if (!GET_DCHASERVICE_FLAG(getApplicationContext())) {
+            if (toast != null) toast.cancel();
+            toast = Toast.makeText(getApplicationContext(), R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
+            toast.show();
+            setSystemSettings(false);
+            return false;
+        }
+
+        bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
+                ActivityInfo activityInfo = null;
                 IDchaService mDchaService = IDchaService.Stub.asInterface(service);
-                if (Common.GET_DCHASERVICE_FLAG(getApplicationContext()) == USE_DCHASERVICE) {
-                    if (isEmergencySettings_Change_Home(getApplicationContext())) {
-                        try {
+
+                if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
+
+                if (isEmergencySettings_Change_Home(getApplicationContext())) {
+                    try {
+                        if (activityInfo != null) {
                             mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
                             mDchaService.setDefaultPreferredHomeApp(packageName);
-                        } catch (RemoteException ignored) {
                         }
+                    } catch (RemoteException ignored) {
+                        if (toast != null) toast.cancel();
+                        toast = Toast.makeText(getApplicationContext(), R.string.toast_not_install_launcher, Toast.LENGTH_SHORT);
+                        toast.show();
+                        setSystemSettings(false);
+                        finishAndRemoveTask();
                     }
-                    if (isEmergencySettings_Remove_Task(getApplicationContext())) {
-                        try {
-                            mDchaService.removeTask(null);
-                        } catch (RemoteException ignored) {
-                        }
-                    }
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(getApplicationContext(), R.string.toast_execution, Toast.LENGTH_SHORT);
-                    toast.show();
-                    unbindService(this);
-                } else {
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(getApplicationContext(), R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
-                    toast.show();
-                    setSystemSettings(false);
-                    unbindService(this);
                 }
+
+                if (isEmergencySettings_Remove_Task(getApplicationContext())) {
+                    try {
+                        mDchaService.removeTask(null);
+                    } catch (RemoteException ignored) {
+                    }
+                }
+                unbindService(this);
             }
 
             @Override
