@@ -917,7 +917,12 @@ public class MainFragment extends PreferenceFragment {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        preferenceNormalLauncher.setSummary("変更するランチャーは" + mString + "に設定されています");
+        if (mString == null) {
+            preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません")
+        }
+        else {
+            preferenceNormalLauncher.setSummary("変更するランチャーは" + mString + "に設定されています");
+        }
     }
 
     /* アクティビティ破棄 */
