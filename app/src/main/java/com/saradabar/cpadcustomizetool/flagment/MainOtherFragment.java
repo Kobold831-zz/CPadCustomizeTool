@@ -9,6 +9,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -18,11 +19,20 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
-import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
 public class MainOtherFragment extends PreferenceFragment {
+
+    Preference preferenceOtherSettings,
+            preferenceSysUiAdjustment,
+            preferenceBlockToUninstallSettings,
+            preferenceDisableDeviceOwner,
+            preferenceDevelopmentSettings,
+            preferenceNowSetOwnerApp;
+
+    SwitchPreference switchPreferencePermissionForced;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -30,12 +40,13 @@ public class MainOtherFragment extends PreferenceFragment {
 
         mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
 
-        final Preference preferenceOtherSettings = findPreference("intent_android_settings");
-        final Preference preferenceSysUiAdjustment = findPreference("intent_sys_ui_adjustment");
-        final Preference preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
-        final Preference preferenceDisableDeviceOwner = findPreference("disable_device_owner");
-        final Preference preferenceDevelopmentSettings = findPreference("intent_development_settings");
-        final SwitchPreference switchPreferencePermissionForced = findPreference("permission_forced");
+        preferenceOtherSettings = findPreference("intent_android_settings");
+        preferenceSysUiAdjustment = findPreference("intent_sys_ui_adjustment");
+        preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
+        preferenceDisableDeviceOwner = findPreference("disable_device_owner");
+        preferenceDevelopmentSettings = findPreference("intent_development_settings");
+        switchPreferencePermissionForced = findPreference("permission_forced");
+        preferenceNowSetOwnerApp = findPreference("now_set_owner_package");
 
         preferenceOtherSettings.setOnPreferenceClickListener(preference -> {
             try {
@@ -102,44 +113,66 @@ public class MainOtherFragment extends PreferenceFragment {
             return false;
         });
 
-        if (Common.GET_MODEL_ID(getActivity()) == 0) {
-            switchPreferencePermissionForced.setEnabled(false);
-            switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
-        }
+        if (getNowOwnerPackage() != null) {
+            preferenceNowSetOwnerApp.setSummary("DeviceOwnerは" + getNowOwnerPackage() + "に設定されています");
+        } else preferenceNowSetOwnerApp.setSummary("DeviceOwnerはデバイスに設定されていません");
 
-        if (Common.GET_MODEL_ID(getActivity()) != 2) {
-            preferenceSysUiAdjustment.setEnabled(false);
-            preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
+        switch (Common.GET_MODEL_ID(getActivity())) {
+            case 0:
+                preferenceSysUiAdjustment.setEnabled(false);
+                preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchPreferencePermissionForced.setEnabled(false);
+                switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                setPreferenceSettings();
+                break;
+            case 1:
+                preferenceSysUiAdjustment.setEnabled(false);
+                preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceBlockToUninstallSettings.setEnabled(false);
+                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceDisableDeviceOwner.setEnabled(false);
+                preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                break;
+            case 2:
+                setPreferenceSettings();
+                break;
         }
+    }
 
-        if (Common.GET_MODEL_ID(getActivity()) == 1) {
-            preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
-            preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
+    private void setPreferenceSettings() {
+        if (!mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
             preferenceBlockToUninstallSettings.setEnabled(false);
             preferenceDisableDeviceOwner.setEnabled(false);
+            switchPreferencePermissionForced.setEnabled(false);
+            preferenceBlockToUninstallSettings.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
+            preferenceDisableDeviceOwner.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
+            switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
         } else {
-            if (!mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
-                preferenceBlockToUninstallSettings.setEnabled(false);
-                preferenceDisableDeviceOwner.setEnabled(false);
-                switchPreferencePermissionForced.setEnabled(false);
-                preferenceBlockToUninstallSettings.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-                preferenceDisableDeviceOwner.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    switch (mDevicePolicyManager.getPermissionPolicy(mComponentName)) {
-                        case 0:
-                            switchPreferencePermissionForced.setChecked(false);
-                            switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
-                            break;
-                        case 1:
-                            switchPreferencePermissionForced.setChecked(true);
-                            switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_GRANTED");
-                            break;
-                    }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                switch (mDevicePolicyManager.getPermissionPolicy(mComponentName)) {
+                    case 0:
+                        switchPreferencePermissionForced.setChecked(false);
+                        switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
+                        break;
+                    case 1:
+                        switchPreferencePermissionForced.setChecked(true);
+                        switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_GRANTED");
+                        break;
                 }
             }
         }
+    }
+
+    private String getNowOwnerPackage() {
+        for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+            /* ユーザーアプリか確認 */
+            if (app.sourceDir.startsWith("/data/app/")) {
+                if (mDevicePolicyManager.isDeviceOwnerApp(app.packageName)) {
+                    return app.loadLabel(getActivity().getPackageManager()).toString();
+                }
+            }
+        }
+        return null;
     }
 
     /* 再表示 */
@@ -147,30 +180,27 @@ public class MainOtherFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
 
-        Common.Variable.mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
 
-        final SwitchPreference switchPreferencePermissionForced = findPreference("permission_forced");
-        final Preference preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
-        final Preference preferenceDisableDeviceOwner = findPreference("disable_device_owner");
+        switchPreferencePermissionForced = findPreference("permission_forced");
+        preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
+        preferenceDisableDeviceOwner = findPreference("disable_device_owner");
 
-        if (Common.GET_MODEL_ID(getActivity()) == 0) {
-            switchPreferencePermissionForced.setEnabled(false);
-            switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
-        }
-        if (Common.GET_MODEL_ID(getActivity()) == 1) {
-            preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
-            preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
-            preferenceBlockToUninstallSettings.setEnabled(false);
-            preferenceDisableDeviceOwner.setEnabled(false);
-        } else {
-            if (!Common.Variable.mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
+        switch (Common.GET_MODEL_ID(getActivity())) {
+            case 0:
+                switchPreferencePermissionForced.setEnabled(false);
+                switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                setPreferenceSettings();
+                break;
+            case 1:
+                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceBlockToUninstallSettings.setEnabled(false);
                 preferenceDisableDeviceOwner.setEnabled(false);
-                switchPreferencePermissionForced.setEnabled(false);
-                preferenceBlockToUninstallSettings.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-                preferenceDisableDeviceOwner.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-            }
+                break;
+            case 2:
+                setPreferenceSettings();
+                break;
         }
     }
 }

@@ -21,7 +21,7 @@ android {
 }
 
 dependencies {
-    implementation files('libs/IDchaService.jar')
+    implementation files('libs/IDchaLibrary.jar')
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.stephentuso:welcome:1.4.1'
 }

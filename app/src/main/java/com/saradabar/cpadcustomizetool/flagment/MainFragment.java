@@ -849,6 +849,7 @@ public class MainFragment extends PreferenceFragment {
             switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
 
+        /* DchaServiceを使用するか */
         if (!GET_DCHASERVICE_FLAG(getActivity())) {
             getPreferenceScreen().removePreference(findPreference("android_silent_install"));
             getPreferenceScreen().removePreference(findPreference("android_home"));
@@ -866,6 +867,7 @@ public class MainFragment extends PreferenceFragment {
         }
     }
 
+    /* ランチャーのパッケージ名を取得 */
     private String getLauncherPackage() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
@@ -875,6 +877,7 @@ public class MainFragment extends PreferenceFragment {
         return activityInfo.packageName;
     }
 
+    /* ランチャーの名前を取得 */
     private String getLauncherName() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
@@ -884,6 +887,7 @@ public class MainFragment extends PreferenceFragment {
         return activityInfo.loadLabel(pm).toString();
     }
 
+    /* 再起動ショートカットを作成 */
     private void makeRebootShortcut() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity");
@@ -896,6 +900,7 @@ public class MainFragment extends PreferenceFragment {
         Toast.makeText(getActivity(), R.string.toast_common_success, Toast.LENGTH_SHORT).show();
     }
 
+    /* スイッチ一括変更 */
     private void setCheckedSwitch() {
         try {
             switchDchaState.setChecked(Settings.System.getInt(resolver, dchaStateString) != 0);
@@ -918,7 +923,7 @@ public class MainFragment extends PreferenceFragment {
             e.printStackTrace();
         }
         if (mString == null) {
-            preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません")
+            preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません");
         }
         else {
             preferenceNormalLauncher.setSummary("変更するランチャーは" + mString + "に設定されています");
@@ -1007,25 +1012,20 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQUEST_INSTALL:
-                preferenceSilentInstall.setEnabled(true);
-                try {
-                    Common.Variable.installData = getInstallData(getActivity(), data.getData());
-                } catch (NullPointerException ignored) {
-                    return;
-                }
-                MainFragment.silentInstallTask silent = new MainFragment.silentInstallTask();
-                silent.setListener(StartActivity.getInstance().createListener());
-                silent.execute();
-                break;
-            case 3:
-                break;
-            default:
-                break;
+        if (requestCode == REQUEST_INSTALL) {
+            preferenceSilentInstall.setEnabled(true);
+            try {
+                installData = getInstallData(getActivity(), data.getData());
+            } catch (NullPointerException ignored) {
+                return;
+            }
+            silentInstallTask silent = new silentInstallTask();
+            silent.setListener(StartActivity.getInstance().createListener());
+            silent.execute();
         }
     }
 
+    /* 選択したファイルデータを取得 */
     private String getInstallData(Context context, Uri uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
             if ("com.android.externalstorage.documents".equals(uri.getAuthority())) {
@@ -1044,6 +1044,7 @@ public class MainFragment extends PreferenceFragment {
         return null;
     }
 
+    /* インストールタスク */
     public static class silentInstallTask extends AsyncTask<Object, Void, Object> {
 
         private Listener mListener;
@@ -1073,6 +1074,7 @@ public class MainFragment extends PreferenceFragment {
             mListener = listener;
         }
 
+        /* StartActivity */
         public interface Listener {
             void onShow();
             void onSuccess();
@@ -1080,6 +1082,7 @@ public class MainFragment extends PreferenceFragment {
         }
     }
 
+    /* 解像度タスク */
     public static class setResolutionTask extends AsyncTask<Object, Void, Object> {
 
         private Listener mListener;
@@ -1105,6 +1108,7 @@ public class MainFragment extends PreferenceFragment {
             mListener = listener;
         }
 
+        /* StartActivity */
         public interface Listener {
             void onSuccess();
             void onFailure();
