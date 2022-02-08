@@ -202,6 +202,8 @@ public class MainFragment extends PreferenceFragment {
                                 mListView.invalidateViews();
                                 setCheckedSwitch();
                                 break;
+                            case FLAG_CHECK:
+                                break;
                             case FLAG_TEST:
                                 break;
                         }
@@ -1056,11 +1058,16 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Object doInBackground(Object... value) {
-            if (MainFragment.getInstance().installApp(StartActivity.getInstance().mDchaService, installData, 1)) {
-                return new Object();
-            } else {
-                return null;
+            if (!MainFragment.getInstance().bindDchaService(FLAG_CHECK, DCHA_MODE)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                }
+                if (MainFragment.getInstance().installApp(MainFragment.getInstance().mDchaService, installData, 1)) {
+                    return new Object();
+                }
             }
+            return null;
         }
 
         @Override

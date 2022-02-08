@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -217,10 +218,6 @@ public class KeepService extends Service {
             loopKeepHome();
         }
         if (!sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
-            try {
-                unbindService(mServiceConnection);
-            } catch (IllegalArgumentException ignored) {
-            }
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -239,25 +236,26 @@ public class KeepService extends Service {
         sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
             startService(new Intent(this, KeepService.class));
-        } else {
-            try {
-                unbindService(mServiceConnection);
-            } catch (IllegalArgumentException ignored) {
-            }
         }
     }
 
-    private final IBinder mBinder = (IBinder) KeepService.this;
+    private final IBinder mBinder = new KeepService.binder();
+
+    public class binder extends Binder {
+        KeepService getService(){
+            return KeepService.this;
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
-        try {
-            unbindService(mServiceConnection);
-        } catch (IllegalArgumentException ignored) {
+        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+            bindService(new Intent(getApplicationContext(), ProtectKeepService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
+            return mBinder;
         }
-        Intent i = new Intent(getApplicationContext(), ProtectKeepService.class);
-        bindService(i, mServiceConnection, Context.BIND_AUTO_CREATE);
-        return mBinder;
+        stopSelf();
+        stopService(new Intent(this, ProtectKeepService.class));
+        return null;
     }
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -271,11 +269,6 @@ public class KeepService extends Service {
             sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
             if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
                 startService(new Intent(getApplicationContext(), ProtectKeepService.class));
-            } else {
-                try {
-                    unbindService(this);
-                } catch (IllegalArgumentException ignored) {
-                }
             }
         }
     };
@@ -358,19 +351,13 @@ public class KeepService extends Service {
                     mHandler.removeCallbacks(mRunnable);
                     isObserberHomeEnable = false;
                 }
-                try {
-                    unbindService(mServiceConnection);
-                } catch (IllegalArgumentException ignored) {
-                }
                 stopSelf();
+                stopService(new Intent(this, ProtectKeepService.class));
                 break;
         }
         if (!sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
-            try {
-                unbindService(mServiceConnection);
-            } catch (IllegalArgumentException ignored) {
-            }
             stopSelf();
+            stopService(new Intent(this, ProtectKeepService.class));
         }
     }
 }

@@ -255,7 +255,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* 端末チェック */
     private boolean checkModel() {
-        String[] modelName = {"TAB-A03-BS", "TAB-A03-BR", "TAB-A03-BR2", "TAB-A03-BR2B", "TAB-A03-BR3", "TAB-A04-BR3", "TAB-A05-BD"};
+        String[] modelName = {"TAB-A03-BS", "TAB-A03-BR", "TAB-A03-BR2", "TAB-A03-BR2B", "TAB-A03-BR3", "TAB-A04-BR3", "TAB-A05-BD", "TAB-A05-BA1"};
         for (String string : modelName) if (Objects.equals(string, Build.MODEL)) return true;
         return false;
     }
@@ -280,6 +280,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     checkSettingsTab3();
                     break;
                 case "TAB-A05-BD":
+                case "TAB-A05-BA1":
                     checkSettingsTabNeo();
                     break;
                 default:
@@ -305,6 +306,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                                 checkSettingsTab3();
                                 break;
                             case "TAB-A05-BD":
+                            case "TAB-A05-BA1":
                                 checkSettingsTabNeo();
                                 break;
                             default:
@@ -322,6 +324,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 checkSettingsTab3();
                 break;
             case "TAB-A05-BD":
+            case "TAB-A05-BA1":
                 checkSettingsTabNeo();
                 break;
             default:
