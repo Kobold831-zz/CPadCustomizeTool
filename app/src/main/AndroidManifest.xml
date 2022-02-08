@@ -63,12 +63,6 @@
             tools:ignore="InnerclassSeparator" />
 
         <activity
-            android:name=".set.HomeLauncherActivity"
-            android:label="@string/app_home_activity"
-            android:theme="@style/MainTheme"
-            tools:ignore="InnerclassSeparator" />
-
-        <activity
             android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
             android:name=".mode.emergency.EmergencyActivity"
@@ -152,7 +146,5 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
-
     </application>
-
 </manifest>

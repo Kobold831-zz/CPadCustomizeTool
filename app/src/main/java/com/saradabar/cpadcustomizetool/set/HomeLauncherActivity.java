@@ -1,12 +1,7 @@
 package com.saradabar.cpadcustomizetool.set;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +17,7 @@ import com.saradabar.cpadcustomizetool.StartActivity;
 import java.util.List;
 import java.util.Objects;
 
-public class HomeLauncherActivity extends Activity {
+public class HomeLauncherActivity {
 
     public static class AppData {
         public String label;
@@ -33,9 +28,6 @@ public class HomeLauncherActivity extends Activity {
     public static class AppListAdapter extends ArrayAdapter<AppData> {
 
         private final LayoutInflater mInflater;
-
-        @SuppressLint("StaticFieldLeak")
-        public static View view;
 
         public AppListAdapter(Context context, List<AppData> dataList) {
             super(context, R.layout.launcher_item);
@@ -48,7 +40,6 @@ public class HomeLauncherActivity extends Activity {
 
             ViewHolder holder = new ViewHolder();
 
-
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.launcher_item, parent, false);
                 holder.textLabel = convertView.findViewById(R.id.launcher_text);
@@ -57,8 +48,6 @@ public class HomeLauncherActivity extends Activity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-
-            view = convertView;
 
             final AppData data = getItem(position);
 
@@ -73,13 +62,8 @@ public class HomeLauncherActivity extends Activity {
         }
 
         /* ランチャーに設定されているかの確認 */
-        private boolean isLauncher(String s1) {
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            PackageManager pm = StartActivity.getInstance().getPackageManager();
-            ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
-            ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-            return Objects.equals(s1, activityInfo.packageName);
+        private boolean isLauncher(String s) {
+            return Objects.equals(s, StartActivity.getInstance().getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0).activityInfo.packageName);
         }
     }
 

@@ -4,6 +4,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.saradabar.cpadcustomizetool.Common.*;
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -96,7 +97,7 @@ public class MainFragment extends PreferenceFragment {
             switchKeepHome,
             switchDeviceAdministrator;
 
-    private Preference preferenceDchaService,
+    Preference preferenceDchaService,
             preferenceEmergencyManual,
             preferenceNormalLauncher,
             preferenceNormalManual,
@@ -108,6 +109,7 @@ public class MainFragment extends PreferenceFragment {
             preferenceResolution,
             preferenceResolutionReset;
 
+    @SuppressLint("StaticFieldLeak")
     private static MainFragment instance = null;
 
     public static MainFragment getInstance() {
@@ -675,9 +677,7 @@ public class MainFragment extends PreferenceFragment {
         preferenceReboot.setOnPreferenceClickListener(preference -> {
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_reboot)
-                    .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        bindDchaService(FLAG_REBOOT, DCHA_MODE);
-                    })
+                    .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindDchaService(FLAG_REBOOT, DCHA_MODE))
 
                     .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
@@ -791,8 +791,8 @@ public class MainFragment extends PreferenceFragment {
                     .setPositiveButton(R.string.dialog_common_ok, (dialog1, which) -> {
                         InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
                         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                        EditText mEditText1 = (EditText) view.findViewById(R.id.edit_text_1);
-                        EditText mEditText2 = (EditText) view.findViewById(R.id.edit_text_2);
+                        EditText mEditText1 = view.findViewById(R.id.edit_text_1);
+                        EditText mEditText2 = view.findViewById(R.id.edit_text_2);
                         try {
                             width = Integer.parseInt(mEditText1.getText().toString());
                             height = Integer.parseInt(mEditText2.getText().toString());

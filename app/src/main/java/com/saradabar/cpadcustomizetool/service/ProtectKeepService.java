@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.os.Binder;
 import android.os.IBinder;
 
 import com.saradabar.cpadcustomizetool.Common;
@@ -15,13 +14,7 @@ public class ProtectKeepService extends Service {
 
     SharedPreferences sp;
 
-    public class MyServiceLocalBinder extends Binder {
-        ProtectKeepService getService() {
-            return ProtectKeepService.this;
-        }
-    }
-
-    private final IBinder mBinder = new MyServiceLocalBinder();
+    private final IBinder mBinder = (IBinder) ProtectKeepService.this;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

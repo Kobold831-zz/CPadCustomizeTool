@@ -18,15 +18,19 @@ import com.saradabar.cpadcustomizetool.R;
 
 public class ApplicationSettingsFragment extends PreferenceFragment {
 
+    SwitchPreference autoUpdateCheck,
+            changeSettingsDcha,
+            autoUsbDebug;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_app_settings, rootKey);
         SharedPreferences sp = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         ContentResolver resolver = getActivity().getContentResolver();
 
-        SwitchPreference autoUpdateCheck = findPreference("switch_auto_update_check");
-        SwitchPreference changeSettingsDcha = findPreference("switch_is_change_settings_use_dcha");
-        SwitchPreference autoUsbDebug = findPreference("switch_auto_usb_debug");
+        autoUpdateCheck = findPreference("switch_auto_update_check");
+        changeSettingsDcha = findPreference("switch_is_change_settings_use_dcha");
+        autoUsbDebug = findPreference("switch_auto_usb_debug");
 
         autoUpdateCheck.setChecked(!GET_UPDATE_FLAG(getActivity()));
         changeSettingsDcha.setChecked(GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()));

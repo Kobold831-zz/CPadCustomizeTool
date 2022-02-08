@@ -67,19 +67,17 @@ public class StartActivity extends Activity {
 
         if (mDevicePolicyManager.isDeviceOwnerApp(getPackageName())) {
             setContentView(R.layout.main_error_enable_own);
-            findViewById(R.id.main_error_button_1).setOnClickListener(view -> {
-                new AlertDialog.Builder(view.getContext())
-                        .setTitle(R.string.dialog_question_device_owner)
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                            mDevicePolicyManager.clearDeviceOwnerApp(getPackageName());
-                            finish();
-                            overridePendingTransition(0, 0);
-                            startActivity(getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", false));
-                        })
-                        .setNegativeButton(R.string.dialog_common_no, null)
-                        .show();
-            });
+            findViewById(R.id.main_error_button_1).setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
+                    .setTitle(R.string.dialog_question_device_owner)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                        mDevicePolicyManager.clearDeviceOwnerApp(getPackageName());
+                        finish();
+                        overridePendingTransition(0, 0);
+                        startActivity(getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", false));
+                    })
+                    .setNegativeButton(R.string.dialog_common_no, null)
+                    .show());
             findViewById(R.id.main_error_button_2).setOnClickListener(view -> {
                 try {
                     startActivity(new Intent(view.getContext(), BlockerActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
@@ -251,9 +249,7 @@ public class StartActivity extends Activity {
                 mAlertDialog.setTitle(R.string.dialog_title_resolution)
                         .setCancelable(false)
                         .setMessage("")
-                        .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> {
-                            mHandler.removeCallbacks(mRunnable);
-                        })
+                        .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
                         .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
                             mHandler.removeCallbacks(mRunnable);
                             MainFragment.getInstance().resetResolution();

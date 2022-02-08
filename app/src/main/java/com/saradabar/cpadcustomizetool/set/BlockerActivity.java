@@ -70,8 +70,6 @@ public class BlockerActivity extends Activity {
             listView.invalidateViews();
         });
 
-        final AppListAdapter appListAdapter = new AppListAdapter(this, dataList);
-
         /* ボタンが押されたならスイッチ一括変更 */
         /* 無効 */
         unDisableButton.setOnClickListener(v -> {

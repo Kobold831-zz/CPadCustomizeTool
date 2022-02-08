@@ -393,9 +393,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                             startActivityForResult(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", getPackageName(), null)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), REQUEST_PERMISSION);
                     })
-                    .setNeutralButton(R.string.dialog_common_exit, (dialogInterface, i) -> {
-                        finishAndRemoveTask();
-                    })
+                    .setNeutralButton(R.string.dialog_common_exit, (dialogInterface, i) -> finishAndRemoveTask())
                     .show();
             return false;
         } else {

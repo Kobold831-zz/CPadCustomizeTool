@@ -20,13 +20,9 @@ public class WelScrollFragment extends Fragment implements WelcomePage.OnChangeL
 
         textView.setText(R.string.wel_terms_of_service);
 
-        view.findViewById(R.id.wel_no).setOnClickListener(v -> {
-            getActivity().finishAffinity();
-        });
+        view.findViewById(R.id.wel_no).setOnClickListener(v -> requireActivity().finishAffinity());
 
-        view.findViewById(R.id.wel_yes).setOnClickListener(v -> {
-            getActivity().finish();
-        });
+        view.findViewById(R.id.wel_yes).setOnClickListener(v -> requireActivity().finish());
 
         return view;
     }

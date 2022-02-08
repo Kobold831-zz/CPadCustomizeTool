@@ -61,7 +61,7 @@ public class Checker {
         HashMap<String, String> map = parseSupportXml(supportCheckUrl);
 
         if (map != null) {
-            supportCode = Integer.parseInt(map.get("supportCode"));
+            supportCode = Integer.parseInt(Objects.requireNonNull(map.get("supportCode")));
         } else {
             supportCode = -99;
         }

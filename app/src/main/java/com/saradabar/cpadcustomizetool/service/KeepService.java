@@ -17,7 +17,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -248,13 +247,7 @@ public class KeepService extends Service {
         }
     }
 
-    public class MyServiceLocalBinder extends Binder {
-        KeepService getService() {
-            return KeepService.this;
-        }
-    }
-
-    private final IBinder mBinder = new MyServiceLocalBinder();
+    private final IBinder mBinder = (IBinder) KeepService.this;
 
     @Override
     public IBinder onBind(Intent intent) {

@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,7 +76,7 @@ public class Updater {
         HashMap<String, String> map = parseUpdateXml(updateCheckUrl);
 
         if (map != null) {
-            latestVersionCode = Integer.parseInt(map.get("versionCode"));
+            latestVersionCode = Integer.parseInt(Objects.requireNonNull(map.get("versionCode")));
             DOWNLOAD_FILE_URL = map.get("url");
             latestDescription = map.get("description");
         } else latestVersionCode = -99;

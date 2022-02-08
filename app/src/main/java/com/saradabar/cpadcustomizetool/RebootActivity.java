@@ -35,24 +35,22 @@ public class RebootActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_reboot)
-                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
-                        @Override
-                        public void onServiceConnected(ComponentName name, IBinder service) {
-                            IDchaService mDchaService = IDchaService.Stub.asInterface(service);
-                            try {
-                                mDchaService.rebootPad(0, null);
-                            } catch (RemoteException ignored) {
-                            }
-                            unbindService(this);
+                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        IDchaService mDchaService = IDchaService.Stub.asInterface(service);
+                        try {
+                            mDchaService.rebootPad(0, null);
+                        } catch (RemoteException ignored) {
                         }
+                        unbindService(this);
+                    }
 
-                        @Override
-                        public void onServiceDisconnected(ComponentName name) {
-                            unbindService(this);
-                        }
-                    }, Context.BIND_AUTO_CREATE);
-                })
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        unbindService(this);
+                    }
+                }, Context.BIND_AUTO_CREATE))
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finishAndRemoveTask())
                 .show();
     }

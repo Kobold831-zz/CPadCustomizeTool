@@ -1,7 +1,15 @@
 package com.saradabar.cpadcustomizetool.mode.emergency;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.*;
-import static com.saradabar.cpadcustomizetool.Common.*;
+import static com.saradabar.cpadcustomizetool.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.isEmergencySettings_Change_Home;
+import static com.saradabar.cpadcustomizetool.Common.isEmergencySettings_Dcha_State;
+import static com.saradabar.cpadcustomizetool.Common.isEmergencySettings_Hide_NavigationBar;
+import static com.saradabar.cpadcustomizetool.Common.isEmergencySettings_Remove_Task;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -12,7 +20,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,8 +28,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 
 import java.util.Objects;
@@ -55,13 +62,11 @@ public class EmergencyActivity extends Activity {
 
         if (Course.contains("1")) {
             if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) finishAndRemoveTask();
-            else finishAndRemoveTask();
             return;
         }
 
         if (Course.contains("2")) {
             if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) finishAndRemoveTask();
-            else finishAndRemoveTask();
             return;
         }
 
@@ -128,18 +133,18 @@ public class EmergencyActivity extends Activity {
             toast = Toast.makeText(this, R.string.toast_not_course, Toast.LENGTH_SHORT);
             toast.show();
             setSystemSettings(false);
-            return false;
+            return true;
         }
 
         if (!isEmergencySettings_Change_Home(this) && !isEmergencySettings_Remove_Task(this))
-            return true;
+            return false;
 
         if (!GET_DCHASERVICE_FLAG(getApplicationContext())) {
             if (toast != null) toast.cancel();
             toast = Toast.makeText(getApplicationContext(), R.string.toast_use_not_dcha, Toast.LENGTH_SHORT);
             toast.show();
             setSystemSettings(false);
-            return false;
+            return true;
         }
 
         bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
@@ -178,6 +183,6 @@ public class EmergencyActivity extends Activity {
                 unbindService(this);
             }
         }, Context.BIND_AUTO_CREATE);
-        return true;
+        return false;
     }
 }

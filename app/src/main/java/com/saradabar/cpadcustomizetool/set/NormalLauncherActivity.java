@@ -1,11 +1,8 @@
 package com.saradabar.cpadcustomizetool.set;
 
-import android.annotation.SuppressLint;
+import static com.saradabar.cpadcustomizetool.Common.GET_NORMAL_LAUNCHER;
+
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +12,8 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.StartActivity;
-import com.saradabar.cpadcustomizetool.flagment.MainFragment;
-import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,9 +29,6 @@ public class NormalLauncherActivity {
     public static class AppListAdapter extends ArrayAdapter<AppData> {
 
         private final LayoutInflater mInflater;
-
-        @SuppressLint("StaticFieldLeak")
-        public static View view;
 
         public AppListAdapter(Context context, List<AppData> dataList) {
             super(context, R.layout.launcher_item);
@@ -59,8 +50,6 @@ public class NormalLauncherActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            view = convertView;
-
             final AppData data = getItem(position);
 
             holder.textLabel.setText(data.label);
@@ -74,9 +63,9 @@ public class NormalLauncherActivity {
         }
 
         /* ランチャーに設定されているかの確認 */
-        private boolean isLauncher(String s1) {
+        private boolean isLauncher(String s) {
             try {
-                return Objects.equals(s1, Common.GET_NORMAL_LAUNCHER(StartActivity.getInstance()));
+                return Objects.equals(s, GET_NORMAL_LAUNCHER(StartActivity.getInstance()));
             } catch (NullPointerException ignored) {
                 return false;
             }
