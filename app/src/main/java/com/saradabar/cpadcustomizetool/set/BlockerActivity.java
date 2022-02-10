@@ -1,7 +1,5 @@
 package com.saradabar.cpadcustomizetool.set;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.mDevicePolicyManager;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
@@ -23,8 +21,8 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +39,7 @@ public class BlockerActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         administratorComponent = Common.getAdministratorComponent(this);
-        mDevicePolicyManager = (DevicePolicyManager)this.getSystemService("device_policy");
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager)this.getSystemService("device_policy");
 
         final PackageManager pm = getPackageManager();
         final List<ApplicationInfo> installedAppList = pm.getInstalledApplications(0);
@@ -65,7 +63,7 @@ public class BlockerActivity extends Activity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             AppData item = dataList.get(position);
             String selectPackage = Uri.fromParts("package", item.packName, null).toString();
-            mDevicePolicyManager.setUninstallBlocked(administratorComponent, selectPackage.replace("package:", ""), !mDevicePolicyManager.isUninstallBlocked(administratorComponent, selectPackage.replace("package:", "")));
+            devicePolicyManager.setUninstallBlocked(administratorComponent, selectPackage.replace("package:", ""), !devicePolicyManager.isUninstallBlocked(administratorComponent, selectPackage.replace("package:", "")));
             /* listviewの更新 */
             listView.invalidateViews();
         });
@@ -74,7 +72,7 @@ public class BlockerActivity extends Activity {
         /* 無効 */
         unDisableButton.setOnClickListener(v -> {
             for (AppData appData : dataList) {
-                mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, false);
+                devicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, false);
             }
             ((Switch) AppListAdapter.view.findViewById(R.id.un_switch)).setChecked(false);
             /* listviewの更新 */
@@ -84,7 +82,7 @@ public class BlockerActivity extends Activity {
         /* 有効 */
         unEnableButton.setOnClickListener(v -> {
             for (AppData appData : dataList) {
-                mDevicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, true);
+                devicePolicyManager.setUninstallBlocked(administratorComponent, appData.packName, true);
             }
             ((Switch) AppListAdapter.view.findViewById(R.id.un_switch)).setChecked(true);
             /* listviewの更新 */

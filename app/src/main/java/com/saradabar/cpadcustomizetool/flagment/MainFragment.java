@@ -1,20 +1,21 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
+import static android.content.Context.ACTIVITY_SERVICE;
 import static android.content.Context.INPUT_METHOD_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
 import static com.saradabar.cpadcustomizetool.Common.*;
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -29,11 +30,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -42,51 +41,38 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
-import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.StartActivity;
-import com.saradabar.cpadcustomizetool.set.NormalLauncherActivity.*;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
+import com.saradabar.cpadcustomizetool.set.NormalLauncherActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 import jp.co.benesse.dcha.dchautilservice.IDchaUtilService;
 
 public class MainFragment extends PreferenceFragment {
-
-    private final String dchaStateString = DCHA_STATE, hideNavigationBarString = HIDE_NAVIGATION_BAR;
-    private String setLauncherPackage;
-
-    private ListView mListView;
-
-    private SharedPreferences sp;
-    private ContentResolver resolver;
-
     private int width, height;
-
-    private IDchaService mDchaService;
-    private IDchaUtilService mIDchaUtilService;
-
-    private final Uri contentDchaState = Settings.System.getUriFor(dchaStateString);
-    private final Uri contentHideNavigationBar = Settings.System.getUriFor(hideNavigationBarString);
-    private final Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
-    private final Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
-
     private boolean isObserberStateEnable = false;
     private boolean isObserberHideEnable = false;
     private boolean isObserberMarketEnable = false;
     private boolean isObserberUsbEnable = false;
 
-    private SwitchPreference switchDchaState,
+    private String setLauncherPackage, installData;
+    private ListView mListView;
+    private IDchaService mDchaService;
+    private IDchaUtilService mIDchaUtilService;
+
+    SwitchPreference switchDchaState,
             switchKeepDchaState,
             switchHideBar,
             switchEnableService,
@@ -122,7 +108,7 @@ public class MainFragment extends PreferenceFragment {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                switchDchaState.setChecked(Settings.System.getInt(resolver, dchaStateString) != 0);
+                switchDchaState.setChecked(Settings.System.getInt(getActivity().getContentResolver(), DCHA_STATE) != 0);
             } catch (Settings.SettingNotFoundException ignored) {
             }
         }
@@ -134,7 +120,7 @@ public class MainFragment extends PreferenceFragment {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                switchHideBar.setChecked(Settings.System.getInt(resolver, hideNavigationBarString) != 0);
+                switchHideBar.setChecked(Settings.System.getInt(getActivity().getContentResolver(), HIDE_NAVIGATION_BAR) != 0);
             } catch (Settings.SettingNotFoundException ignored) {
             }
         }
@@ -146,7 +132,7 @@ public class MainFragment extends PreferenceFragment {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                switchMarketApp.setChecked(Settings.Secure.getInt(resolver, Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
+                switchMarketApp.setChecked(Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
             } catch (Settings.SettingNotFoundException ignored) {
             }
         }
@@ -158,33 +144,35 @@ public class MainFragment extends PreferenceFragment {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                switchUsbDebug.setChecked(Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) != 0);
+                switchUsbDebug.setChecked(Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED) != 0);
             } catch (Settings.SettingNotFoundException ignored) {
             }
         }
     };
 
-    public boolean bindDchaService(int flag, int dchaMode) {
-        Intent intent = new Intent();
-        if (dchaMode == DCHA_MODE) {
-            intent = new Intent(DCHA_SERVICE);
-            intent.setPackage(PACKAGE_DCHASERVICE);
-        } else if (dchaMode == DCHA_UTIL_MODE) {
-            intent = new Intent(DCHA_UTIL_SERVICE);
-            intent.setPackage(PACKAGE_DCHA_UTIL_SERVICE);
+    public boolean bindDchaService(int flag, boolean dchaService) {
+        Intent intent;
+        if (dchaService) {
+            intent = new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE);
+        } else {
+            intent = new Intent(DCHA_UTIL_SERVICE).setPackage(PACKAGE_DCHA_UTIL_SERVICE);
         }
         return !getActivity().bindService(intent, new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder iBinder) {
-                if (dchaMode == DCHA_MODE) {
+                if (dchaService) {
                     mDchaService = IDchaService.Stub.asInterface(iBinder);
                     try {
                         switch (flag) {
                             case FLAG_SET_DCHA_STATE_0:
-                                mDchaService.setSetupStatus(0);
+                                if (!confirmationDialog()) {
+                                    mDchaService.setSetupStatus(0);
+                                }
                                 break;
                             case FLAG_SET_DCHA_STATE_3:
-                                mDchaService.setSetupStatus(3);
+                                if (!confirmationDialog()) {
+                                    mDchaService.setSetupStatus(3);
+                                }
                                 break;
                             case FLAG_HIDE_NAVIGATION_BAR:
                                 mDchaService.hideNavigationBar(true);
@@ -203,13 +191,12 @@ public class MainFragment extends PreferenceFragment {
                                 setCheckedSwitch();
                                 break;
                             case FLAG_CHECK:
-                                break;
                             case FLAG_TEST:
                                 break;
                         }
                     } catch (RemoteException ignored) {
                     }
-                } else if (dchaMode == DCHA_UTIL_MODE) {
+                } else {
                     mIDchaUtilService = IDchaUtilService.Stub.asInterface(iBinder);
                     try {
                         switch (flag) {
@@ -236,16 +223,20 @@ public class MainFragment extends PreferenceFragment {
     private void settingsFlag(int flag) {
         switch (flag) {
             case FLAG_SET_DCHA_STATE_0:
-                Settings.System.putInt(resolver, dchaStateString, 0);
+                if (!confirmationDialog()) {
+                    Settings.System.putInt(getActivity().getContentResolver(), DCHA_STATE, 0);
+                }
                 break;
             case FLAG_SET_DCHA_STATE_3:
-                Settings.System.putInt(resolver, dchaStateString, 3);
+                if (!confirmationDialog()) {
+                    Settings.System.putInt(getActivity().getContentResolver(), DCHA_STATE, 3);
+                }
                 break;
             case FLAG_HIDE_NAVIGATION_BAR:
-                Settings.System.putInt(resolver, hideNavigationBarString, 1);
+                Settings.System.putInt(getActivity().getContentResolver(), HIDE_NAVIGATION_BAR, 1);
                 break;
             case FLAG_VIEW_NAVIGATION_BAR:
-                Settings.System.putInt(resolver, hideNavigationBarString, 0);
+                Settings.System.putInt(getActivity().getContentResolver(), HIDE_NAVIGATION_BAR, 0);
                 break;
             case FLAG_USB_DEBUG_TRUE:
                 Settings.Global.putInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED, 1);
@@ -267,10 +258,10 @@ public class MainFragment extends PreferenceFragment {
         setPreferencesFromResource(R.xml.pre_main, rootKey);
 
         instance = this;
-        mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        mComponentName = new ComponentName(getActivity(), AdministratorReceiver.class);
-        resolver = getActivity().getContentResolver();
-        sp = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        Uri contentDchaState = Settings.System.getUriFor(DCHA_STATE);
+        Uri contentHideNavigationBar = Settings.System.getUriFor(HIDE_NAVIGATION_BAR);
+        Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
+        Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
 
         switchDchaState = findPreference("switch1");
         switchKeepDchaState = findPreference("switch2");
@@ -296,26 +287,26 @@ public class MainFragment extends PreferenceFragment {
 
         /* オブサーバーを有効化 */
         isObserberStateEnable = true;
-        resolver.registerContentObserver(contentDchaState, false, observerState);
+        getActivity().getContentResolver().registerContentObserver(contentDchaState, false, observerState);
         isObserberHideEnable = true;
-        resolver.registerContentObserver(contentHideNavigationBar, false, observerHide);
+        getActivity().getContentResolver().registerContentObserver(contentHideNavigationBar, false, observerHide);
         isObserberMarketEnable = true;
-        resolver.registerContentObserver(contentMarketApp, false, observerMarket);
-        isObserberMarketEnable = true;
-        resolver.registerContentObserver(contentUsbDebug, false, observerUsb);
+        getActivity().getContentResolver().registerContentObserver(contentMarketApp, false, observerMarket);
+        isObserberUsbEnable = true;
+        getActivity().getContentResolver().registerContentObserver(contentUsbDebug, false, observerUsb);
 
         /* 一括変更 */
         setCheckedSwitch();
 
         /* リスナーを有効化 */
         switchDchaState.setOnPreferenceChangeListener((preference, o) -> {
-            if (!Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
+            if (!GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     settingsFlag(FLAG_SET_DCHA_STATE_3);
                 } else {
                     settingsFlag(FLAG_SET_DCHA_STATE_0);
                 }
-            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
+            } else if (GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     bindDchaService(FLAG_SET_DCHA_STATE_3, DCHA_MODE);
                 } else {
@@ -326,13 +317,13 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchHideBar.setOnPreferenceChangeListener((preference, o) -> {
-            if (!Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
+            if (!GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     settingsFlag(FLAG_HIDE_NAVIGATION_BAR);
                 } else {
                     settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
                 }
-            } else if (Common.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
+            } else if (GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity())) {
                 if ((boolean) o) {
                     bindDchaService(FLAG_HIDE_NAVIGATION_BAR, DCHA_MODE);
                 } else {
@@ -343,15 +334,11 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchEnableService.setOnPreferenceChangeListener((preference, o) -> {
-            SharedPreferences sp15 = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor spe = sp15.edit();
-            spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, (boolean) o);
-            spe.apply();
-            ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_SERVICE, (boolean) o).apply();
             if ((boolean) o) {
                 settingsFlag(FLAG_VIEW_NAVIGATION_BAR);
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
                             KeepService.getInstance().startService();
@@ -360,7 +347,7 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(1);
                         return true;
@@ -371,16 +358,12 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchKeepMarketApp.setOnPreferenceChangeListener((preference, o) -> {
-            SharedPreferences sp14 = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor spe = sp14.edit();
-            spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, (boolean) o);
-            spe.apply();
-            ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_MARKET_APP_SERVICE, (boolean) o).apply();
             if ((boolean) o) {
                 try {
                     Settings.Secure.putInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 1);
                     getActivity().startService(new Intent(getActivity(), KeepService.class));
-                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                    for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                         if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                             try {
                                 KeepService.getInstance().startService();
@@ -389,16 +372,15 @@ public class MainFragment extends PreferenceFragment {
                         }
                     }
                 } catch (SecurityException e) {
-                    e.printStackTrace();
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
-                    spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false).apply();
+                    getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false).apply();
                     switchKeepMarketApp.setChecked(false);
                     return false;
                 }
             } else {
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(3);
                         return true;
@@ -409,23 +391,22 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchKeepUsbDebug.setOnPreferenceChangeListener((preference, o) -> {
-            SharedPreferences sp13 = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor spe = sp13.edit();
-            spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, (boolean) o);
-            spe.apply();
-            ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            if (confirmationDialog()) {
+                return false;
+            }
+            getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_USB_DEBUG, (boolean) o).apply();
             if ((boolean) o) {
                 try {
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_3);
                     }
                     Thread.sleep(100);
                     Settings.Global.putInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED, 1);
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     getActivity().startService(new Intent(getActivity(), KeepService.class));
-                    for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                    for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                         if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                             try {
                                 KeepService.getInstance().startService();
@@ -434,19 +415,18 @@ public class MainFragment extends PreferenceFragment {
                         }
                     }
                 } catch (SecurityException | InterruptedException e) {
-                    e.printStackTrace();
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
-                    spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false).apply();
+                    getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_USB_DEBUG, false).apply();
                     switchKeepUsbDebug.setChecked(false);
                     return false;
                 }
             } else {
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE))
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE))
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(4);
                         return true;
@@ -456,15 +436,14 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchKeepDchaState.setOnPreferenceChangeListener((preference, o) -> {
-            SharedPreferences sp12 = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor spe = sp12.edit();
-            spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, (boolean) o);
-            spe.apply();
-            ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            if (confirmationDialog()) {
+                return false;
+            }
+            getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_DCHA_STATE, (boolean) o).apply();
             if ((boolean) o) {
                 settingsFlag(FLAG_SET_DCHA_STATE_0);
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
                             KeepService.getInstance().startService();
@@ -473,7 +452,7 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(2);
                         return true;
@@ -484,16 +463,11 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchKeepHome.setOnPreferenceChangeListener((preference, o) -> {
-            SharedPreferences sp1 = getActivity().getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            SharedPreferences.Editor spe = sp1.edit();
-            spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, (boolean) o);
-            spe.apply();
-            ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putBoolean(KEY_ENABLED_KEEP_HOME, (boolean) o).apply();
             if ((boolean) o) {
-                spe.putString(Common.Variable.KEY_SAVE_KEEP_HOME, getLauncherPackage());
-                spe.apply();
+                getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE).edit().putString(KEY_SAVE_KEEP_HOME, getLauncherPackage()).apply();
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
                             KeepService.getInstance().startService();
@@ -502,7 +476,7 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
-                for (ActivityManager.RunningServiceInfo serviceInfo : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
+                for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(5);
                         return true;
@@ -516,29 +490,25 @@ public class MainFragment extends PreferenceFragment {
             if ((boolean) o) {
                 try {
                     settingsFlag(FLAG_MARKET_APP_TRUE);
-                } catch (SecurityException e) {
-                    e.printStackTrace();
+                } catch (SecurityException ignored) {
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
                     try {
-                        switchMarketApp.setChecked(Settings.Secure.getInt(resolver, Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
-                    } catch (Settings.SettingNotFoundException ex) {
-                        ex.printStackTrace();
+                        switchMarketApp.setChecked(Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
+                    } catch (Settings.SettingNotFoundException ignored1) {
                     }
                 }
             } else {
                 try {
                     settingsFlag(FLAG_MARKET_APP_FALSE);
-                } catch (SecurityException e) {
-                    e.printStackTrace();
+                } catch (SecurityException ignored) {
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
                     try {
-                        switchMarketApp.setChecked(Settings.Secure.getInt(resolver, Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
-                    } catch (Settings.SettingNotFoundException ex) {
-                        ex.printStackTrace();
+                        switchMarketApp.setChecked(Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
+                    } catch (Settings.SettingNotFoundException ignored1) {
                     }
                 }
             }
@@ -546,42 +516,41 @@ public class MainFragment extends PreferenceFragment {
         });
 
         switchUsbDebug.setOnPreferenceChangeListener((preference, o) -> {
+            if (confirmationDialog()) {
+                return false;
+            }
             if ((boolean) o) {
                 try {
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_3);
+                        Thread.sleep(100);
                     }
-                    Thread.sleep(100);
                     settingsFlag(FLAG_USB_DEBUG_TRUE);
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
-                } catch (SecurityException | InterruptedException e) {
-                    e.printStackTrace();
-                    if (Common.GET_MODEL_ID(getActivity()) == 2) {
+                } catch (SecurityException | InterruptedException ignored) {
+                    if (GET_MODEL_ID(getActivity()) == 2) {
                         settingsFlag(FLAG_SET_DCHA_STATE_0);
                     }
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
                     try {
-                        switchUsbDebug.setChecked(Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) != 0);
-                    } catch (Settings.SettingNotFoundException ex) {
-                        ex.printStackTrace();
+                        switchUsbDebug.setChecked(Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED) != 0);
+                    } catch (Settings.SettingNotFoundException ignored1) {
                     }
                 }
             } else {
                 try {
                     settingsFlag(FLAG_USB_DEBUG_FALSE);
-                } catch (SecurityException e) {
-                    e.printStackTrace();
+                } catch (SecurityException ignored) {
                     if (null != toast) toast.cancel();
                     toast = Toast.makeText(getActivity(), R.string.toast_not_change, Toast.LENGTH_SHORT);
                     toast.show();
                     try {
-                        switchUsbDebug.setChecked(Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) != 0);
-                    } catch (Settings.SettingNotFoundException ex) {
-                        ex.printStackTrace();
+                        switchUsbDebug.setChecked(Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED) != 0);
+                    } catch (Settings.SettingNotFoundException ignored1) {
                     }
                 }
             }
@@ -590,10 +559,8 @@ public class MainFragment extends PreferenceFragment {
 
         switchDeviceAdministrator.setOnPreferenceChangeListener((preference, o) -> {
             if ((boolean) o) {
-                if (!mDevicePolicyManager.isAdminActive(mComponentName)) {
-                    Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mComponentName);
-                    startActivityForResult(intent, REQUEST_ADMIN);
+                if (!((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isAdminActive(new ComponentName(getActivity(), AdministratorReceiver.class))) {
+                    startActivityForResult(new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(getActivity(), AdministratorReceiver.class)), REQUEST_ADMIN);
                 }
             } else {
                 switchDeviceAdministrator.setChecked(true);
@@ -601,7 +568,7 @@ public class MainFragment extends PreferenceFragment {
                         .setTitle(R.string.dialog_title_dcha_service)
                         .setMessage(R.string.dialog_question_device_admin)
                         .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                            mDevicePolicyManager.removeActiveAdmin(new ComponentName(getActivity(), AdministratorReceiver.class));
+                            ((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).removeActiveAdmin(new ComponentName(getActivity(), AdministratorReceiver.class));
                             switchDeviceAdministrator.setChecked(false);
                         })
 
@@ -615,15 +582,15 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceEmergencyManual.setOnPreferenceClickListener(preference -> {
-            TextView alertView = new TextView(getActivity());
-            alertView.setText(R.string.dialog_emergency_manual_red);
-            alertView.setTextSize(16);
-            alertView.setTextColor(Color.RED);
-            alertView.setPadding(20, 0, 40, 20);
+            TextView textView = new TextView(getActivity());
+            textView.setText(R.string.dialog_emergency_manual_red);
+            textView.setTextSize(16);
+            textView.setTextColor(Color.RED);
+            textView.setPadding(20, 0, 40, 20);
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_emergency_manual)
                     .setMessage(R.string.dialog_emergency_manual)
-                    .setView(alertView)
+                    .setView(textView)
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
@@ -639,39 +606,29 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceNormalLauncher.setOnPreferenceClickListener(preference -> {
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            View view = inflater.inflate(R.layout.normal_mode_launcher, null);
-
-            Intent setPackageName = new Intent();
-            setPackageName.setAction(Intent.ACTION_MAIN);
-            setPackageName.addCategory(Intent.CATEGORY_HOME);
-            final PackageManager pm = getActivity().getPackageManager();
-            final List<ResolveInfo> installedAppList = pm.queryIntentActivities(setPackageName, 0);
-            final List<AppData> dataList = new ArrayList<>();
-            for (ResolveInfo app : installedAppList) {
-                AppData data = new AppData();
-                data.label = app.loadLabel(pm).toString();
-                data.icon = app.loadIcon(pm);
-                data.packName = app.activityInfo.packageName;
+            View view = getActivity().getLayoutInflater().inflate(R.layout.normal_mode_launcher, null);
+            List<ResolveInfo> installedAppList = getActivity().getPackageManager().queryIntentActivities(new Intent().setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
+            List<NormalLauncherActivity.AppData> dataList = new ArrayList<>();
+            for (ResolveInfo resolveInfo : installedAppList) {
+                NormalLauncherActivity.AppData data = new NormalLauncherActivity.AppData();
+                data.label = resolveInfo.loadLabel(getActivity().getPackageManager()).toString();
+                data.icon = resolveInfo.loadIcon(getActivity().getPackageManager());
+                data.packName = resolveInfo.activityInfo.packageName;
                 dataList.add(data);
             }
-
-            final ListView listView = view.findViewById(R.id.normal_launcher_list);
+            ListView listView = view.findViewById(R.id.normal_launcher_list);
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-            listView.setAdapter(new AppListAdapter(getActivity(), dataList));
+            listView.setAdapter(new NormalLauncherActivity.AppListAdapter(getActivity(), dataList));
             listView.setOnItemClickListener((parent, mView, position, id) -> {
-                ResolveInfo app = installedAppList.get(position);
-                final String setLauncherPackage = Uri.fromParts("package", app.activityInfo.packageName, null).toString().replace("package:", "");
-                Common.SET_NORMAL_LAUNCHER(setLauncherPackage, StartActivity.getInstance());
+                SET_NORMAL_LAUNCHER(Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", ""), StartActivity.getInstance());
                 /* listviewの更新 */
                 listView.invalidateViews();
                 setCheckedSwitch();
             });
-
             new AlertDialog.Builder(getActivity())
                     .setView(view)
                     .setTitle(R.string.dialog_title_launcher)
-                    .setPositiveButton(R.string.dialog_common_yes, null)
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });
@@ -680,7 +637,6 @@ public class MainFragment extends PreferenceFragment {
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_reboot)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindDchaService(FLAG_REBOOT, DCHA_MODE))
-
                     .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
@@ -688,16 +644,11 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceRebootShortCut.setOnPreferenceClickListener(preference -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent shortcutIntent = new Intent(Intent.ACTION_MAIN);
-                shortcutIntent.setClassName(getActivity(), "com.saradabar.cpadcustomizetool.RebootActivity");
-                Icon icon = Icon.createWithResource(getActivity(), R.drawable.reboot);
-                ShortcutInfo shortcut = new ShortcutInfo.Builder(getActivity(), "再起動")
+                getActivity().getSystemService(ShortcutManager.class).requestPinShortcut(new ShortcutInfo.Builder(getActivity(), "再起動")
                         .setShortLabel("再起動")
-                        .setIcon(icon)
-                        .setIntent(shortcutIntent)
-                        .build();
-                ShortcutManager shortcutManager = getActivity().getSystemService(ShortcutManager.class);
-                shortcutManager.requestPinShortcut(shortcut, null);
+                        .setIcon(Icon.createWithResource(getActivity(), R.drawable.reboot))
+                        .setIntent(new Intent(Intent.ACTION_MAIN).setClassName(getActivity(), "com.saradabar.cpadcustomizetool.RebootActivity"))
+                        .build(), null);
             } else {
                 makeRebootShortcut();
             }
@@ -705,6 +656,9 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceDchaService.setOnPreferenceClickListener(preference -> {
+            if (confirmationDialog()) {
+                return false;
+            }
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_dcha_service)
                     .setMessage(R.string.dialog_dcha_service)
@@ -712,7 +666,7 @@ public class MainFragment extends PreferenceFragment {
                         if (StartActivity.getInstance().bindDchaService()) {
                             new AlertDialog.Builder(getActivity())
                                     .setMessage(R.string.dialog_error_no_work_dcha)
-                                    .setPositiveButton(R.string.dialog_common_ok, null)
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                     .show();
                         } else {
                             SET_DCHASERVICE_FLAG(true, getActivity());
@@ -721,43 +675,33 @@ public class MainFragment extends PreferenceFragment {
                             startActivity(getActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
                         }
                     })
-
-                    .setNegativeButton(R.string.dialog_common_no, null)
+                    .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });
 
         preferenceChangeHome.setOnPreferenceClickListener(preference -> {
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            View view = inflater.inflate(R.layout.launcher_list, null);
-
-            Intent setPackageName = new Intent();
-            setPackageName.setAction(Intent.ACTION_MAIN);
-            setPackageName.addCategory(Intent.CATEGORY_HOME);
-            final PackageManager pm = getActivity().getPackageManager();
-            final List<ResolveInfo> installedAppList = pm.queryIntentActivities(setPackageName, 0);
-            final List<HomeLauncherActivity.AppData> dataList = new ArrayList<>();
-            for (ResolveInfo app : installedAppList) {
+            View view = getActivity().getLayoutInflater().inflate(R.layout.launcher_list, null);
+            List<ResolveInfo> installedAppList = getActivity().getPackageManager().queryIntentActivities(new Intent().setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
+            List<HomeLauncherActivity.AppData> dataList = new ArrayList<>();
+            for (ResolveInfo resolveInfo : installedAppList) {
                 HomeLauncherActivity.AppData data = new HomeLauncherActivity.AppData();
-                data.label = app.loadLabel(pm).toString();
-                data.icon = app.loadIcon(pm);
-                data.packName = app.activityInfo.packageName;
+                data.label = resolveInfo.loadLabel(getActivity().getPackageManager()).toString();
+                data.icon = resolveInfo.loadIcon(getActivity().getPackageManager());
+                data.packName = resolveInfo.activityInfo.packageName;
                 dataList.add(data);
             }
-
             mListView = view.findViewById(R.id.launcher_list);
             mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
             mListView.setAdapter(new HomeLauncherActivity.AppListAdapter(getActivity(), dataList));
             mListView.setOnItemClickListener((parent, mView, position, id) -> {
-                ResolveInfo app = installedAppList.get(position);
-                setLauncherPackage = Uri.fromParts("package", app.activityInfo.packageName, null).toString().replace("package:", "");
+                setLauncherPackage = Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", "");
                 bindDchaService(FLAG_SET_LAUNCHER, DCHA_MODE);
             });
-
             new AlertDialog.Builder(getActivity())
                     .setView(view)
                     .setTitle(R.string.dialog_title_launcher)
-                    .setPositiveButton(R.string.dialog_common_yes, null)
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });
@@ -769,9 +713,7 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceSilentInstall.setOnPreferenceClickListener(preference -> {
             preferenceSilentInstall.setEnabled(false);
-            Intent intent = new Intent("android.intent.action.GET_CONTENT");
-            intent.setType("application/vnd.android.package-archive");
-            startActivityForResult(intent, REQUEST_INSTALL);
+            startActivityForResult(new Intent("android.intent.action.GET_CONTENT").setType("application/vnd.android.package-archive"), REQUEST_INSTALL);
             return false;
         });
 
@@ -780,44 +722,42 @@ public class MainFragment extends PreferenceFragment {
             if (bindDchaService(FLAG_CHECK, DCHA_UTIL_MODE)) {
                 new AlertDialog.Builder(getActivity())
                         .setMessage(R.string.dialog_error_no_work_dcha_util)
-                        .setPositiveButton(R.string.dialog_common_ok, null)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
                 return false;
             }
 
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            View view = inflater.inflate(R.layout.resolution_dialog, null);
+            View view = getActivity().getLayoutInflater().inflate(R.layout.resolution_dialog, null);
             new AlertDialog.Builder(getActivity())
                     .setView(view)
                     .setTitle(R.string.dialog_title_resolution)
-                    .setPositiveButton(R.string.dialog_common_ok, (dialog1, which) -> {
-                        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
-                        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                        EditText mEditText1 = view.findViewById(R.id.edit_text_1);
-                        EditText mEditText2 = view.findViewById(R.id.edit_text_2);
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> {
+                        ((InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        EditText editTextWidth = view.findViewById(R.id.edit_text_1);
+                        EditText editTextHeight = view.findViewById(R.id.edit_text_2);
                         try {
-                            width = Integer.parseInt(mEditText1.getText().toString());
-                            height = Integer.parseInt(mEditText2.getText().toString());
+                            width = Integer.parseInt(editTextWidth.getText().toString());
+                            height = Integer.parseInt(editTextHeight.getText().toString());
                             if (width < 300 || height < 300) {
                                 new AlertDialog.Builder(getActivity())
                                         .setTitle(R.string.dialog_title_error)
                                         .setMessage(R.string.dialog_illegal_value)
-                                        .setPositiveButton(R.string.dialog_common_ok, null)
+                                        .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                         .show();
                             } else {
-                                MainFragment.setResolutionTask resolution = new MainFragment.setResolutionTask();
-                                resolution.setListener(StartActivity.getInstance().mCreateListener());
-                                resolution.execute();
+                                MainFragment.setResolutionTask resolutionTask = new MainFragment.setResolutionTask();
+                                resolutionTask.setListener(StartActivity.getInstance().mCreateListener());
+                                resolutionTask.execute();
                             }
                         } catch (NumberFormatException ignored) {
                             new AlertDialog.Builder(getActivity())
                                     .setTitle(R.string.dialog_title_error)
                                     .setMessage(R.string.dialog_illegal_value)
-                                    .setPositiveButton(R.string.dialog_common_ok, null)
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                     .show();
                         }
                     })
-                    .setNegativeButton(R.string.dialog_common_cancel, null)
+                    .setNegativeButton(R.string.dialog_common_cancel, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });
@@ -846,7 +786,7 @@ public class MainFragment extends PreferenceFragment {
                 break;
         }
 
-        if (mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
+        if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
             switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
@@ -863,72 +803,99 @@ public class MainFragment extends PreferenceFragment {
             getPreferenceScreen().removePreference(findPreference("android_resolution"));
             getPreferenceScreen().removePreference(findPreference("android_resolution_reset"));
         } else {
-            if (Common.GET_DCHASERVICE_FLAG(getActivity())) {
-                getPreferenceScreen().removePreference(findPreference("dcha_service"));
+            getPreferenceScreen().removePreference(findPreference("dcha_service"));
+        }
+    }
+
+    /* 確認ダイアログ */
+    private boolean confirmationDialog() {
+        if (!COUNT_DCHA_COMPLETED_FILE.exists() && IGNORE_DCHA_COMPLETED_FILE.exists()) {
+            if (!GET_CONFIRMATION(getActivity())) {
+                new AlertDialog.Builder(getActivity())
+                        .setCancelable(false)
+                        .setTitle("本当によろしいですか？")
+                        .setMessage("このデバイスのシステム領域にDchaServiceが恒久的な変更を加えていないことを検出しました\n続行すると一部の動作がAndroidシステムによって制限される可能性があります")
+                        .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
+                            new AlertDialog.Builder(getActivity())
+                                    .setCancelable(false)
+                                    .setTitle("最終確認")
+                                    .setMessage("続行するとこの操作は取り消せません\n初期化をおこなってもシステム領域の変更、Androidシステムによる制限はもとには戻りません\n続行すると警告は無効になり、設定変更が可能になります")
+                                    .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
+                                        SET_CONFIRMATION(true, getActivity());
+                                        dialog1.dismiss();
+                                    })
+                                    .setNegativeButton(R.string.dialog_common_cancel, (dialog1, which1) -> dialog.dismiss())
+                                    .show();
+                        })
+                        .setNegativeButton(R.string.dialog_common_cancel, (dialog, which) -> dialog.dismiss())
+                        .show();
+                return true;
+            } else {
+                return false;
             }
+        } else {
+            return false;
         }
     }
 
     /* ランチャーのパッケージ名を取得 */
     private String getLauncherPackage() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        PackageManager pm = getActivity().getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-        ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-        return activityInfo.packageName;
+        return (getActivity().getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)).activityInfo.packageName;
     }
 
     /* ランチャーの名前を取得 */
     private String getLauncherName() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        PackageManager pm = getActivity().getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-        ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-        return activityInfo.loadLabel(pm).toString();
+        return (getActivity().getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)).activityInfo.loadLabel(getActivity().getPackageManager()).toString();
     }
 
     /* 再起動ショートカットを作成 */
     private void makeRebootShortcut() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity");
-        Intent intent2 = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        intent2.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent.setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity"));
-        Parcelable icon = Intent.ShortcutIconResource.fromContext(getActivity(), R.drawable.reboot);
-        intent2.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        intent2.putExtra(Intent.EXTRA_SHORTCUT_NAME, R.string.reboot);
-        getActivity().sendBroadcast(intent2);
-        Toast.makeText(getActivity(), R.string.toast_common_success, Toast.LENGTH_SHORT).show();
+        getActivity().sendBroadcast(new Intent("com.android.launcher.action.INSTALL_SHORTCUT")
+                .putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(Intent.ACTION_MAIN)
+                        .setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity")
+                        .setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.RebootActivity"))
+                .putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(getActivity(), R.drawable.reboot))
+                .putExtra(Intent.EXTRA_SHORTCUT_NAME, R.string.reboot));
+        if (null != toast) toast.cancel();
+        toast = Toast.makeText(getActivity(), R.string.toast_common_success, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     /* スイッチ一括変更 */
     private void setCheckedSwitch() {
+        SharedPreferences sp = getActivity().getSharedPreferences(SHARED_PREFERENCE_KEY, MODE_PRIVATE);
         try {
-            switchDchaState.setChecked(Settings.System.getInt(resolver, dchaStateString) != 0);
-            switchHideBar.setChecked(Settings.System.getInt(resolver, hideNavigationBarString) != 0);
-            switchMarketApp.setChecked(Settings.Secure.getInt(resolver, Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
-            switchUsbDebug.setChecked(Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED) != 0);
-            switchDeviceAdministrator.setChecked(mDevicePolicyManager.isAdminActive(mComponentName));
+            switchDchaState.setChecked(Settings.System.getInt(getActivity().getContentResolver(), DCHA_STATE) != 0);
         } catch (Settings.SettingNotFoundException ignored) {
         }
-        switchEnableService.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false));
-        switchKeepMarketApp.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false));
-        switchKeepDchaState.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false));
-        switchKeepUsbDebug.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false));
-        switchKeepHome.setChecked(sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false));
-        preferenceChangeHome.setSummary(getLauncherName());
-        String mString = null;
         try {
-            mString = (String) getActivity().getPackageManager().getApplicationLabel(getActivity().getPackageManager().getApplicationInfo(Common.GET_NORMAL_LAUNCHER(getActivity()), 0));
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            switchHideBar.setChecked(Settings.System.getInt(getActivity().getContentResolver(), HIDE_NAVIGATION_BAR) != 0);
+        } catch (Settings.SettingNotFoundException ignored) {
         }
-        if (mString == null) {
+        try {
+            switchMarketApp.setChecked(Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) != 0);
+        } catch (Settings.SettingNotFoundException ignored) {
+        }
+        try {
+            switchUsbDebug.setChecked(Settings.Global.getInt(getActivity().getContentResolver(), Settings.Global.ADB_ENABLED) != 0);
+        } catch (Settings.SettingNotFoundException ignored) {
+        }
+        switchDeviceAdministrator.setChecked(((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isAdminActive(new ComponentName(getActivity(), AdministratorReceiver.class)));
+        switchEnableService.setChecked(sp.getBoolean(KEY_ENABLED_KEEP_SERVICE, false));
+        switchKeepMarketApp.setChecked(sp.getBoolean(KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false));
+        switchKeepDchaState.setChecked(sp.getBoolean(KEY_ENABLED_KEEP_DCHA_STATE, false));
+        switchKeepUsbDebug.setChecked(sp.getBoolean(KEY_ENABLED_KEEP_USB_DEBUG, false));
+        switchKeepHome.setChecked(sp.getBoolean(KEY_ENABLED_KEEP_HOME, false));
+        preferenceChangeHome.setSummary(getLauncherName());
+        String normalLauncherName = null;
+        try {
+            normalLauncherName = (String) getActivity().getPackageManager().getApplicationLabel(getActivity().getPackageManager().getApplicationInfo(GET_NORMAL_LAUNCHER(getActivity()), 0));
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        if (normalLauncherName == null) {
             preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません");
-        }
-        else {
-            preferenceNormalLauncher.setSummary("変更するランチャーは" + mString + "に設定されています");
+        } else {
+            preferenceNormalLauncher.setSummary("変更するランチャーは" + normalLauncherName + "に設定されています");
         }
     }
 
@@ -937,20 +904,20 @@ public class MainFragment extends PreferenceFragment {
     public void onDestroy() {
         super.onDestroy();
         if (isObserberStateEnable) {
-            resolver.unregisterContentObserver(observerState);
+            getActivity().getContentResolver().unregisterContentObserver(observerState);
             isObserberStateEnable = false;
         }
         if (isObserberHideEnable) {
-            resolver.unregisterContentObserver(observerHide);
+            getActivity().getContentResolver().unregisterContentObserver(observerHide);
             isObserberHideEnable = false;
         }
         if (isObserberMarketEnable) {
-            resolver.unregisterContentObserver(observerMarket);
-            isObserberStateEnable = false;
+            getActivity().getContentResolver().unregisterContentObserver(observerMarket);
+            isObserberMarketEnable = false;
         }
         if (isObserberUsbEnable) {
-            resolver.unregisterContentObserver(observerUsb);
-            isObserberStateEnable = false;
+            getActivity().getContentResolver().unregisterContentObserver(observerUsb);
+            isObserberUsbEnable = false;
         }
     }
 
@@ -958,25 +925,29 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity().getActionBar() != null)
-            getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
+        instance = this;
+        Uri contentDchaState = Settings.System.getUriFor(DCHA_STATE);
+        Uri contentHideNavigationBar = Settings.System.getUriFor(HIDE_NAVIGATION_BAR);
+        Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
+        Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
 
+        if (getActivity().getActionBar() != null) getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         if (!preferenceChangeHome.isEnabled()) preferenceChangeHome.setEnabled(true);
 
         /* オブザーバー有効 */
         isObserberStateEnable = true;
-        resolver.registerContentObserver(contentDchaState, false, observerState);
+        getActivity().getContentResolver().registerContentObserver(contentDchaState, false, observerState);
         isObserberHideEnable = true;
-        resolver.registerContentObserver(contentHideNavigationBar, false, observerHide);
+        getActivity().getContentResolver().registerContentObserver(contentHideNavigationBar, false, observerHide);
         isObserberMarketEnable = true;
-        resolver.registerContentObserver(contentMarketApp, false, observerMarket);
+        getActivity().getContentResolver().registerContentObserver(contentMarketApp, false, observerMarket);
         isObserberUsbEnable = true;
-        resolver.registerContentObserver(contentUsbDebug, false, observerUsb);
+        getActivity().getContentResolver().registerContentObserver(contentUsbDebug, false, observerUsb);
 
         /* 一括変更 */
         setCheckedSwitch();
 
-        switch (Common.GET_MODEL_ID(getActivity())) {
+        switch (GET_MODEL_ID(getActivity())) {
             case 0:
                 preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceSilentInstall.setEnabled(false);
@@ -995,18 +966,18 @@ public class MainFragment extends PreferenceFragment {
                 break;
         }
 
-        if (mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
+        if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
             switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
         }
     }
 
     /* フラグメント切り替え */
-    private void transitionFragment(PreferenceFragment nextPreferenceFragment) {
+    private void transitionFragment(PreferenceFragment preferenceFragment) {
         getFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.layout_main, nextPreferenceFragment)
+                .replace(R.id.layout_main, preferenceFragment)
                 .commit();
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -1048,7 +1019,6 @@ public class MainFragment extends PreferenceFragment {
 
     /* インストールタスク */
     public static class silentInstallTask extends AsyncTask<Object, Void, Object> {
-
         private Listener mListener;
 
         @Override
@@ -1058,14 +1028,8 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Object doInBackground(Object... value) {
-            if (!MainFragment.getInstance().bindDchaService(FLAG_CHECK, DCHA_MODE)) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                }
-                if (MainFragment.getInstance().installApp(MainFragment.getInstance().mDchaService, installData, 1)) {
-                    return new Object();
-                }
+            if (MainFragment.getInstance().installApp()) {
+                return new Object();
             }
             return null;
         }
@@ -1084,24 +1048,23 @@ public class MainFragment extends PreferenceFragment {
         /* StartActivity */
         public interface Listener {
             void onShow();
+
             void onSuccess();
+
             void onFailure();
         }
     }
 
     /* 解像度タスク */
     public static class setResolutionTask extends AsyncTask<Object, Void, Object> {
-
         private Listener mListener;
 
         @Override
         protected Object doInBackground(Object... value) {
-            getInstance().setResolution(MainFragment.getInstance().width, MainFragment.getInstance().height);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+            if (MainFragment.getInstance().setResolution()) {
+                return new Object();
             }
-            return new Object();
+            return null;
         }
 
         @Override
@@ -1118,24 +1081,47 @@ public class MainFragment extends PreferenceFragment {
         /* StartActivity */
         public interface Listener {
             void onSuccess();
+
             void onFailure();
         }
     }
 
     /* サイレントインストール */
-    public boolean installApp(IDchaService mDchaService, String str, int i) {
-        try {
-            return mDchaService.installApp(str, i);
-        } catch (RemoteException | NullPointerException ignored) {
+    public boolean installApp() {
+        if (!bindDchaService(FLAG_CHECK, DCHA_MODE)) {
+            /* 一回目に失敗する問題を防ぐ */
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+
+            try {
+                return mDchaService.installApp(installData, 1);
+            } catch (RemoteException | NullPointerException ignored) {
+                return false;
+            }
+        } else {
             return false;
         }
     }
 
     /* 解像度の変更 */
-    public void setResolution(int i1, int i2) {
-        width = i1;
-        height = i2;
-        bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE);
+    public boolean setResolution() {
+        if (!bindDchaService(FLAG_CHECK, DCHA_UTIL_MODE)) {
+            /* 一回目に失敗する問題を防ぐ */
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+
+            try {
+                return mIDchaUtilService.setForcedDisplaySize(width, height);
+            } catch (RemoteException ignored) {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /* 解像度のリセット */
@@ -1148,7 +1134,7 @@ public class MainFragment extends PreferenceFragment {
                 if (bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE)) {
                     new AlertDialog.Builder(getActivity())
                             .setMessage(R.string.dialog_error_no_work_dcha_util)
-                            .setPositiveButton(R.string.dialog_common_ok, null)
+                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                             .show();
                 }
                 break;
@@ -1158,7 +1144,7 @@ public class MainFragment extends PreferenceFragment {
                 if (bindDchaService(FLAG_RESOLUTION, DCHA_UTIL_MODE)) {
                     new AlertDialog.Builder(getActivity())
                             .setMessage(R.string.dialog_error_no_work_dcha_util)
-                            .setPositiveButton(R.string.dialog_common_ok, null)
+                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                             .show();
                 }
                 break;

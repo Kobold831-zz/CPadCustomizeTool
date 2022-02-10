@@ -1,12 +1,15 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.mComponentName;
-import static com.saradabar.cpadcustomizetool.Common.Variable.mDevicePolicyManager;
+import static com.saradabar.cpadcustomizetool.Common.GET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.SET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.Variable.COUNT_DCHA_COMPLETED_FILE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.IGNORE_DCHA_COMPLETED_FILE;
 import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -21,6 +24,7 @@ import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
+import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
 public class MainOtherFragment extends PreferenceFragment {
@@ -38,7 +42,7 @@ public class MainOtherFragment extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_main_setting, rootKey);
 
-        mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
 
         preferenceOtherSettings = findPreference("intent_android_settings");
         preferenceSysUiAdjustment = findPreference("intent_sys_ui_adjustment");
@@ -90,11 +94,11 @@ public class MainOtherFragment extends PreferenceFragment {
             if ((boolean) o) {
                 switchPreferencePermissionForced.setChecked(true);
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_GRANTED");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
             } else {
                 switchPreferencePermissionForced.setChecked(false);
                 switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) mDevicePolicyManager.setPermissionPolicy(mComponentName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
             }
             return true;
         });
@@ -103,7 +107,7 @@ public class MainOtherFragment extends PreferenceFragment {
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_question_device_owner)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        mDevicePolicyManager.clearDeviceOwnerApp(getActivity().getPackageName());
+                        devicePolicyManager.clearDeviceOwnerApp(getActivity().getPackageName());
                         getActivity().finish();
                         getActivity().overridePendingTransition(0, 0);
                         startActivity(getActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
@@ -140,7 +144,8 @@ public class MainOtherFragment extends PreferenceFragment {
     }
 
     private void setPreferenceSettings() {
-        if (!mDevicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (!devicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
             preferenceBlockToUninstallSettings.setEnabled(false);
             preferenceDisableDeviceOwner.setEnabled(false);
             switchPreferencePermissionForced.setEnabled(false);
@@ -149,7 +154,7 @@ public class MainOtherFragment extends PreferenceFragment {
             switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                switch (mDevicePolicyManager.getPermissionPolicy(mComponentName)) {
+                switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
                     case 0:
                         switchPreferencePermissionForced.setChecked(false);
                         switchPreferencePermissionForced.setTitle("PERMISSION_GRANT_STATE_DEFAULT");
@@ -164,10 +169,11 @@ public class MainOtherFragment extends PreferenceFragment {
     }
 
     private String getNowOwnerPackage() {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
         for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
             /* ユーザーアプリか確認 */
             if (app.sourceDir.startsWith("/data/app/")) {
-                if (mDevicePolicyManager.isDeviceOwnerApp(app.packageName)) {
+                if (devicePolicyManager.isDeviceOwnerApp(app.packageName)) {
                     return app.loadLabel(getActivity().getPackageManager()).toString();
                 }
             }
@@ -179,9 +185,6 @@ public class MainOtherFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        mDevicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
-
         switchPreferencePermissionForced = findPreference("permission_forced");
         preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
         preferenceDisableDeviceOwner = findPreference("disable_device_owner");

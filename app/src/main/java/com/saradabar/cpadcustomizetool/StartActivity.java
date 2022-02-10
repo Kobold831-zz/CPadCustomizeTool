@@ -54,7 +54,7 @@ public class StartActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         instance = this;
-        mDevicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
 
@@ -65,13 +65,13 @@ public class StartActivity extends Activity {
             return;
         }
 
-        if (mDevicePolicyManager.isDeviceOwnerApp(getPackageName())) {
+        if (devicePolicyManager.isDeviceOwnerApp(getPackageName())) {
             setContentView(R.layout.main_error_enable_own);
             findViewById(R.id.main_error_button_1).setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
                     .setTitle(R.string.dialog_question_device_owner)
                     .setCancelable(false)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        mDevicePolicyManager.clearDeviceOwnerApp(getPackageName());
+                        devicePolicyManager.clearDeviceOwnerApp(getPackageName());
                         finish();
                         overridePendingTransition(0, 0);
                         startActivity(getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", false));
@@ -203,6 +203,7 @@ public class StartActivity extends Activity {
     public MainFragment.silentInstallTask.Listener createListener() {
         return new MainFragment.silentInstallTask.Listener() {
             ProgressDialog progressDialog;
+
             /* プログレスバーの表示 */
             @Override
             public void onShow() {
@@ -241,6 +242,7 @@ public class StartActivity extends Activity {
         return new MainFragment.setResolutionTask.Listener() {
             private Handler mHandler;
             private Runnable mRunnable;
+
             /* 成功 */
             @Override
             public void onSuccess() {
@@ -252,10 +254,11 @@ public class StartActivity extends Activity {
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
                         .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
                             mHandler.removeCallbacks(mRunnable);
-                            MainFragment.getInstance().resetResolution();
+                            new MainFragment().resetResolution();
                         });
                 AlertDialog AlertDialog = mAlertDialog.create();
                 AlertDialog.show();
+
                 /* カウント開始 */
                 mHandler = new Handler();
                 mRunnable = new Runnable() {
@@ -267,7 +270,7 @@ public class StartActivity extends Activity {
                         if (i <= 0) {
                             AlertDialog.dismiss();
                             mHandler.removeCallbacks(this);
-                            MainFragment.getInstance().resetResolution();
+                            new MainFragment().resetResolution();
                         }
                         i--;
                     }
@@ -278,7 +281,7 @@ public class StartActivity extends Activity {
             /* 失敗 */
             @Override
             public void onFailure() {
-                MainFragment.getInstance().resetResolution();
+                new MainFragment().resetResolution();
             }
         };
     }
@@ -287,6 +290,7 @@ public class StartActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        instance = this;
         /* DchaServiceの使用可否を確認 */
         if (GET_DCHASERVICE_FLAG(this)) {
             //DchaServiceが機能していないなら終了

@@ -1,12 +1,12 @@
 package com.saradabar.cpadcustomizetool;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.Set;
 
 public final class Common {
@@ -31,8 +31,8 @@ public final class Common {
         public static final int REQUEST_INSTALL = 2;
         public static final int REQUEST_PERMISSION = 3;
 
-        public static final int DCHA_MODE = 1;
-        public static final int DCHA_UTIL_MODE = 2;
+        public static final boolean DCHA_MODE = true;
+        public static final boolean DCHA_UTIL_MODE = false;
 
         public static String DOWNLOAD_FILE_URL;
         public static String UPDATE_CHECK_URL = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Update.xml";
@@ -40,13 +40,8 @@ public final class Common {
         public static String UPDATE_INFO_URL = "https://docs.google.com/document/d/1uh-FrHM5o84uh7zXw3W_FRIDuzJo8NcVnUD8Rrw4CMQ/";
         public static String UPDATE_URL = "https://is.gd/W5XR2Z";
         public static String WIKI_URL = "https://ctabwiki.nerrog.net/";
-        public static String installData;
 
         public static Toast toast;
-
-        public static DevicePolicyManager mDevicePolicyManager;
-
-        public static ComponentName mComponentName;
 
         public static final String DCHA_SERVICE = "jp.co.benesse.dcha.dchaservice.DchaService";
         public static final String PACKAGE_DCHASERVICE = "jp.co.benesse.dcha.dchaservice";
@@ -64,6 +59,9 @@ public final class Common {
         public static final String KEY_ENABLED_KEEP_HOME = "enabled_keep_home";
         public static final String KEY_SAVE_KEEP_HOME = "save_keep_home";
         public static final String KEY_ENABLED_AUTO_USB_DEBUG = "enabled_auto_usb_debug";
+
+        public static final File IGNORE_DCHA_COMPLETED_FILE = new File("/factory/ignore_dcha_completed");
+        public static final File COUNT_DCHA_COMPLETED_FILE = new File("/factory/count_dcha_completed");
     }
 
     public static ComponentName getAdministratorComponent(Context context) {
@@ -225,5 +223,14 @@ public final class Common {
         string = sp.getString("normal_launcher", null);
         return string;
     }
-}
 
+    public static void SET_CONFIRMATION(boolean bl, Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean("confirmation", bl).apply();
+    }
+
+    public static boolean GET_CONFIRMATION(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("confirmation", false);
+    }
+}

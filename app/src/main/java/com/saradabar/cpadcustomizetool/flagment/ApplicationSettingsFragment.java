@@ -3,6 +3,7 @@ package com.saradabar.cpadcustomizetool.flagment;
 import static com.saradabar.cpadcustomizetool.Common.*;
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -54,6 +55,9 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         });
 
         autoUsbDebug.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (confirmationDialog()) {
+                return false;
+            }
             try {
                 if (GET_MODEL_ID(getActivity()) == 2)
                     Settings.System.putInt(resolver, DCHA_STATE, 3);
@@ -79,6 +83,37 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
             changeSettingsDcha.setChecked(false);
             changeSettingsDcha.setSummary("この機能を使用するには、\"DchaServiceを使用\"を押して内容を確認してください");
             changeSettingsDcha.setEnabled(false);
+        }
+    }
+
+    /* 確認ダイアログ */
+    private boolean confirmationDialog() {
+        if (!COUNT_DCHA_COMPLETED_FILE.exists() && IGNORE_DCHA_COMPLETED_FILE.exists()) {
+            if (!GET_CONFIRMATION(getActivity())) {
+                new AlertDialog.Builder(getActivity())
+                        .setCancelable(false)
+                        .setTitle("本当によろしいですか？")
+                        .setMessage("このデバイスのシステム領域にDchaServiceが恒久的な変更を加えていないことを検出しました\n続行すると一部の動作がAndroidシステムによって制限される可能性があります")
+                        .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
+                            new AlertDialog.Builder(getActivity())
+                                    .setCancelable(false)
+                                    .setTitle("最終確認")
+                                    .setMessage("続行するとこの操作は取り消せません\n初期化をおこなってもシステム領域の変更、Androidシステムによる制限はもとには戻りません\n続行すると警告は無効になり、設定変更が可能になります")
+                                    .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
+                                        SET_CONFIRMATION(true, getActivity());
+                                        dialog1.dismiss();
+                                    })
+                                    .setNegativeButton(R.string.dialog_common_cancel, (dialog1, which1) -> dialog.dismiss())
+                                    .show();
+                        })
+                        .setNegativeButton(R.string.dialog_common_cancel, (dialog, which) -> dialog.dismiss())
+                        .show();
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 }
