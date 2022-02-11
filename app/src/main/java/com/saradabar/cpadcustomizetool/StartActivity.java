@@ -254,7 +254,7 @@ public class StartActivity extends Activity {
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
                         .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
                             mHandler.removeCallbacks(mRunnable);
-                            new MainFragment().resetResolution();
+                            MainFragment.getInstance().resetResolution();
                         });
                 AlertDialog AlertDialog = mAlertDialog.create();
                 AlertDialog.show();
@@ -270,7 +270,7 @@ public class StartActivity extends Activity {
                         if (i <= 0) {
                             AlertDialog.dismiss();
                             mHandler.removeCallbacks(this);
-                            new MainFragment().resetResolution();
+                            MainFragment.getInstance().resetResolution();
                         }
                         i--;
                     }
@@ -281,7 +281,10 @@ public class StartActivity extends Activity {
             /* 失敗 */
             @Override
             public void onFailure() {
-                new MainFragment().resetResolution();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage("解像度設定に失敗しました")
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
             }
         };
     }

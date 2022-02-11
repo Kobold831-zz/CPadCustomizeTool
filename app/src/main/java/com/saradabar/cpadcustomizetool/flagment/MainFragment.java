@@ -11,6 +11,8 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -713,7 +716,15 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceSilentInstall.setOnPreferenceClickListener(preference -> {
             preferenceSilentInstall.setEnabled(false);
-            startActivityForResult(new Intent("android.intent.action.GET_CONTENT").setType("application/vnd.android.package-archive"), REQUEST_INSTALL);
+            try {
+                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("application/vnd.android.package-archive").addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), ""), REQUEST_INSTALL);
+            } catch (ActivityNotFoundException ignored) {
+                preferenceSilentInstall.setEnabled(true);
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("ファイルブラウザがインストールされていません")
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
             return false;
         });
 
@@ -987,32 +998,41 @@ public class MainFragment extends PreferenceFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_INSTALL) {
             preferenceSilentInstall.setEnabled(true);
-            try {
+            ClipData clipData = data.getClipData();
+            if (clipData == null) {
+                /* シングルApk */
                 installData = getInstallData(getActivity(), data.getData());
-            } catch (NullPointerException ignored) {
-                return;
+            } else {
+                /* マルチApk */
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    /* 処理 */
+                }
             }
-            silentInstallTask silent = new silentInstallTask();
-            silent.setListener(StartActivity.getInstance().createListener());
-            silent.execute();
+            if (installData != null) {
+                silentInstallTask silent = new silentInstallTask();
+                silent.setListener(StartActivity.getInstance().createListener());
+                silent.execute();
+            } else {
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("ファイルデータを取得できませんでした")
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
         }
     }
 
     /* 選択したファイルデータを取得 */
     private String getInstallData(Context context, Uri uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            if ("com.android.externalstorage.documents".equals(uri.getAuthority())) {
-                String[] s1 = DocumentsContract.getDocumentId(uri).split(":");
-                String s2 = s1[0];
-                if ("primary".equalsIgnoreCase(s2)) {
-                    return Environment.getExternalStorageDirectory() + "/" + s1[1];
-                }
-                return "/storage/" + s2 + "/" + s1[1];
+            String[] string = DocumentsContract.getDocumentId(uri).split(":");
+            switch (uri.getAuthority()) {
+                case "com.android.externalstorage.documents":
+                    return Environment.getExternalStorageDirectory() + "/" + string[1];
+                case "com.android.providers.downloads.documents":
+                    return string[1];
             }
-        } else {
-            if ("file".equalsIgnoreCase(uri.getScheme())) {
-                return uri.getPath();
-            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
         }
         return null;
     }
@@ -1062,6 +1082,11 @@ public class MainFragment extends PreferenceFragment {
         @Override
         protected Object doInBackground(Object... value) {
             if (MainFragment.getInstance().setResolution()) {
+                /* 待機 */
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                }
                 return new Object();
             }
             return null;
