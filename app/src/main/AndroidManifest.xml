@@ -103,7 +103,12 @@
             android:name=".set.BlockerActivity"
             android:theme="@style/MainTheme"
             tools:ignore="InnerclassSeparator"
-            android:label="@string/block_to_uninstall"/>
+            android:label="@string/block_to_uninstall" />
+
+        <activity
+            android:name=".CrashLog"
+            android:theme="@style/MainTheme"
+            android:label="クラッシュ履歴" />
 
         <service
             android:name=".service.KeepService"

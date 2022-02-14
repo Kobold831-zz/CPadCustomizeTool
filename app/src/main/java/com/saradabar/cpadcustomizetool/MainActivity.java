@@ -42,6 +42,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CrashDetection customUncaughtExceptionHandler = new CrashDetection(getApplicationContext());
+        Thread.setDefaultUncaughtExceptionHandler(customUncaughtExceptionHandler);
         /* ネットワークチェック */
         if (!isNetWork()) {
             netWorkError();

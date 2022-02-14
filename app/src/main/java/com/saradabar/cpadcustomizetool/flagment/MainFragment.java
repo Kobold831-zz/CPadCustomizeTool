@@ -998,10 +998,18 @@ public class MainFragment extends PreferenceFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_INSTALL) {
             preferenceSilentInstall.setEnabled(true);
-            ClipData clipData = data.getClipData();
+            ClipData clipData = null;
+            try {
+                clipData = data.getClipData();
+            } catch (NullPointerException ignored) {
+            }
             if (clipData == null) {
                 /* シングルApk */
-                installData = getInstallData(getActivity(), data.getData());
+                try {
+                    installData = getInstallData(getActivity(), data.getData());
+                } catch (NullPointerException ignored) {
+                    installData = null;
+                }
             } else {
                 /* マルチApk */
                 for (int i = 0; i < clipData.getItemCount(); i++) {

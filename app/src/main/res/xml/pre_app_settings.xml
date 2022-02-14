@@ -27,4 +27,18 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:iconSpaceReserved="false" android:title="アプリログ">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="debug_log"
+            android:title="クラッシュ履歴" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="debug_log_remove"
+            android:title="クラッシュ履歴消去" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

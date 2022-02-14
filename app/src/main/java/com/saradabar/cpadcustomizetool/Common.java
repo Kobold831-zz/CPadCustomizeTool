@@ -233,4 +233,30 @@ public final class Common {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("confirmation", false);
     }
+
+    public static void saveCrashLog(String[] array, Context context){
+        StringBuilder buffer = new StringBuilder();
+        for(String item : array){
+            buffer.append(item).append(",");
+        };
+        String buf = buffer.toString();
+        String str = buf.substring(0, buf.length() - 1);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString("crash_log", str).apply();
+    }
+
+    public static String[] getCrashLog(Context context){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String str = sp.getString("crash_log","");
+        if(str != null && str.length() != 0){
+            return str.split(",");
+        }else{
+            return null;
+        }
+    }
+
+    public static void removeCrashLog(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().remove("crash_log").apply();
+    }
 }

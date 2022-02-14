@@ -1,20 +1,35 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
-import static com.saradabar.cpadcustomizetool.Common.*;
-import static com.saradabar.cpadcustomizetool.Common.Variable.*;
+import static com.saradabar.cpadcustomizetool.Common.GET_CHANGE_SETTINGS_DCHA_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.GET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.GET_MODEL_ID;
+import static com.saradabar.cpadcustomizetool.Common.GET_UPDATE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.SET_CHANGE_SETTINGS_DCHA_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.SET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.SET_UPDATE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.Variable;
+import static com.saradabar.cpadcustomizetool.Common.Variable.COUNT_DCHA_COMPLETED_FILE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.IGNORE_DCHA_COMPLETED_FILE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
+import static com.saradabar.cpadcustomizetool.Common.removeCrashLog;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.CrashLog;
 import com.saradabar.cpadcustomizetool.R;
 
 public class ApplicationSettingsFragment extends PreferenceFragment {
@@ -22,6 +37,9 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
     SwitchPreference autoUpdateCheck,
             changeSettingsDcha,
             autoUsbDebug;
+
+    Preference crashLog,
+            crashLogRemove;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -32,6 +50,8 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         autoUpdateCheck = findPreference("switch_auto_update_check");
         changeSettingsDcha = findPreference("switch_is_change_settings_use_dcha");
         autoUsbDebug = findPreference("switch_auto_usb_debug");
+        crashLog = findPreference("debug_log");
+        crashLogRemove = findPreference("debug_log_remove");
 
         autoUpdateCheck.setChecked(!GET_UPDATE_FLAG(getActivity()));
         changeSettingsDcha.setChecked(GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()));
@@ -76,6 +96,20 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                 return false;
             }
             return true;
+        });
+
+        crashLog.setOnPreferenceClickListener(preference -> {
+            startActivity(new Intent(getActivity(), CrashLog.class));
+            return false;
+        });
+
+        crashLogRemove.setOnPreferenceClickListener(preference -> {
+            removeCrashLog(getActivity());
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("消去しました")
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                    .show();
+            return false;
         });
 
         if (!GET_DCHASERVICE_FLAG(getActivity())) {
