@@ -3,13 +3,51 @@ package com.saradabar.cpadcustomizetool.flagment;
 import static android.content.Context.ACTIVITY_SERVICE;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
-import static com.saradabar.cpadcustomizetool.Common.*;
-import static com.saradabar.cpadcustomizetool.Common.Variable.*;
+import static com.saradabar.cpadcustomizetool.Common.GET_CHANGE_SETTINGS_DCHA_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.GET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.GET_MODEL_ID;
+import static com.saradabar.cpadcustomizetool.Common.GET_NORMAL_LAUNCHER;
+import static com.saradabar.cpadcustomizetool.Common.SET_CONFIRMATION;
+import static com.saradabar.cpadcustomizetool.Common.SET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.SET_NORMAL_LAUNCHER;
+import static com.saradabar.cpadcustomizetool.Common.Variable.COUNT_DCHA_COMPLETED_FILE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_MODE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_UTIL_MODE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_UTIL_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_CHECK;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_MARKET_APP_FALSE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_MARKET_APP_TRUE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_REBOOT;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_RESOLUTION;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_SET_DCHA_STATE_0;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_SET_DCHA_STATE_3;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_SET_LAUNCHER;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_TEST;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_USB_DEBUG_FALSE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_USB_DEBUG_TRUE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.FLAG_VIEW_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.IGNORE_DCHA_COMPLETED_FILE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_ENABLED_KEEP_HOME;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_ENABLED_KEEP_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG;
+import static com.saradabar.cpadcustomizetool.Common.Variable.KEY_SAVE_KEEP_HOME;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHA_UTIL_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_ADMIN;
+import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_INSTALL;
+import static com.saradabar.cpadcustomizetool.Common.Variable.SHARED_PREFERENCE_KEY;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -35,7 +73,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -44,11 +81,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
+import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 import com.saradabar.cpadcustomizetool.StartActivity;
@@ -56,7 +93,6 @@ import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 import com.saradabar.cpadcustomizetool.set.NormalLauncherActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -907,6 +943,18 @@ public class MainFragment extends PreferenceFragment {
             preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません");
         } else {
             preferenceNormalLauncher.setSummary("変更するランチャーは" + normalLauncherName + "に設定されています");
+        }
+
+        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+            getActivity().startService(new Intent(getActivity(), KeepService.class));
+            for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
+                if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
+                    try {
+                        KeepService.getInstance().startService();
+                    } catch (NullPointerException ignored) {
+                    }
+                }
+            }
         }
     }
 

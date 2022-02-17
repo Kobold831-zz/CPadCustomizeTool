@@ -21,6 +21,7 @@ public class RebootActivity extends Activity {
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(this));
         if (GET_DCHASERVICE_FLAG(this)) {
             startReboot();
         } else {

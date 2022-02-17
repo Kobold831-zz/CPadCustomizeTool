@@ -11,13 +11,17 @@ import android.content.SharedPreferences;
 import android.provider.Settings;
 
 import com.saradabar.cpadcustomizetool.Common;
+import com.saradabar.cpadcustomizetool.CrashDetection;
 import com.saradabar.cpadcustomizetool.service.KeepService;
+
+import java.util.ArrayList;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(context));
             ContentResolver resolver = context.getContentResolver();
             SharedPreferences sp = context.getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
 

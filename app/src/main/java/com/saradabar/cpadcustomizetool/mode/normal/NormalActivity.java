@@ -18,6 +18,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import com.saradabar.cpadcustomizetool.CrashDetection;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Common;
 
@@ -30,6 +31,7 @@ public class NormalActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(this));
 
         if (!startCheck()) {
             if (toast != null) toast.cancel();
