@@ -32,6 +32,16 @@ public class InformationActivity extends Activity {
                 toast.show();
             }
         });
+
+        findViewById(R.id.download_button).setOnClickListener(view -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL)));
+            } catch (ActivityNotFoundException ignored) {
+                if(toast != null) toast.cancel();
+                toast = Toast.makeText(this, R.string.toast_unknown_activity, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
     }
 
     @SuppressLint("SetTextI18n")

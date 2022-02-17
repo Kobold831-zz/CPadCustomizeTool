@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool;
+package com.saradabar.cpadcustomizetool.menu;
 
 import static com.saradabar.cpadcustomizetool.Common.getCrashLog;
 
@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentManager;
 
+import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.check.UpdateActivity;
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;

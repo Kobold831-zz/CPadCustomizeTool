@@ -39,7 +39,8 @@ public final class Common {
         public static String SUPPORT_CHECK_URL = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Support.xml";
         public static String UPDATE_INFO_URL = "https://docs.google.com/document/d/1uh-FrHM5o84uh7zXw3W_FRIDuzJo8NcVnUD8Rrw4CMQ/";
         public static String UPDATE_URL = "https://is.gd/W5XR2Z";
-        public static String WIKI_URL = "https://ctabwiki.nerrog.net/";
+        public static String WIKI_URL = "https://ctabwiki.nerrog.net/?Discord";
+        public static String GITHUB_URL = "https://github.com/Kobold831/CPadCustomizeTool";
 
         public static Toast toast;
 
@@ -255,8 +256,9 @@ public final class Common {
         }
     }
 
-    public static void removeCrashLog(Context context) {
+    public static boolean removeCrashLog(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().remove("crash_log").apply();
+        return true;
     }
 }

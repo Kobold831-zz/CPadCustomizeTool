@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 
 import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.CrashDetection;
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 
 public class ProtectKeepService extends Service {
 

@@ -11,10 +11,8 @@ import android.content.SharedPreferences;
 import android.provider.Settings;
 
 import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.CrashDetection;
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.saradabar.cpadcustomizetool.service.KeepService;
-
-import java.util.ArrayList;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 

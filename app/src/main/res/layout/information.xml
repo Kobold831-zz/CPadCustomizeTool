@@ -24,54 +24,54 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                    <TextView
-                        android:layout_marginTop="20dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="15sp"
-                        android:text="@string/info_text_1" />
+                <TextView
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:text="@string/info_text_1" />
 
-                    <TextView
-                        android:layout_marginStart="20dp"
-                        android:layout_gravity="start"
-                        android:layout_marginTop="10dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/menu_text_1" />
+                <TextView
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_text_1" />
 
-                    <TextView
-                        android:layout_marginStart="20dp"
-                        android:layout_gravity="start"
-                        android:layout_marginTop="10dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/menu_text_2" />
+                <TextView
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_text_2" />
 
-                    <TextView
-                        android:layout_marginStart="20dp"
-                        android:layout_gravity="start"
-                        android:layout_marginTop="10dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/menu_text_3" />
+                <TextView
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_text_3" />
 
-                    <TextView
-                        android:layout_gravity="start"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/menu_text_4" />
+                <TextView
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_text_4" />
 
-                    <TextView
-                        android:layout_marginStart="20dp"
-                        android:layout_gravity="start"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="20dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/menu_text_5" />
+                <TextView
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_text_5" />
             </LinearLayout>
 
             <LinearLayout
@@ -97,7 +97,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Kobold"/>
-
             </LinearLayout>
 
             <LinearLayout
@@ -115,7 +114,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="このアプリについてのお問い合わせ" />
+                    android:text="CTabLabo" />
 
                 <TextView
                     android:gravity="center"
@@ -131,10 +130,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/info_button" />
-
             </LinearLayout>
 
             <LinearLayout
+                android:layout_marginBottom="20dp"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
                 android:layout_marginHorizontal="10dp"
@@ -148,7 +147,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="使用している外部ライブラリー" />
+                    android:text="外部ライブラリー" />
 
                 <TextView
                     android:layout_gravity="start"
@@ -168,6 +167,37 @@
                     android:layout_height="wrap_content"
                     android:text="@string/info_text_3" />
             </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/shape_rounded_corners"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GitHub" />
+
+                <TextView
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="このアプリのソースコードを取得できます" />
+
+                <Button
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="20dp"
+                    android:id="@+id/download_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="取得" />
+            </LinearLayout>
         </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
+    </ScrollView>
+</LinearLayout>

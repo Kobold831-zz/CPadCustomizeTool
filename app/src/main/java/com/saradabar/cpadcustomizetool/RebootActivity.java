@@ -14,6 +14,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.Toast;
 
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
+
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class RebootActivity extends Activity {

@@ -131,10 +131,10 @@
 
     <!-- アプリ情報 -->
     <string name="info_text_1">アプリの情報</string>
-    <string name="info_text_2">CTabLaboサーバーまでお問い合わせください\n\nCTabLaboサーバーは下のボタンより参加可能です</string>
+    <string name="info_text_2">CTabLaboに参加して提案・不具合報告をしてください\n下のボタンより参加可能です</string>
     <string name="info_text_3">・YiB-PC\ncpadmaterial.png\nex.png\nnavigationbar.png\nウォークスルーの追加</string>
     <string name="info_text_4">・Copyright 2015\-2017 Stephen Tuso\nwelcome-android</string>
-    <string name="info_button">サイトに飛ぶ</string>
+    <string name="info_button">参加</string>
     <string name="info_app_state_not_use">アプリの状態：このアプリは使用できません / このアプリは開発者により使用制限が行われているか、開発が停止した可能性があります</string>
     <string name="info_app_state_use">アプリの状態：リリースバージョン / このアプリはサポートされており、使用可能です</string>
     

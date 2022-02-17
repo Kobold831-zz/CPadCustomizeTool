@@ -29,7 +29,7 @@ import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.CrashLog;
+import com.saradabar.cpadcustomizetool.menu.CrashLog;
 import com.saradabar.cpadcustomizetool.R;
 
 public class ApplicationSettingsFragment extends PreferenceFragment {
@@ -104,10 +104,17 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         });
 
         crashLogRemove.setOnPreferenceClickListener(preference -> {
-            removeCrashLog(getActivity());
             new AlertDialog.Builder(getActivity())
-                    .setMessage("消去しました")
-                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                    .setMessage("消去しますか？")
+                    .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                        if (removeCrashLog(getActivity())) {
+                            new AlertDialog.Builder(getActivity())
+                                    .setMessage("消去しました")
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
+                                    .show();
+                        }
+                    })
+                    .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });

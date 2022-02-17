@@ -29,7 +29,7 @@ import android.provider.Settings;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.CrashDetection;
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 

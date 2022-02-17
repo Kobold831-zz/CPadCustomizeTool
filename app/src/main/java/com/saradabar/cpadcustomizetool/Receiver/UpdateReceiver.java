@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.saradabar.cpadcustomizetool.CrashDetection;
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 
 public class UpdateReceiver extends BroadcastReceiver {

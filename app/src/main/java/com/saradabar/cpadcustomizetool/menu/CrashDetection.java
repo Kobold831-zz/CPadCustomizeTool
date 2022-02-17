@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool;
+package com.saradabar.cpadcustomizetool.menu;
 
 import static com.saradabar.cpadcustomizetool.Common.getCrashLog;
 import static com.saradabar.cpadcustomizetool.Common.saveCrashLog;

@@ -29,6 +29,7 @@ import com.saradabar.cpadcustomizetool.check.Checker;
 import com.saradabar.cpadcustomizetool.check.ProgressHandler;
 import com.saradabar.cpadcustomizetool.check.Updater;
 import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.stephentuso.welcome.WelcomeHelper;
 
 import java.io.File;
@@ -153,6 +154,14 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void showUpdateDialog(String string) {
+        if (!GET_SETTINGS_FLAG(this)) {
+            switch (Build.MODEL) {
+                case "TAB-A05-BD":
+                case "TAB-A05-BA1":
+                    SET_MODEL_ID(2, this);
+                    break;
+            }
+        }
         View view = getLayoutInflater().inflate(R.layout.update_dialog, null);
         TextView mTextView = view.findViewById(R.id.update_information);
         mTextView.setText(string);

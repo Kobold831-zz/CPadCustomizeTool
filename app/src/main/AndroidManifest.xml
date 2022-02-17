@@ -4,9 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.saradabar.cpadcustomizetool">
 
+    <permission-group
+        android:label="CPad Customize Tool"
+        android:name="android.permission-group.KOBOLD" />
+
     <permission
+        android:permissionGroup="android.permission-group.KOBOLD"
         android:name="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
-        android:protectionLevel="signature" />
+        android:label="デバイスオーナーへのアクセス"
+        android:protectionLevel="dangerous" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
@@ -106,7 +112,7 @@
             android:label="@string/block_to_uninstall" />
 
         <activity
-            android:name=".CrashLog"
+            android:name=".menu.CrashLog"
             android:theme="@style/MainTheme"
             android:label="クラッシュ履歴" />
 
