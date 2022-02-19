@@ -15,7 +15,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -25,23 +24,18 @@ import android.widget.Toast;
 import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class KeepService extends Service {
 
-    private IDchaService mDchaService;
     private Handler mHandler;
     private Runnable mRunnable;
-
-    private final String dchaStateString = DCHA_STATE;
-    private final String hideNavigationBarString = HIDE_NAVIGATION_BAR;
-
-    private final Uri contentHideNavigationBar = Settings.System.getUriFor(hideNavigationBarString);
-    private final Uri contentDchaState = Settings.System.getUriFor(dchaStateString);
-    private final Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
-    private final Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
 
     private boolean isObserberHideEnable = false;
     private boolean isObserberStateEnable = false;
@@ -95,6 +89,7 @@ public class KeepService extends Service {
     }
 
     private final ServiceConnection dchaServiceConnection = new ServiceConnection() {
+        IDchaService mDchaService;
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
@@ -109,7 +104,7 @@ public class KeepService extends Service {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mDchaService = null;
+            unbindService(this);
         }
     };
 
@@ -118,8 +113,8 @@ public class KeepService extends Service {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                if (Settings.System.getInt(getContentResolver(), dchaStateString) == 3) {
-                    Settings.System.putInt(getContentResolver(), dchaStateString, 0);
+                if (Settings.System.getInt(getContentResolver(), DCHA_STATE) == 3) {
+                    Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
                 }
             } catch (Settings.SettingNotFoundException ignored) {
             }
@@ -131,8 +126,8 @@ public class KeepService extends Service {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                if (Settings.System.getInt(getContentResolver(), hideNavigationBarString) == 1) {
-                    Settings.System.putInt(getContentResolver(), hideNavigationBarString, 0);
+                if (Settings.System.getInt(getContentResolver(), HIDE_NAVIGATION_BAR) == 1) {
+                    Settings.System.putInt(getContentResolver(), HIDE_NAVIGATION_BAR, 0);
                 }
             } catch (Settings.SettingNotFoundException ignored) {
             }
@@ -167,18 +162,18 @@ public class KeepService extends Service {
             try {
                 if (Settings.Global.getInt(getContentResolver(), Settings.Global.ADB_ENABLED) == 0) {
                     if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                        Settings.System.putInt(getContentResolver(), dchaStateString, 3);
+                        Settings.System.putInt(getContentResolver(), DCHA_STATE, 3);
                     }
                     Thread.sleep(100);
                     Settings.Global.putInt(getContentResolver(), Settings.Global.ADB_ENABLED, 1);
                     if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                        Settings.System.putInt(getContentResolver(), dchaStateString, 0);
+                        Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
                     }
                 }
             } catch (SecurityException | Settings.SettingNotFoundException | InterruptedException e) {
                 e.printStackTrace();
                 if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                    Settings.System.putInt(getContentResolver(), dchaStateString, 0);
+                    Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
                 }
                 Common.Variable.toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);
                 Common.Variable.toast.show();
@@ -199,19 +194,19 @@ public class KeepService extends Service {
         /* オブザーバーを有効化 */
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false)) {
             isObserberHideEnable = true;
-            getContentResolver().registerContentObserver(contentHideNavigationBar, false, NavigationObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
             isObserberStateEnable = true;
-            getContentResolver().registerContentObserver(contentDchaState, false, DchaStateObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(DCHA_STATE), false, DchaStateObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
             isObserberMarketEnable = true;
-            getContentResolver().registerContentObserver(contentMarketApp, false, MarketObserver);
+            getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
             isObserberUsbEnable = true;
-            getContentResolver().registerContentObserver(contentUsbDebug, false, UsbDebugObserver);
+            getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
             isObserberHomeEnable = true;
@@ -244,19 +239,19 @@ public class KeepService extends Service {
         /* オブザーバーを有効化 */
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false)) {
             isObserberHideEnable = true;
-            getContentResolver().registerContentObserver(contentHideNavigationBar, false, NavigationObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
             isObserberStateEnable = true;
-            getContentResolver().registerContentObserver(contentDchaState, false, DchaStateObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(DCHA_STATE), false, DchaStateObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
             isObserberMarketEnable = true;
-            getContentResolver().registerContentObserver(contentMarketApp, false, MarketObserver);
+            getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
             isObserberUsbEnable = true;
-            getContentResolver().registerContentObserver(contentUsbDebug, false, UsbDebugObserver);
+            getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
         if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
             isObserberHomeEnable = true;

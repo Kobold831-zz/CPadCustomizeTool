@@ -137,7 +137,8 @@
 
     <Preference app:iconSpaceReserved="false"
         android:key="android_silent_install"
-        android:title="@string/main_pre_title_silent_install" />
+        android:title="@string/main_pre_title_silent_install"
+        android:summary="「apks」などの分割Apkには対応していません\n分割Apkはその他の設定のサイレントインストールからできます"/>
 
     <Preference app:iconSpaceReserved="false"
         android:key="android_resolution"
@@ -146,6 +147,11 @@
     <Preference app:iconSpaceReserved="false"
         android:key="android_resolution_reset"
         android:title="@string/main_pre_title_resolution_reset" />
+
+    <Preference
+        app:iconSpaceReserved="false"
+        android:key="android_copy"
+        android:title="コピー" />
 
     <SwitchPreference app:iconSpaceReserved="false"
         android:key="switch10"

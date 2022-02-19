@@ -37,7 +37,7 @@ public class RebootActivity extends Activity {
     private void startReboot() {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
-                .setTitle(R.string.dialog_title_reboot)
+                .setMessage(R.string.dialog_title_reboot)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
                     @Override
                     public void onServiceConnected(ComponentName name, IBinder service) {

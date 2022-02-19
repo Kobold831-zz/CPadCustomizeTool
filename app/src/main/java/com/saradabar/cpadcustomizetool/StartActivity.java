@@ -17,23 +17,27 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
+import com.saradabar.cpadcustomizetool.flagment.MainOtherFragment;
 import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 import com.saradabar.cpadcustomizetool.check.UpdateActivity;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
+import java.io.File;
 import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -198,6 +202,92 @@ public class StartActivity extends Activity {
                 unbindService(this);
             }
         }, Context.BIND_AUTO_CREATE);
+    }
+
+    public MainFragment.CopyTask.Listener CopyListener() {
+        return new MainFragment.CopyTask.Listener() {
+            ProgressDialog progressDialog;
+
+            /* プログレスバーの表示 */
+            @Override
+            public void onShow() {
+                progressDialog = new ProgressDialog(StartActivity.this);
+                progressDialog.setTitle("");
+                progressDialog.setMessage("コピー中・・・");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+            }
+
+            /* 成功 */
+            @Override
+            public void onSuccess() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage("成功しました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+
+            /* 失敗 */
+            @Override
+            public void onFailure() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage("失敗しました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+        };
+    }
+
+    public MainOtherFragment.OwnerInstallTask.Listener OwnerInstallCreateListener() {
+        return new MainOtherFragment.OwnerInstallTask.Listener() {
+            ProgressDialog progressDialog;
+
+            /* プログレスバーの表示 */
+            @Override
+            public void onShow() {
+                progressDialog = new ProgressDialog(StartActivity.this);
+                progressDialog.setTitle("");
+                progressDialog.setMessage("インストール中・・・");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+            }
+
+            /* 成功 */
+            @Override
+            public void onSuccess() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage(R.string.dialog_success_silent_install)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+
+            /* 失敗 */
+            @Override
+            public void onFailure() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage(R.string.dialog_failure_silent_install)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+
+            @Override
+            public void onError(String str) {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage(str)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+        };
     }
 
     public MainFragment.silentInstallTask.Listener createListener() {

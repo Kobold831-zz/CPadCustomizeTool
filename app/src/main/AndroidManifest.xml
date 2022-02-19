@@ -147,6 +147,15 @@
         </receiver>
 
         <receiver
+            android:name=".Receiver.InstallReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".Receiver.AdministratorReceiver"
             android:permission="android.permission.BIND_DEVICE_ADMIN"
             android:exported="false">

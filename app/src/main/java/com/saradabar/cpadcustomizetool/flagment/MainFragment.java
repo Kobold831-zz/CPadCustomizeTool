@@ -93,6 +93,7 @@ import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 import com.saradabar.cpadcustomizetool.set.NormalLauncherActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,7 +133,8 @@ public class MainFragment extends PreferenceFragment {
             preferenceSilentInstall,
             preferenceChangeHome,
             preferenceResolution,
-            preferenceResolutionReset;
+            preferenceResolutionReset,
+            preferenceCopy;
 
     @SuppressLint("StaticFieldLeak")
     private static MainFragment instance = null;
@@ -323,6 +325,7 @@ public class MainFragment extends PreferenceFragment {
         preferenceSilentInstall = findPreference("android_silent_install");
         preferenceResolution = findPreference("android_resolution");
         preferenceResolutionReset = findPreference("android_resolution_reset");
+        preferenceCopy = findPreference("android_copy");
 
         /* オブサーバーを有効化 */
         isObserberStateEnable = true;
@@ -674,7 +677,7 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceReboot.setOnPreferenceClickListener(preference -> {
             new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.dialog_title_reboot)
+                    .setMessage(R.string.dialog_title_reboot)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindDchaService(FLAG_REBOOT, DCHA_MODE))
                     .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
@@ -753,7 +756,7 @@ public class MainFragment extends PreferenceFragment {
         preferenceSilentInstall.setOnPreferenceClickListener(preference -> {
             preferenceSilentInstall.setEnabled(false);
             try {
-                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("application/vnd.android.package-archive").addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), ""), REQUEST_INSTALL);
+                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("application/vnd.android.package-archive").addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false), ""), REQUEST_INSTALL);
             } catch (ActivityNotFoundException ignored) {
                 preferenceSilentInstall.setEnabled(true);
                 new AlertDialog.Builder(getActivity())
@@ -814,6 +817,13 @@ public class MainFragment extends PreferenceFragment {
             return false;
         });
 
+        preferenceCopy.setOnPreferenceClickListener(preference -> {
+            CopyTask copy = new CopyTask();
+            copy.setListener(StartActivity.getInstance().CopyListener());
+            copy.execute();
+            return false;
+        });
+
         switch (GET_MODEL_ID(getActivity())) {
             case 0:
                 preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
@@ -852,6 +862,7 @@ public class MainFragment extends PreferenceFragment {
         } else {
             getPreferenceScreen().removePreference(findPreference("dcha_service"));
         }
+        getPreferenceScreen().removePreference(findPreference("android_copy"));
     }
 
     /* 確認ダイアログ */
@@ -1046,23 +1057,11 @@ public class MainFragment extends PreferenceFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_INSTALL) {
             preferenceSilentInstall.setEnabled(true);
-            ClipData clipData = null;
+            /* シングルApk */
             try {
-                clipData = data.getClipData();
+                installData = getInstallData(getActivity(), data.getData());
             } catch (NullPointerException ignored) {
-            }
-            if (clipData == null) {
-                /* シングルApk */
-                try {
-                    installData = getInstallData(getActivity(), data.getData());
-                } catch (NullPointerException ignored) {
-                    installData = null;
-                }
-            } else {
-                /* マルチApk */
-                for (int i = 0; i < clipData.getItemCount(); i++) {
-                    /* 処理 */
-                }
+                installData = null;
             }
             if (installData != null) {
                 silentInstallTask silent = new silentInstallTask();
@@ -1080,17 +1079,56 @@ public class MainFragment extends PreferenceFragment {
     /* 選択したファイルデータを取得 */
     private String getInstallData(Context context, Uri uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            String[] string = DocumentsContract.getDocumentId(uri).split(":");
+            String[] str = DocumentsContract.getDocumentId(uri).split(":");
             switch (uri.getAuthority()) {
                 case "com.android.externalstorage.documents":
-                    return Environment.getExternalStorageDirectory() + "/" + string[1];
+                    return Environment.getExternalStorageDirectory() + "/" + str[1];
                 case "com.android.providers.downloads.documents":
-                    return string[1];
+                    return str[1];
             }
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             return uri.getPath();
         }
         return null;
+    }
+
+    /* コピータスク */
+    public static class CopyTask extends AsyncTask<Object, Void, Object> {
+        private Listener mListener;
+
+        @Override
+        protected void onPreExecute() {
+            mListener.onShow();
+        }
+
+        @Override
+        protected Object doInBackground(Object... value) {
+            if (MainFragment.getInstance().copySystemFile()) {
+                return new Object();
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            if (result != null) {
+                mListener.onSuccess();
+            } else mListener.onFailure();
+        }
+
+        public void setListener(Listener listener) {
+            mListener = listener;
+        }
+
+        /* StartActivity */
+        public interface Listener {
+            void onShow();
+
+            void onSuccess();
+
+            void onFailure();
+        }
     }
 
     /* インストールタスク */
@@ -1164,6 +1202,24 @@ public class MainFragment extends PreferenceFragment {
             void onSuccess();
 
             void onFailure();
+        }
+    }
+
+    public boolean copySystemFile() {
+        if (!bindDchaService(FLAG_CHECK, DCHA_MODE)) {
+            /* 一回目に失敗する問題を防ぐ */
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+
+            try {
+                return mDchaService.copyUpdateImage("", "");
+            } catch (RemoteException | NullPointerException ignored) {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
