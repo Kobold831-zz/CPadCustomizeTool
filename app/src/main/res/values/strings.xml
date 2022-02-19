@@ -26,7 +26,7 @@
     <string name="main_pre_title_keep_system_ui">システムUIを通常用に維持</string>
     <string name="main_pre_title_navigation_bar">ナビゲーションバーを非表示</string>
     <string name="main_pre_title_keep_navigation_bar">ナビゲーションバーの表示を維持</string>
-    <string name="main_pre_category_android_settings">Android設定</string>
+    <string name="main_pre_category_android_settings">システム設定</string>
     <string name="main_pre_title_usb_debug">USBデバッグ</string>
     <string name="main_pre_title_keep_usb_debug">USBデバッグの有効を維持</string>
     <string name="main_pre_title_non_market">提供元不明のアプリを許可</string>
@@ -44,7 +44,7 @@
     <string name="main_pre_title_change_to_normal_mode_settings">通常モード実行時に変更する設定を変更</string>
     <string name="main_pre_sum_change_to_normal_mode_settings">デフォルトではすべての設定が変更されます</string>
     <string name="main_pre_title_normal_mode_manual">通常モードの説明</string>
-    <string name="main_pre_category_other_settings">その他のオプション</string>
+    <string name="main_pre_category_other_settings">その他の機能</string>
     <string name="main_pre_title_reboot">再起動</string>
     <string name="main_pre_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
     <string name="main_pre_title_silent_install">サイレントインストール</string>

@@ -127,6 +127,13 @@
             android:process=":protect"
             tools:ignore="InnerclassSeparator" />
 
+        <service android:name=".service.DeviceOwnerService" android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="com.saradabar.cpadcustomizetool.service.DeviceOwnerService"/>
+            </intent-filter>
+        </service>
+
+
         <receiver
             android:name=".Receiver.UpdateReceiver"
             tools:ignore="InnerclassSeparator"

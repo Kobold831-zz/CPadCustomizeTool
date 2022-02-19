@@ -50,7 +50,6 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -93,7 +92,6 @@ import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.HomeLauncherActivity;
 import com.saradabar.cpadcustomizetool.set.NormalLauncherActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,7 +132,8 @@ public class MainFragment extends PreferenceFragment {
             preferenceChangeHome,
             preferenceResolution,
             preferenceResolutionReset,
-            preferenceCopy;
+            preferenceCopy,
+            preferenceDeviceOwner;
 
     @SuppressLint("StaticFieldLeak")
     private static MainFragment instance = null;
@@ -326,6 +325,7 @@ public class MainFragment extends PreferenceFragment {
         preferenceResolution = findPreference("android_resolution");
         preferenceResolutionReset = findPreference("android_resolution_reset");
         preferenceCopy = findPreference("android_copy");
+        preferenceDeviceOwner = findPreference("device_owner");
 
         /* オブサーバーを有効化 */
         isObserberStateEnable = true;
@@ -821,6 +821,11 @@ public class MainFragment extends PreferenceFragment {
             CopyTask copy = new CopyTask();
             copy.setListener(StartActivity.getInstance().CopyListener());
             copy.execute();
+            return false;
+        });
+
+        preferenceDeviceOwner.setOnPreferenceClickListener(preference -> {
+            transitionFragment(new DeviceOwnerFragment());
             return false;
         });
 

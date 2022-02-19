@@ -1,7 +1,13 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.Common.*;
-import static com.saradabar.cpadcustomizetool.Common.Variable.*;
+import static com.saradabar.cpadcustomizetool.Common.GET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.SET_DCHASERVICE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.SET_UPDATE_FLAG;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
+import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
+import static com.saradabar.cpadcustomizetool.Common.Variable.toast;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,28 +22,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
-import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
-import com.saradabar.cpadcustomizetool.flagment.MainFragment;
-import com.saradabar.cpadcustomizetool.flagment.MainOtherFragment;
-import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 import com.saradabar.cpadcustomizetool.check.UpdateActivity;
+import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
+import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
+import com.saradabar.cpadcustomizetool.flagment.MainFragment;
+import com.saradabar.cpadcustomizetool.menu.InformationActivity;
+import com.saradabar.cpadcustomizetool.service.IDeviceOwnerService;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
-import java.io.File;
 import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -57,6 +62,7 @@ public class StartActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         instance = this;
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 
@@ -242,8 +248,8 @@ public class StartActivity extends Activity {
         };
     }
 
-    public MainOtherFragment.OwnerInstallTask.Listener OwnerInstallCreateListener() {
-        return new MainOtherFragment.OwnerInstallTask.Listener() {
+    public DeviceOwnerFragment.OwnerInstallTask.Listener OwnerInstallCreateListener() {
+        return new DeviceOwnerFragment.OwnerInstallTask.Listener() {
             ProgressDialog progressDialog;
 
             /* プログレスバーの表示 */

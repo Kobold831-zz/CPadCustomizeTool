@@ -16,14 +16,30 @@
         <SwitchPreference
             app:iconSpaceReserved="false"
             android:key="switch_is_change_settings_use_dcha"
-            android:title="DchaServiceを使用して設定変更"
-            android:summary="有効にすると、システムUIやナビゲーションバーをDchaServiceを使用して設定変更します\n問題が発生した場合に使用してください" />
+            android:title="DchaServiceによる設定変更"
+            android:summary="DchaServiceによってシステム設定を変更します" />
 
         <SwitchPreference
             app:iconSpaceReserved="false"
             android:key="switch_auto_usb_debug"
             android:title="デバイス起動時のUSBデバッグを有効"
             android:summary="有効にすると、デバイス起動時にUSBデバッグが自動的に無効にされるのを防ぎます" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false" android:title="アップデート設定">
+
+        <ListPreference
+            app:iconSpaceReserved="false"
+            android:enabled="false"
+            android:selectable="false"
+            android:key="app_update_mode"
+            android:title="アップデートモードを選択"
+            android:dialogTitle="モードを選択してください"
+            android:defaultValue="1"
+            android:entries="@array/app_update_mode_text"
+            android:entryValues="@array/app_update_mode_value" />
 
     </PreferenceCategory>
 
