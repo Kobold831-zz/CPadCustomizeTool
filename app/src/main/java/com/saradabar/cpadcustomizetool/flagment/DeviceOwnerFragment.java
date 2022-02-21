@@ -127,6 +127,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 setPreferenceSettings();
                 break;
             case 1:
+                switchPreferencePermissionForced.setEnabled(false);
+                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
                 preferenceBlockToUninstallSettings.setEnabled(false);
                 preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceDisableDeviceOwner.setEnabled(false);
@@ -193,6 +195,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 setPreferenceSettings();
                 break;
             case 1:
+                switchPreferencePermissionForced.setEnabled(false);
+                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
                 preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
                 preferenceBlockToUninstallSettings.setEnabled(false);

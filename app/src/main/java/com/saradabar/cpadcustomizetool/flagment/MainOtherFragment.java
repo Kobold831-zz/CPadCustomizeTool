@@ -58,14 +58,9 @@ public class MainOtherFragment extends PreferenceFragment {
             return false;
         });
 
-        switch (Common.GET_MODEL_ID(getActivity())) {
-            case 0:
-            case 1:
-                preferenceSysUiAdjustment.setEnabled(false);
-                preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
-                break;
-            case 2:
-                break;
+        if (Common.GET_MODEL_ID(getActivity()) == 0) {
+            preferenceSysUiAdjustment.setEnabled(false);
+            preferenceSysUiAdjustment.setSummary(Build.MODEL + "ではこの機能は使用できません");
         }
     }
 }
