@@ -24,4 +24,5 @@ dependencies {
     implementation files('libs/IDchaLibrary.jar')
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'com.stephentuso:welcome:1.4.1'
+    implementation 'org.zeroturnaround:zt-zip:1.12'
 }

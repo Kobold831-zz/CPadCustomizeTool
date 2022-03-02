@@ -33,14 +33,6 @@ public class Installer {
         }
     }
 
-    public Result installApk(Context context, File apkFile, PendingIntent pendingIntent) throws Exception {
-        int sessionId = createSession(context.getPackageManager().getPackageInstaller());
-        if (sessionId < 0) {
-            return new Result(false, "", -1, -1);
-        }
-        return new Result(true, "", writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile), commitSession(context.getPackageManager().getPackageInstaller(), sessionId, pendingIntent));
-    }
-
     public SessionId splitCreateSession(Context context) throws Exception {
         int sessionId = createSession(context.getPackageManager().getPackageInstaller());
         if (sessionId < 0) {
@@ -53,8 +45,8 @@ public class Installer {
         return new Result(true, "", writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile), 0);
     }
 
-    public Result splitCommitSession(Context context, PendingIntent pendingIntent, int sessionId) throws Exception {
-        return new Result(true, "", commitSession(context.getPackageManager().getPackageInstaller(), sessionId, pendingIntent), 0);
+    public Result splitCommitSession(Context context, PendingIntent pendingIntent, int sessionId) {
+        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, pendingIntent), "", 0, 0);
     }
 
     private int createSession(PackageInstaller packageInstaller) throws IOException {
@@ -95,12 +87,14 @@ public class Installer {
         }
     }
 
-    private int commitSession(PackageInstaller packageInstaller, int sessionId, PendingIntent pendingIntent) throws IOException {
+    private boolean commitSession(PackageInstaller packageInstaller, int sessionId, PendingIntent pendingIntent) {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
             session.commit(pendingIntent.getIntentSender());
-            return 0;
+            return true;
+        } catch (Exception ignored) {
+            return false;
         } finally {
             if (session != null) {
                 session.close();

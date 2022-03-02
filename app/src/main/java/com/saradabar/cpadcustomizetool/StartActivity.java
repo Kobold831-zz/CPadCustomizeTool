@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,17 +38,17 @@ import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 import com.saradabar.cpadcustomizetool.menu.InformationActivity;
-import com.saradabar.cpadcustomizetool.service.IDeviceOwnerService;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
+import java.io.File;
 import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class StartActivity extends Activity {
 
-    private Menu mMenu;
+    private Menu menu;
     public IDchaService mDchaService;
 
     private static StartActivity instance = null;
@@ -136,7 +135,7 @@ public class StartActivity extends Activity {
     /* メニュー表示 */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        mMenu = menu;
+        this.menu = menu;
         if (getIntent().getBooleanExtra("result", false)) {
             getMenuInflater().inflate(R.menu.main, menu);
         } else {
@@ -157,11 +156,11 @@ public class StartActivity extends Activity {
                 startActivity(new Intent(this, UpdateActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 return true;
             case R.id.app_info_3:
-                mMenu.findItem(R.id.app_info_3).setVisible(false);
+                menu.findItem(R.id.app_info_3).setVisible(false);
                 mTransitionFragment(new ApplicationSettingsFragment());
                 return true;
             case android.R.id.home:
-                mMenu.findItem(R.id.app_info_3).setVisible(true);
+                menu.findItem(R.id.app_info_3).setVisible(true);
                 getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 transitionFragment(new MainFragment());
                 return true;
@@ -172,7 +171,7 @@ public class StartActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (getIntent().getBooleanExtra("result", false)) {
-            mMenu.findItem(R.id.app_info_3).setVisible(true);
+            menu.findItem(R.id.app_info_3).setVisible(true);
             getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             transitionFragment(new MainFragment());
         }
