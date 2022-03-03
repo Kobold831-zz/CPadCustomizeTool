@@ -26,9 +26,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
@@ -252,24 +257,31 @@ public class StartActivity extends Activity {
 
     public DeviceOwnerFragment.TryXApkTask.Listener XApkListener() {
         return new DeviceOwnerFragment.TryXApkTask.Listener() {
-            ProgressDialog progressDialog;
+            AlertDialog alertDialog;
             @Override
             public void onShow() {
-                progressDialog = new ProgressDialog(StartActivity.this);
-                progressDialog.setMessage("");
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setProgress(0);
-                progressDialog.setCancelable(false);
-                if (!progressDialog.isShowing()) progressDialog.show();
+                View view = getLayoutInflater().inflate(R.layout.progress_dialog, null);
+                ProgressBar progressBar = view.findViewById(R.id.progress);
+                progressBar.setProgress(0);
+                TextView textPercent = view.findViewById(R.id.progress_percent);
+                TextView textByte = view.findViewById(R.id.progress_byte);
+                textPercent.setText(progressBar.getProgress() + "%");
+                alertDialog = new AlertDialog.Builder(StartActivity.this)
+                        .setView(view)
+                        .setMessage("")
+                        .create();
+                if (!alertDialog.isShowing()) alertDialog.show();
                 ByteProgressHandler progressHandler = new ByteProgressHandler();
-                progressHandler.progressDialog = progressDialog;
+                progressHandler.progressBar = progressBar;
+                progressHandler.textPercent = textPercent;
+                progressHandler.textByte = textByte;
                 progressHandler.tryXApkTask = new DeviceOwnerFragment.TryXApkTask();
                 progressHandler.sendEmptyMessage(0);
             }
 
             @Override
             public void onSuccess() {
-                progressDialog.dismiss();
+                alertDialog.dismiss();
                 DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
                 ownerInstallTask.setListener(getInstance().OwnerInstallCreateListener());
                 ownerInstallTask.execute();
@@ -277,7 +289,7 @@ public class StartActivity extends Activity {
 
             @Override
             public void onFailure() {
-                progressDialog.dismiss();
+                alertDialog.dismiss();
                 try {
                     /* 一時ファイルを消去 */
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
@@ -292,7 +304,7 @@ public class StartActivity extends Activity {
 
             @Override
             public void onError(String str) {
-                progressDialog.dismiss();
+                alertDialog.dismiss();
                 try {
                     /* 一時ファイルを消去 */
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
@@ -307,7 +319,7 @@ public class StartActivity extends Activity {
 
             @Override
             public void onProgressUpdate(String str) {
-                progressDialog.setMessage(str);
+                alertDialog.setMessage(str);
             }
         };
     }
@@ -335,15 +347,15 @@ public class StartActivity extends Activity {
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
                 } catch (IOException ignored) {
                 }
+                new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setMessage(R.string.dialog_success_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .create();
-                if (alertDialog.isShowing()) {
-                    alertDialog.dismiss();
+                if (!alertDialog.isShowing()) {
+                    alertDialog.show();
                 }
-                alertDialog.show();
             }
 
             /* 失敗 */

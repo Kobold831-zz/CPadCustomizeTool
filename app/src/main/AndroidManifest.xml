@@ -127,7 +127,8 @@
             android:process=":protect"
             tools:ignore="InnerclassSeparator" />
 
-        <service android:name=".service.DeviceOwnerService" android:label="@string/app_name" android:permission="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER">
+        <service android:name=".service.DeviceOwnerService" android:label="@string/app_name" android:permission="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.saradabar.cpadcustomizetool.service.DeviceOwnerService"/>
             </intent-filter>

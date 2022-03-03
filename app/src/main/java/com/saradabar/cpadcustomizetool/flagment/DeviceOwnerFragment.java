@@ -340,8 +340,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             onProgressUpdate("拡張子を変更しています・・・");
             new File(getInstance().splitInstallData[0]).renameTo(new File(str));
             File file = Common.TMP_DIRECTORY(getInstance().getActivity());
-            /* zipを解凍して外部ディレクトリに一時保存 */
-            onProgressUpdate("圧縮ファイルを解凍しています・・・");
+            /* zipを展開して外部ディレクトリに一時保存 */
+            onProgressUpdate("圧縮ファイルを展開しています・・・");
             getInstance().totalByte = new File(str).length();
             ZipUtil.unpack(new File(str), file);
             /* 拡張子.zipを.xapkに変更 */
@@ -436,6 +436,25 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             return (int) Math.floor(100 * fileSize / getInstance().totalByte);
+        }
+
+        public int getLoadedTotalByte() {
+            return (int) getInstance().totalByte / (1024 * 1024);
+        }
+
+        @SuppressLint("NewApi")
+        public int getLoadedCurrentByte() {
+            double fileSize = 0;
+            if (getInstance().totalByte <= 0) return 0;
+            if (obbPath1 == null) {
+                fileSize = getInstance().getDirectorySize(Common.TMP_DIRECTORY(getInstance().getActivity()));
+            } else {
+                try {
+                    fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
+                } catch (IOException ignored) {
+                }
+            }
+            return (int) fileSize / (1024 * 1024);
         }
     }
 
