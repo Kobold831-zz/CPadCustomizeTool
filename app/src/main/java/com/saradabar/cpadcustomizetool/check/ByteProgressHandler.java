@@ -1,9 +1,9 @@
 package com.saradabar.cpadcustomizetool.check;
 
 import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,7 +17,11 @@ public class ByteProgressHandler extends Handler {
     @Override
     public void handleMessage(@NonNull Message msg) {
         super.handleMessage(msg);
-        progressDialog.setProgress(tryXApkTask.getLoadedBytePercent());
-        sendEmptyMessageDelayed(0, 100);
+        if (tryXApkTask.isCancelled()) progressDialog.dismiss();
+        else if (tryXApkTask.getStatus() == AsyncTask.Status.FINISHED) progressDialog.dismiss();
+        else {
+            progressDialog.setProgress(tryXApkTask.getLoadedBytePercent());
+            sendEmptyMessageDelayed(0, 100);
+        }
     }
 }

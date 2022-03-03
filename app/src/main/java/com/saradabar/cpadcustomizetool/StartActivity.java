@@ -13,7 +13,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
@@ -31,12 +30,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.appcompat.widget.AlertDialogLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
 import com.saradabar.cpadcustomizetool.check.ByteProgressHandler;
-import com.saradabar.cpadcustomizetool.check.ProgressHandler;
 import com.saradabar.cpadcustomizetool.check.UpdateActivity;
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
@@ -45,6 +42,9 @@ import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
+import org.zeroturnaround.zip.commons.FileUtils;
+
+import java.io.IOException;
 import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -271,13 +271,18 @@ public class StartActivity extends Activity {
             public void onSuccess() {
                 progressDialog.dismiss();
                 DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
-                ownerInstallTask.setListener(StartActivity.getInstance().OwnerInstallCreateListener());
+                ownerInstallTask.setListener(getInstance().OwnerInstallCreateListener());
                 ownerInstallTask.execute();
             }
 
             @Override
             public void onFailure() {
                 progressDialog.dismiss();
+                try {
+                    /* 一時ファイルを消去 */
+                    FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
+                } catch (IOException ignored) {
+                }
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage("コピーに失敗しました")
                         .setCancelable(false)
@@ -288,6 +293,11 @@ public class StartActivity extends Activity {
             @Override
             public void onError(String str) {
                 progressDialog.dismiss();
+                try {
+                    /* 一時ファイルを消去 */
+                    FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
+                } catch (IOException ignored) {
+                }
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(str)
                         .setCancelable(false)
@@ -320,6 +330,11 @@ public class StartActivity extends Activity {
             @Override
             public void onSuccess() {
                 progressDialog.dismiss();
+                try {
+                    /* 一時ファイルを消去 */
+                    FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
+                } catch (IOException ignored) {
+                }
                 AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setMessage(R.string.dialog_success_silent_install)
                         .setCancelable(false)
@@ -335,6 +350,11 @@ public class StartActivity extends Activity {
             @Override
             public void onFailure() {
                 progressDialog.dismiss();
+                try {
+                    /* 一時ファイルを消去 */
+                    FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
+                } catch (IOException ignored) {
+                }
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(R.string.dialog_failure_silent_install)
                         .setCancelable(false)
@@ -345,6 +365,11 @@ public class StartActivity extends Activity {
             @Override
             public void onError(String str) {
                 progressDialog.dismiss();
+                try {
+                    /* 一時ファイルを消去 */
+                    FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
+                } catch (IOException ignored) {
+                }
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(str)
                         .setCancelable(false)

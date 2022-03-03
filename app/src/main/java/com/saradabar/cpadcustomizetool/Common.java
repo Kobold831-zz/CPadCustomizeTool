@@ -65,6 +65,10 @@ public final class Common {
         public static final File COUNT_DCHA_COMPLETED_FILE = new File("/factory/count_dcha_completed");
     }
 
+    public static File TMP_DIRECTORY(Context context) {
+        return new File(context.getExternalCacheDir() + "/tmp");
+    }
+
     public static ComponentName getAdministratorComponent(Context context) {
         return new ComponentName(context, com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver.class);
     }

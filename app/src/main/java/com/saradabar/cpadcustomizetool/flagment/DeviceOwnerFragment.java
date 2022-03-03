@@ -1,7 +1,5 @@
 package com.saradabar.cpadcustomizetool.flagment;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_INSTALL;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -38,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 public class DeviceOwnerFragment extends PreferenceFragment {
 
@@ -112,7 +109,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         preferenceOwnerSilentInstall.setOnPreferenceClickListener(preference -> {
             preferenceOwnerSilentInstall.setEnabled(false);
             try {
-                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/*"}).addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), ""), REQUEST_INSTALL);
+                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/*"}).addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), ""), Common.Variable.REQUEST_INSTALL);
             } catch (ActivityNotFoundException ignored) {
                 preferenceOwnerSilentInstall.setEnabled(true);
                 new AlertDialog.Builder(getActivity())
@@ -222,9 +219,9 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_INSTALL) {
+        if (requestCode == Common.Variable.REQUEST_INSTALL) {
             preferenceOwnerSilentInstall.setEnabled(true);
-            if (selectInstallFiles(data)) {
+            if (setInstallFiles(data)) {
                 String str = new File(splitInstallData[0]).getName();
                 /* ファイルの拡張子 */
                 switch (str.substring(str.lastIndexOf("."))) {
@@ -235,12 +232,6 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                         return;
                     case ".XAPK":
                     case ".xapk":
-                        try {
-                            /* 一時ファイルを消去 */
-                            FileUtils.deleteDirectory(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null));
-                        } catch (IOException ignored) {
-                            break;
-                        }
                         TryXApkTask tryXApkTask = new TryXApkTask();
                         tryXApkTask.setListener(StartActivity.getInstance().XApkListener());
                         tryXApkTask.execute();
@@ -254,28 +245,29 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         }
     }
 
-    /* インストールファイルの取得と解凍 */
-    private boolean selectInstallFiles(Intent data) {
+    /* インストールファイルの取得 */
+    private boolean setInstallFiles(Intent data) {
         try {
+            try {
+                /* 一時ファイルを消去 */
+                FileUtils.deleteDirectory(getActivity().getExternalCacheDir());
+            } catch (IOException ignored) {
+            }
             ClipData clipData = data.getClipData();
             if (clipData == null) {
                 /* シングルApk */
-                /* 選択されたファイルを取得 */
                 splitInstallData[0] = getInstallData(getActivity(), data.getData());
-                if (splitInstallData[0] != null) {
-                    String str = new File(splitInstallData[0]).getName();
-                    /* ファイルの拡張子 */
-                    switch (str.substring(str.lastIndexOf("."))) {
-                        case ".apk":
-                        case ".XAPK":
-                        case ".xapk":
-                            break;
-                        default:
-                            /* 未対応またはインストールファイルでないなら終了 */
-                            return false;
-                    }
-                } else {
-                    return false;
+                if (splitInstallData[0] == null) return false;
+                String str = new File(splitInstallData[0]).getName();
+                /* ファイルの拡張子 */
+                switch (str.substring(str.lastIndexOf("."))) {
+                    case ".apk":
+                    case ".XAPK":
+                    case ".xapk":
+                        break;
+                    default:
+                        /* 未対応またはインストールファイルでないなら終了 */
+                        return false;
                 }
             } else {
                 /* マルチApk */
@@ -328,7 +320,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         return fileSize;
     }
 
-    /* インストールタスク */
+    /* 解凍コピータスク */
     public static class TryXApkTask extends AsyncTask<Object, Void, Object> {
 
         public static TryXApkTask.Listener mListener;
@@ -343,54 +335,51 @@ public class DeviceOwnerFragment extends PreferenceFragment {
 
         @Override
         protected Object doInBackground(Object... value) {
-            String str = new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).getParent() + File.separator + new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).getName().replaceFirst("\\..*", ".zip");
+            String str = new File(getInstance().splitInstallData[0]).getParent() + File.separator + new File(getInstance().splitInstallData[0]).getName().replaceFirst("\\..*", ".zip");
             /* 拡張子.xapkを.zipに変更 */
             onProgressUpdate("拡張子を変更しています・・・");
-            if (new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).renameTo(new File(str))) {
-                File file = new File(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null) + "/temp");
-                /* zipを解凍して外部ディレクトリに一時保存 */
-                onProgressUpdate("圧縮ファイルを解凍しています・・・");
-                getInstance().totalByte = new File(str).length();
-                ZipUtil.unpack(new File(str), file);
-                File[] list = file.listFiles();
-                if (list != null) {
-                    int c = 0;
-                    /* ディレクトリのなかのファイルを取得 */
-                    for (int i = 0; i < list.length; i++) {
-                        /* obbデータを取得 */
-                        if (list[i].isDirectory()) {
-                            c++;
-                            try {
-                                /* obbデータをコピー */
-                                onProgressUpdate("obbデータをコピーしています・・・");
-                                File[] obbName = new File(list[i].getPath() + "/obb").listFiles();
-                                File[] obbFile = Objects.requireNonNull(obbName)[0].listFiles();
-                                //getInstance().totalByte = Objects.requireNonNull(obbFile)[0].length();
-                                getInstance().totalByte = 1733650831.00;
-                                obbPath1 = obbName[0].getName();
-                                Log.i("TAG", obbPath1);
-                                obbPath2 = Objects.requireNonNull(obbFile)[0].getName();
-                                Log.i("TAG", obbPath2);
-                                FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
-                            } catch (IOException ignored) {
-                                return false;
-                            }
+            new File(getInstance().splitInstallData[0]).renameTo(new File(str));
+            File file = Common.TMP_DIRECTORY(getInstance().getActivity());
+            /* zipを解凍して外部ディレクトリに一時保存 */
+            onProgressUpdate("圧縮ファイルを解凍しています・・・");
+            getInstance().totalByte = new File(str).length();
+            ZipUtil.unpack(new File(str), file);
+            /* 拡張子.zipを.xapkに変更 */
+            onProgressUpdate("拡張子を変更しています・・・");
+            new File(str).renameTo(new File(new File(str).getParent() + File.separator + new File(str).getName().replaceFirst("\\..*", ".xapk")));
+            File[] list = file.listFiles();
+            if (list != null) {
+                int c = 0;
+                /* ディレクトリのなかのファイルを取得 */
+                for (int i = 0; i < list.length; i++) {
+                    /* obbデータを取得 */
+                    if (list[i].isDirectory()) {
+                        c++;
+                        try {
+                            /* obbデータをコピー */
+                            onProgressUpdate("obbデータをコピーしています・・・");
+                            File[] obbName = new File(list[i].getPath() + "/obb").listFiles();
+                            File[] obbFile = obbName != null ? obbName[0].listFiles() : new File[0];
+                            getInstance().totalByte = obbFile != null ? obbFile[0].length() : 0;
+                            obbPath1 = obbName[0].getName();
+                            obbPath2 = obbFile != null ? obbFile[0].getName() : null;
+                            FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
+                        } catch (IOException ignored) {
+                            return false;
+                        }
+                    } else {
+                        onProgressUpdate("ファイルを確認しています・・・");
+                        str = list[i].getName();
+                        /* apkファイルならパスをインストールデータへ */
+                        if (str.substring(str.lastIndexOf(".")).equalsIgnoreCase(".apk")) {
+                            getInstance().splitInstallData[i - c] = list[i].getPath();
                         } else {
-                            onProgressUpdate("ファイルを確認しています・・・");
-                            str = list[i].getName();
-                            /* apkファイルならパスをインストールデータへ */
-                            if (str.substring(str.lastIndexOf(".")).equalsIgnoreCase(".apk")) {
-                                DeviceOwnerFragment.getInstance().splitInstallData[i - c] = list[i].getPath();
-                            } else {
-                                /* apkファイルでなかったときのリストの順番を修正 */
-                                c++;
-                            }
+                            /* apkファイルでなかったときのリストの順番を修正 */
+                            c++;
                         }
                     }
-                    return true;
-                } else {
-                    return false;
                 }
+                return true;
             } else {
                 return false;
             }
@@ -439,32 +428,33 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             double fileSize = 0;
             if (getInstance().totalByte <= 0) return 0;
             if (obbPath1 == null) {
-                fileSize = getInstance().getDirectorySize(new File(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null) + "/temp"));
+                fileSize = getInstance().getDirectorySize(Common.TMP_DIRECTORY(getInstance().getActivity()));
             } else {
                 try {
                     fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
                 } catch (IOException ignored) {
                 }
             }
-            return (int) Math.floor(100 * fileSize / DeviceOwnerFragment.getInstance().totalByte);
+            return (int) Math.floor(100 * fileSize / getInstance().totalByte);
         }
     }
 
     /* インストールタスク */
     public static class OwnerInstallTask extends AsyncTask<Object, Void, Object> {
-        public static DeviceOwnerFragment.OwnerInstallTask.Listener mListener;
+        public static OwnerInstallTask.Listener mListener;
 
         @Override
         protected void onPreExecute() {
             mListener.onShow();
         }
 
+        @SuppressLint("UnspecifiedImmutableFlag")
         @Override
         protected Object doInBackground(Object... value) {
             Installer installer = new Installer();
             int sessionId;
             try {
-                sessionId = installer.splitCreateSession(DeviceOwnerFragment.getInstance().getActivity()).i;
+                sessionId = installer.splitCreateSession(getInstance().getActivity()).i;
                 if (sessionId < 0) {
                     return false;
                 }
@@ -472,11 +462,11 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 return e.getMessage();
             }
             /* インストールデータの長さ回数繰り返す */
-            for (String str : DeviceOwnerFragment.getInstance().splitInstallData) {
+            for (String str : getInstance().splitInstallData) {
                 /* 配列の中身を確認 */
                 if (str != null) {
                     try {
-                        if (!installer.splitWriteSession(DeviceOwnerFragment.getInstance().getActivity(), new File(str), sessionId).bl) {
+                        if (!installer.splitWriteSession(getInstance().getActivity(), new File(str), sessionId).bl) {
                             return false;
                         }
                     } catch (Exception e) {
@@ -488,7 +478,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             try {
-                return installer.splitCommitSession(DeviceOwnerFragment.getInstance().getActivity(), PendingIntent.getActivity(DeviceOwnerFragment.getInstance().getActivity(), 0, new Intent("TEST"), 0), sessionId).bl;
+                return installer.splitCommitSession(getInstance().getActivity(), PendingIntent.getActivity(getInstance().getActivity(), 0, new Intent("INSTALL"), 0), sessionId).bl;
             } catch (Exception e) {
                 return e.getMessage();
             }
@@ -510,7 +500,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             mListener.onError(result.toString());
         }
 
-        public void setListener(DeviceOwnerFragment.OwnerInstallTask.Listener listener) {
+        public void setListener(OwnerInstallTask.Listener listener) {
             mListener = listener;
         }
 
