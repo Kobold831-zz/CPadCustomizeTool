@@ -13,6 +13,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
@@ -30,9 +31,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.appcompat.widget.AlertDialogLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
+import com.saradabar.cpadcustomizetool.check.ByteProgressHandler;
+import com.saradabar.cpadcustomizetool.check.ProgressHandler;
 import com.saradabar.cpadcustomizetool.check.UpdateActivity;
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
@@ -41,7 +45,6 @@ import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 import com.saradabar.cpadcustomizetool.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
-import java.io.File;
 import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
@@ -247,6 +250,58 @@ public class StartActivity extends Activity {
         };
     }
 
+    public DeviceOwnerFragment.TryXApkTask.Listener XApkListener() {
+        return new DeviceOwnerFragment.TryXApkTask.Listener() {
+            ProgressDialog progressDialog;
+            @Override
+            public void onShow() {
+                progressDialog = new ProgressDialog(StartActivity.this);
+                progressDialog.setMessage("");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setProgress(0);
+                progressDialog.setCancelable(false);
+                if (!progressDialog.isShowing()) progressDialog.show();
+                ByteProgressHandler progressHandler = new ByteProgressHandler();
+                progressHandler.progressDialog = progressDialog;
+                progressHandler.tryXApkTask = new DeviceOwnerFragment.TryXApkTask();
+                progressHandler.sendEmptyMessage(0);
+            }
+
+            @Override
+            public void onSuccess() {
+                progressDialog.dismiss();
+                DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
+                ownerInstallTask.setListener(StartActivity.getInstance().OwnerInstallCreateListener());
+                ownerInstallTask.execute();
+            }
+
+            @Override
+            public void onFailure() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage("コピーに失敗しました")
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+
+            @Override
+            public void onError(String str) {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(StartActivity.this)
+                        .setMessage(str)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+
+            @Override
+            public void onProgressUpdate(String str) {
+                progressDialog.setMessage(str);
+            }
+        };
+    }
+
     public DeviceOwnerFragment.OwnerInstallTask.Listener OwnerInstallCreateListener() {
         return new DeviceOwnerFragment.OwnerInstallTask.Listener() {
             ProgressDialog progressDialog;
@@ -265,11 +320,15 @@ public class StartActivity extends Activity {
             @Override
             public void onSuccess() {
                 progressDialog.dismiss();
-                new AlertDialog.Builder(StartActivity.this)
+                AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setMessage(R.string.dialog_success_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                        .show();
+                        .create();
+                if (alertDialog.isShowing()) {
+                    alertDialog.dismiss();
+                }
+                alertDialog.show();
             }
 
             /* 失敗 */

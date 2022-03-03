@@ -2,8 +2,6 @@ package com.saradabar.cpadcustomizetool.flagment;
 
 import static com.saradabar.cpadcustomizetool.Common.Variable.REQUEST_INSTALL;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -13,18 +11,15 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
@@ -38,16 +33,18 @@ import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
 import org.zeroturnaround.zip.ZipUtil;
 import org.zeroturnaround.zip.commons.FileUtils;
-import org.zeroturnaround.zip.commons.FileUtilsV2_2;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Set;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 public class DeviceOwnerFragment extends PreferenceFragment {
 
     String[] splitInstallData = new String[256];
+
+    double totalByte;
 
     Preference preferenceBlockToUninstallSettings,
             preferenceDisableDeviceOwner,
@@ -63,6 +60,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         return instance;
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_device_owner, rootKey);
@@ -227,15 +225,32 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         if (requestCode == REQUEST_INSTALL) {
             preferenceOwnerSilentInstall.setEnabled(true);
             if (selectInstallFiles(data)) {
-                DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
-                ownerInstallTask.setListener(StartActivity.getInstance().OwnerInstallCreateListener());
-                ownerInstallTask.execute();
-            } else {
-                new AlertDialog.Builder(getActivity())
-                        .setMessage("ファイルデータを取得できませんでした\n内部ストレージからファイルを選択してください")
-                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                        .show();
+                String str = new File(splitInstallData[0]).getName();
+                /* ファイルの拡張子 */
+                switch (str.substring(str.lastIndexOf("."))) {
+                    case ".apk":
+                        DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
+                        ownerInstallTask.setListener(StartActivity.getInstance().OwnerInstallCreateListener());
+                        ownerInstallTask.execute();
+                        return;
+                    case ".XAPK":
+                    case ".xapk":
+                        try {
+                            /* 一時ファイルを消去 */
+                            FileUtils.deleteDirectory(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null));
+                        } catch (IOException ignored) {
+                            break;
+                        }
+                        TryXApkTask tryXApkTask = new TryXApkTask();
+                        tryXApkTask.setListener(StartActivity.getInstance().XApkListener());
+                        tryXApkTask.execute();
+                        return;
+                }
             }
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("ファイルデータを取得できませんでした")
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                    .show();
         }
     }
 
@@ -245,24 +260,15 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             ClipData clipData = data.getClipData();
             if (clipData == null) {
                 /* シングルApk */
-                String str, fileExtension;
                 /* 選択されたファイルを取得 */
                 splitInstallData[0] = getInstallData(getActivity(), data.getData());
                 if (splitInstallData[0] != null) {
-                    str = new File(splitInstallData[0]).getName();
-                    fileExtension = str.substring(str.lastIndexOf("."));
+                    String str = new File(splitInstallData[0]).getName();
                     /* ファイルの拡張子 */
-                    switch (fileExtension) {
+                    switch (str.substring(str.lastIndexOf("."))) {
                         case ".apk":
-                            break;
                         case ".XAPK":
                         case ".xapk":
-                            /* 一時ファイルを消去 */
-                            FileUtils.deleteDirectory(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null));
-                            /* XApkをApkに変える */
-                            if (!tryMakeXApkApk()) {
-                                return false;
-                            }
                             break;
                         default:
                             /* 未対応またはインストールファイルでないなら終了 */
@@ -284,50 +290,6 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         }
     }
 
-    /* XApkの解凍と配置 */
-    private boolean tryMakeXApkApk() {
-        String str, fileExtension;
-        str = new File(splitInstallData[0]).getParent() + File.separator + new File(splitInstallData[0]).getName().replaceFirst("\\..*", ".zip");
-        /* 拡張子.xapkを.zipに変更 */
-        if (new File(splitInstallData[0]).renameTo(new File(str))) {
-            File file = new File(getActivity().getExternalFilesDir(null) + "/temp");
-            /* zipを解凍して外部ディレクトリに一時保存 */
-            ZipUtil.unpack(new File(str), file);
-            File[] list = file.listFiles();
-            if (list != null) {
-                int c = 0;
-                /* ディレクトリのなかのファイルを取得 */
-                for (int i = 0; i < list.length; i++) {
-                    /* obbデータを取得 */
-                    if (list[i].isDirectory()) {
-                        c++;
-                        try {
-                            /* obbデータをコピー */
-                            FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
-                        } catch (IOException ignored) {
-                            return false;
-                        }
-                    } else {
-                        str = list[i].getName();
-                        fileExtension = str.substring(str.lastIndexOf("."));
-                        /* apkファイルならパスをインストールデータへ */
-                        if (fileExtension.equalsIgnoreCase(".apk")) {
-                            splitInstallData[i - c] = list[i].getPath();
-                        } else {
-                            /* apkファイルでなかったときのリストの順番を修正 */
-                            c++;
-                        }
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     /* 選択したファイルデータを取得 */
     private String getInstallData(Context context, Uri uri) {
         try {
@@ -345,6 +307,147 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    @SuppressLint("NewApi")
+    private double getDirectorySize(File file) {
+        double fileSize = 0;
+        File[] list = file.listFiles();
+        try {
+            for (File value : list != null ? list : new File[0]) {
+                if (!value.isDirectory()) {
+                    fileSize += Files.size(Paths.get(value.getPath()));
+                } else {
+                    File[] obbName = new File(value.getPath() + "/obb").listFiles();
+                    File[] obbFile = obbName != null ? obbName[0].listFiles() : new File[0];
+                    fileSize += Files.size(Paths.get(obbFile != null ? obbFile[0].getPath() : null));
+                }
+            }
+        } catch (IOException ignored) {
+        }
+        return fileSize;
+    }
+
+    /* インストールタスク */
+    public static class TryXApkTask extends AsyncTask<Object, Void, Object> {
+
+        public static TryXApkTask.Listener mListener;
+
+        public static String obbPath1;
+        public static String obbPath2;
+
+        @Override
+        protected void onPreExecute() {
+            mListener.onShow();
+        }
+
+        @Override
+        protected Object doInBackground(Object... value) {
+            String str = new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).getParent() + File.separator + new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).getName().replaceFirst("\\..*", ".zip");
+            /* 拡張子.xapkを.zipに変更 */
+            onProgressUpdate("拡張子を変更しています・・・");
+            if (new File(DeviceOwnerFragment.getInstance().splitInstallData[0]).renameTo(new File(str))) {
+                File file = new File(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null) + "/temp");
+                /* zipを解凍して外部ディレクトリに一時保存 */
+                onProgressUpdate("圧縮ファイルを解凍しています・・・");
+                getInstance().totalByte = new File(str).length();
+                ZipUtil.unpack(new File(str), file);
+                File[] list = file.listFiles();
+                if (list != null) {
+                    int c = 0;
+                    /* ディレクトリのなかのファイルを取得 */
+                    for (int i = 0; i < list.length; i++) {
+                        /* obbデータを取得 */
+                        if (list[i].isDirectory()) {
+                            c++;
+                            try {
+                                /* obbデータをコピー */
+                                onProgressUpdate("obbデータをコピーしています・・・");
+                                File[] obbName = new File(list[i].getPath() + "/obb").listFiles();
+                                File[] obbFile = Objects.requireNonNull(obbName)[0].listFiles();
+                                //getInstance().totalByte = Objects.requireNonNull(obbFile)[0].length();
+                                getInstance().totalByte = 1733650831.00;
+                                obbPath1 = obbName[0].getName();
+                                Log.i("TAG", obbPath1);
+                                obbPath2 = Objects.requireNonNull(obbFile)[0].getName();
+                                Log.i("TAG", obbPath2);
+                                FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
+                            } catch (IOException ignored) {
+                                return false;
+                            }
+                        } else {
+                            onProgressUpdate("ファイルを確認しています・・・");
+                            str = list[i].getName();
+                            /* apkファイルならパスをインストールデータへ */
+                            if (str.substring(str.lastIndexOf(".")).equalsIgnoreCase(".apk")) {
+                                DeviceOwnerFragment.getInstance().splitInstallData[i - c] = list[i].getPath();
+                            } else {
+                                /* apkファイルでなかったときのリストの順番を修正 */
+                                c++;
+                            }
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        private void onProgressUpdate(String str) {
+            mListener.onProgressUpdate(str);
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            if (result == null) {
+                mListener.onError("エラー\n不明なエラーが発生しました");
+                return;
+            }
+            if (result.equals(true)) {
+                mListener.onSuccess();
+                return;
+            }
+            if (result.equals(false)) {
+                mListener.onFailure();
+                return;
+            }
+            mListener.onError(result.toString());
+        }
+
+        public void setListener(TryXApkTask.Listener listener) {
+            mListener = listener;
+        }
+
+        /* StartActivity */
+        public interface Listener {
+            void onShow();
+
+            void onSuccess();
+
+            void onFailure();
+
+            void onError(String str);
+
+            void onProgressUpdate(String str);
+        }
+
+        @SuppressLint("NewApi")
+        public int getLoadedBytePercent() {
+            double fileSize = 0;
+            if (getInstance().totalByte <= 0) return 0;
+            if (obbPath1 == null) {
+                fileSize = getInstance().getDirectorySize(new File(DeviceOwnerFragment.getInstance().getActivity().getExternalFilesDir(null) + "/temp"));
+            } else {
+                try {
+                    fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
+                } catch (IOException ignored) {
+                }
+            }
+            return (int) Math.floor(100 * fileSize / DeviceOwnerFragment.getInstance().totalByte);
+        }
     }
 
     /* インストールタスク */
