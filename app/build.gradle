@@ -2,22 +2,32 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 32
+
     defaultConfig {
         applicationId "com.saradabar.cpadcustomizetool"
+        
         minSdkVersion 22
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 22
+
         versionCode 36
         versionName "1.5.6"
+
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '28.0.3'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {

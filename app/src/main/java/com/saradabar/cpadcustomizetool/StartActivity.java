@@ -284,6 +284,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             @Override
             public void onSuccess() {
                 alertDialog.dismiss();
+                new DeviceOwnerFragment.TryXApkTask().cancel(true);
                 DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
                 ownerInstallTask.setListener(getInstance().OwnerInstallCreateListener());
                 ownerInstallTask.execute();
@@ -297,6 +298,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
                 } catch (IOException ignored) {
                 }
+                new DeviceOwnerFragment.TryXApkTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage("コピーに失敗しました")
                         .setCancelable(false)
@@ -312,6 +314,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
                 } catch (IOException ignored) {
                 }
+                new DeviceOwnerFragment.TryXApkTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(getString(R.string.dialog_error) + "\n" + str)
                         .setCancelable(false)
@@ -369,6 +372,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
                 } catch (IOException ignored) {
                 }
+                new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(getString(R.string.dialog_failure_silent_install) + str)
                         .setCancelable(false)
@@ -384,6 +388,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                     FileUtils.deleteDirectory(StartActivity.this.getExternalCacheDir());
                 } catch (IOException ignored) {
                 }
+                new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
                         .setMessage(getString(R.string.dialog_error) + str)
                         .setCancelable(false)

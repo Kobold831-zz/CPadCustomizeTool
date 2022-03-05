@@ -66,9 +66,11 @@ public final class Common {
     }
 
     public static File TMP_DIRECTORY(Context context) {
-        File file = new File(context.getExternalCacheDir() + "/tmp");
-        if (!file.exists()) file.mkdir();
-        return file;
+        if (context != null) {
+            File file = new File(context.getExternalCacheDir() + "/tmp");
+            if (!file.exists()) file.mkdir();
+            return file;
+        } else return null;
     }
 
     public static ComponentName getAdministratorComponent(Context context) {

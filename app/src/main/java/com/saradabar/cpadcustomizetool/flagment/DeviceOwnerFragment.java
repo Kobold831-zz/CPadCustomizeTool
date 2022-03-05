@@ -304,8 +304,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     @SuppressLint("NewApi")
     private double getDirectorySize(File file) {
         double fileSize = 0;
-        File[] list = file.listFiles();
         try {
+            File[] list = file.listFiles();
             for (File value : list != null ? list : new File[0]) {
                 if (!value.isDirectory()) {
                     fileSize += Files.size(Paths.get(value.getPath()));
@@ -432,7 +432,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             double fileSize = 0;
             if (getInstance().totalByte <= 0) return 0;
             if (obbPath1 == null) {
-                fileSize = getInstance().getDirectorySize(Common.TMP_DIRECTORY(getInstance().getActivity()));
+                fileSize = getInstance().getDirectorySize(Common.TMP_DIRECTORY(StartActivity.getInstance()));
             } else {
                 try {
                     fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
