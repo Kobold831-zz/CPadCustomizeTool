@@ -6,12 +6,17 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 
+import com.aurora.store.data.service.IInstallResult;
+import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
 
 import java.io.File;
@@ -61,19 +66,26 @@ public class DeviceOwnerService extends Service {
             }
             for (Uri uri : uriList) {
                 try {
-                    writeSession(getPackageManager().getPackageInstaller(), sessionId, new File(Environment.getExternalStorageDirectory() + uri.getPath().replace("/external_files", "")));
+                    if (!writeSession(getPackageManager().getPackageInstaller(), sessionId, new File(Environment.getExternalStorageDirectory() + uri.getPath().replace("/external_files", "")))) {
+                        getPackageManager().getPackageInstaller().abandonSession(sessionId);
+                        return false;
+                    }
                 } catch (IOException ignored) {
                     getPackageManager().getPackageInstaller().abandonSession(sessionId);
                     return false;
                 }
             }
             try {
-                commitSession(getPackageManager().getPackageInstaller(), sessionId, getBaseContext());
+                if (commitSession(getPackageManager().getPackageInstaller(), sessionId, getBaseContext())) {
+                    return true;
+                } else {
+                    getPackageManager().getPackageInstaller().abandonSession(sessionId);
+                    return false;
+                }
             } catch (IOException ignored) {
                 getPackageManager().getPackageInstaller().abandonSession(sessionId);
                 return false;
             }
-            return true;
         }
     };
 
@@ -84,7 +96,79 @@ public class DeviceOwnerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) postStatus(intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void postStatus(int status, String packageName, String extra) {
+        switch (status) {
+            case PackageInstaller.STATUS_SUCCESS:
+                if (bindInstallResult(0, packageName, null, null)) {
+                    Log.v("TAG", "Success");
+                } else Log.v("TAG", "失敗");
+                break;
+            case PackageInstaller.STATUS_FAILURE_ABORTED:
+                if (bindInstallResult(1, packageName, getErrorMessage(this, status), null)) {
+                    Log.v("TAG", "Success");
+                } else Log.v("TAG", "失敗");
+                break;
+            default:
+                if (bindInstallResult(2, packageName, getErrorMessage(this, status), extra)) {
+                    Log.v("TAG", "Success");
+                } else Log.v("TAG", "失敗");
+                break;
+        }
+    }
+
+    private boolean bindInstallResult(int flag, String packageName, String errorString, String extra) {
+        Intent intent = new Intent("com.aurora.store.data.service.ResultService").setPackage("com.aurora.store");
+        return bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                IInstallResult mIInstallResult = IInstallResult.Stub.asInterface(iBinder);
+                try {
+                    switch (flag) {
+                        case 0:
+                            mIInstallResult.InstallSuccess(packageName);
+                            unbindService(this);
+                            break;
+                        case 1:
+                            mIInstallResult.InstallFailure(packageName, errorString);
+                            unbindService(this);
+                            break;
+                        case 2:
+                            mIInstallResult.InstallError(packageName, errorString, extra);
+                            unbindService(this);
+                            break;
+                    }
+                } catch (RemoteException ignored) {
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                unbindService(this);
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    private String getErrorMessage(Context context, int status) {
+        switch (status) {
+            case PackageInstaller.STATUS_FAILURE_ABORTED:
+                return context.getString(R.string.installer_status_user_action);
+            case PackageInstaller.STATUS_FAILURE_BLOCKED:
+                return context.getString(R.string.installer_status_failure_blocked);
+            case PackageInstaller.STATUS_FAILURE_CONFLICT:
+                return context.getString(R.string.installer_status_failure_conflict);
+            case PackageInstaller.STATUS_FAILURE_INCOMPATIBLE:
+                return context.getString(R.string.installer_status_failure_incompatible);
+            case PackageInstaller.STATUS_FAILURE_INVALID:
+                return context.getString(R.string.installer_status_failure_invalid);
+            case PackageInstaller.STATUS_FAILURE_STORAGE:
+                return context.getString(R.string.installer_status_failure_storage);
+            default:
+                return context.getString(R.string.installer_status_failure);
+        }
     }
 
     public static int createSession(PackageInstaller packageInstaller) throws IOException {
@@ -93,7 +177,7 @@ public class DeviceOwnerService extends Service {
         return packageInstaller.createSession(params);
     }
 
-    public static int writeSession(PackageInstaller packageInstaller, int sessionId, File apkFile) throws IOException {
+    public static boolean writeSession(PackageInstaller packageInstaller, int sessionId, File apkFile) throws IOException {
         long sizeBytes = -1;
         String apkPath = apkFile.getAbsolutePath();
 
@@ -107,7 +191,6 @@ public class DeviceOwnerService extends Service {
         OutputStream out = null;
         try {
             session = packageInstaller.openSession(sessionId);
-            in =
             in = new FileInputStream(apkPath);
             out = session.openWrite(getRandomString(), 0, sizeBytes);
             byte[] buffer = new byte[65536];
@@ -116,7 +199,9 @@ public class DeviceOwnerService extends Service {
                 out.write(buffer, 0, c);
             }
             session.fsync(out);
-            return 0;
+            return true;
+        } catch (Exception ignored) {
+            return false;
         } finally {
             if (out != null) {
                 out.close();

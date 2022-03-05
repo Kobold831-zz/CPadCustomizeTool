@@ -95,7 +95,7 @@ public class Installer {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
-            Intent intent = new Intent(context, InstallService.class);
+            Intent intent = new Intent(context, InstallService.class).putExtra("isAuroraInstall", false);
             PendingIntent pendingIntent = PendingIntent.getService(
                     context,
                     sessionId,

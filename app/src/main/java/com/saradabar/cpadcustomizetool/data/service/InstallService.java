@@ -1,11 +1,16 @@
 package com.saradabar.cpadcustomizetool.data.service;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInstaller;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 
+import com.aurora.store.data.service.IInstallResult;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.StartActivity;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
@@ -27,7 +32,7 @@ public class InstallService extends Service {
 
     private void postStatus(int status, String packageName, String extra) {
         InstallEventListenerList installEventListener = new InstallEventListenerList();
-        installEventListener.addEventListener((InstallEventListener) StartActivity.getInstance());
+        installEventListener.addEventListener(StartActivity.getInstance());
         switch (status) {
             case PackageInstaller.STATUS_SUCCESS:
                 installEventListener.installSuccessNotify();
