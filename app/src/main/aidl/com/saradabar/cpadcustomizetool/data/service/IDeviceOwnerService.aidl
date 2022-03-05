@@ -1,8 +1,8 @@
-package com.saradabar.cpadcustomizetool.service;
+package com.saradabar.cpadcustomizetool.data.service;
 
 interface IDeviceOwnerService {
     boolean isDeviceOwnerApp();
     void setUninstallBlocked(String str, boolean bl);
     boolean isUninstallBlocked(String str);
-    void installPackages(String str, in List<Uri> uriList);
+    boolean installPackages(String str, in List<Uri> uriList);
 }

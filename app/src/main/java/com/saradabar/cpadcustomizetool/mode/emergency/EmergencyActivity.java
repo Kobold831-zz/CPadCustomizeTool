@@ -31,7 +31,7 @@ import android.widget.Toast;
 import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.service.KeepService;
+import com.saradabar.cpadcustomizetool.data.service.KeepService;
 
 import java.util.Objects;
 

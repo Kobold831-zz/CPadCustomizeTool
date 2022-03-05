@@ -24,11 +24,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.check.AsyncFileDownload;
-import com.saradabar.cpadcustomizetool.check.Checker;
-import com.saradabar.cpadcustomizetool.check.ProgressHandler;
-import com.saradabar.cpadcustomizetool.check.Updater;
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.check.AsyncFileDownload;
+import com.saradabar.cpadcustomizetool.data.check.Checker;
+import com.saradabar.cpadcustomizetool.data.check.ProgressHandler;
+import com.saradabar.cpadcustomizetool.data.check.Updater;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 import com.stephentuso.welcome.WelcomeHelper;
 

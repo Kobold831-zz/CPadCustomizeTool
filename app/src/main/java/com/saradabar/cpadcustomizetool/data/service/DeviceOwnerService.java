@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.service;
+package com.saradabar.cpadcustomizetool.data.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -11,10 +11,8 @@ import android.content.pm.PackageInstaller;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.RemoteException;
 
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
-import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,26 +48,32 @@ public class DeviceOwnerService extends Service {
         }
 
         @Override
-        public void installPackages(String str, List<Uri> uriList) {
-            int sessionId = 0;
+        public boolean installPackages(String str, List<Uri> uriList) {
+            int sessionId;
             try {
                 sessionId = createSession(getPackageManager().getPackageInstaller());
                 if (sessionId < 0) {
-                    return;
+                    getPackageManager().getPackageInstaller().abandonSession(sessionId);
+                    return false;
                 }
             } catch (IOException ignored) {
-                return;
+                return false;
             }
             for (Uri uri : uriList) {
                 try {
                     writeSession(getPackageManager().getPackageInstaller(), sessionId, new File(Environment.getExternalStorageDirectory() + uri.getPath().replace("/external_files", "")));
                 } catch (IOException ignored) {
+                    getPackageManager().getPackageInstaller().abandonSession(sessionId);
+                    return false;
                 }
             }
             try {
-                commitSession(getPackageManager().getPackageInstaller(), sessionId, PendingIntent.getService(getApplicationContext(), 0, new Intent("TEST"), 0));
+                commitSession(getPackageManager().getPackageInstaller(), sessionId, getBaseContext());
             } catch (IOException ignored) {
+                getPackageManager().getPackageInstaller().abandonSession(sessionId);
+                return false;
             }
+            return true;
         }
     };
 
@@ -122,12 +126,21 @@ public class DeviceOwnerService extends Service {
         }
     }
 
-    public static int commitSession(PackageInstaller packageInstaller, int sessionId, PendingIntent pendingIntent) throws IOException {
+    public static boolean commitSession(PackageInstaller packageInstaller, int sessionId, Context context) throws IOException {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
+            Intent intent = new Intent(context, DeviceOwnerService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(
+                    context,
+                    sessionId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            );
             session.commit(pendingIntent.getIntentSender());
-            return 0;
+            return true;
+        } catch (Exception ignored) {
+            return false;
         } finally {
             if (session != null) {
                 session.close();

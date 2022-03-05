@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.service;
+package com.saradabar.cpadcustomizetool.data.service;
 
 import android.app.Service;
 import android.content.Context;

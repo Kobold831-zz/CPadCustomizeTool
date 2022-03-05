@@ -144,4 +144,17 @@
     <string name="layout_resolution_width">横の解像度</string>
     <string name="layout_resolution_x">x</string>
     <string name="layout_resolution_height">縦の解像度</string>
+
+    <!-- インストーラー -->
+    <string name="installer_status_user_action">ユーザの確認待ち</string>
+    <string name="installer_status_unknown">不明</string>
+    <string name="installer_status_success">インストール成功</string>
+    <string name="installer_status_failure_storage">メモリが不足しています</string>
+    <string name="installer_status_failure_invalid">APKが無効か破損しています</string>
+    <string name="installer_status_failure_incompatible">非対応アプリ</string>
+    <string name="installer_status_failure_conflict">衝突するパッケージが存在します</string>
+    <string name="installer_status_failure_session">セッションを作成できませんでした</string>
+    <string name="installer_status_failure_blocked">インストールがブロックされました</string>
+    <string name="installer_status_failure_aborted">インストールがキャンセルされました</string>
+    <string name="installer_status_failure">インストーラ失敗</string>
 </resources>

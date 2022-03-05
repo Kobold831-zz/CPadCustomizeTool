@@ -315,7 +315,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                     fileSize += Files.size(Paths.get(obbFile != null ? obbFile[0].getPath() : null));
                 }
             }
-        } catch (IOException ignored) {
+        } catch (Exception ignored) {
         }
         return fileSize;
     }
@@ -343,7 +343,11 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             /* zipを展開して外部ディレクトリに一時保存 */
             onProgressUpdate("圧縮ファイルを展開しています・・・");
             getInstance().totalByte = new File(str).length();
-            ZipUtil.unpack(new File(str), file);
+            try {
+                ZipUtil.unpack(new File(str), file);
+            } catch (Exception e) {
+                return "ストレージの空き容量が不足している可能性があります\n" + e.getMessage();
+            }
             /* 拡張子.zipを.xapkに変更 */
             onProgressUpdate("拡張子を変更しています・・・");
             new File(str).renameTo(new File(new File(str).getParent() + File.separator + new File(str).getName().replaceFirst("\\..*", ".xapk")));
@@ -364,8 +368,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                             obbPath1 = obbName[0].getName();
                             obbPath2 = obbFile != null ? obbFile[0].getName() : null;
                             FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
-                        } catch (IOException ignored) {
-                            return false;
+                        } catch (Exception e) {
+                            return "ストレージの空き容量が不足している可能性があります\n" + e.getMessage();
                         }
                     } else {
                         onProgressUpdate("ファイルを確認しています・・・");
@@ -497,7 +501,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             try {
-                return installer.splitCommitSession(getInstance().getActivity(), PendingIntent.getActivity(getInstance().getActivity(), 0, new Intent("INSTALL"), 0), sessionId).bl;
+                return installer.splitCommitSession(getInstance().getActivity(), sessionId).bl;
             } catch (Exception e) {
                 return e.getMessage();
             }
@@ -513,7 +517,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 return;
             }
             if (result.equals(false)) {
-                mListener.onFailure();
+                mListener.onFailure("");
                 return;
             }
             mListener.onError(result.toString());
@@ -529,7 +533,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
 
             void onSuccess();
 
-            void onFailure();
+            void onFailure(String str);
 
             void onError(String str);
         }

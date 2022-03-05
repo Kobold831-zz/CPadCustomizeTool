@@ -1,10 +1,10 @@
-package com.saradabar.cpadcustomizetool.check;
+package com.saradabar.cpadcustomizetool.data.check;
 
 import android.app.Activity;
 import android.os.AsyncTask;
 
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListenerList;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListenerList;
 
 import java.io.BufferedInputStream;
 import java.io.File;

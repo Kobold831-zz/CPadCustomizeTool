@@ -3,7 +3,6 @@ package com.saradabar.cpadcustomizetool.menu;
 import static com.saradabar.cpadcustomizetool.Common.getCrashLog;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -11,13 +10,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentManager;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.check.UpdateActivity;
-import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
-import com.saradabar.cpadcustomizetool.flagment.MainFragment;
-import com.saradabar.cpadcustomizetool.menu.InformationActivity;
 
 public class CrashLog extends Activity {
 

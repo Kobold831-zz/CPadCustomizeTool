@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.check;
+package com.saradabar.cpadcustomizetool.data.check;
 
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
 
@@ -10,8 +10,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListenerList;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListenerList;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

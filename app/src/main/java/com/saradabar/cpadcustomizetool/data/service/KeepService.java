@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.service;
+package com.saradabar.cpadcustomizetool.data.service;
 
 import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
 import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
@@ -24,11 +24,7 @@ import android.widget.Toast;
 import com.saradabar.cpadcustomizetool.Common;
 import com.saradabar.cpadcustomizetool.menu.CrashDetection;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 

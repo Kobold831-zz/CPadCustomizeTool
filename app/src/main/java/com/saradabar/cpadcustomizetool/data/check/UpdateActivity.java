@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.check;
+package com.saradabar.cpadcustomizetool.data.check;
 
 import static com.saradabar.cpadcustomizetool.Common.GET_MODEL_ID;
 import static com.saradabar.cpadcustomizetool.Common.Variable.*;
@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 
 import java.io.File;
 

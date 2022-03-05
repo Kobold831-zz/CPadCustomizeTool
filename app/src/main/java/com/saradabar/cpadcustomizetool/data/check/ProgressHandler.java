@@ -1,4 +1,4 @@
-package com.saradabar.cpadcustomizetool.check;
+package com.saradabar.cpadcustomizetool.data.check;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;

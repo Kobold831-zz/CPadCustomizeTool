@@ -26,25 +26,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceFragment;
 
-import com.saradabar.cpadcustomizetool.check.ByteProgressHandler;
-import com.saradabar.cpadcustomizetool.check.UpdateActivity;
+import com.saradabar.cpadcustomizetool.data.check.ByteProgressHandler;
+import com.saradabar.cpadcustomizetool.data.check.UpdateActivity;
+import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
+import com.saradabar.cpadcustomizetool.data.event.InstallEventListenerList;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListenerList;
 import com.saradabar.cpadcustomizetool.flagment.ApplicationSettingsFragment;
 import com.saradabar.cpadcustomizetool.flagment.DeviceOwnerFragment;
 import com.saradabar.cpadcustomizetool.flagment.MainFragment;
 import com.saradabar.cpadcustomizetool.menu.InformationActivity;
-import com.saradabar.cpadcustomizetool.service.KeepService;
+import com.saradabar.cpadcustomizetool.data.service.KeepService;
 import com.saradabar.cpadcustomizetool.set.BlockerActivity;
 
 import org.zeroturnaround.zip.commons.FileUtils;
@@ -54,7 +55,7 @@ import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
-public class StartActivity extends Activity {
+public class StartActivity extends Activity implements InstallEventListener {
 
     private Menu menu;
     public IDchaService mDchaService;
@@ -269,6 +270,7 @@ public class StartActivity extends Activity {
                 alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setView(view)
                         .setMessage("")
+                        .setCancelable(false)
                         .create();
                 if (!alertDialog.isShowing()) alertDialog.show();
                 ByteProgressHandler progressHandler = new ByteProgressHandler();
@@ -311,7 +313,7 @@ public class StartActivity extends Activity {
                 } catch (IOException ignored) {
                 }
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(str)
+                        .setMessage(getString(R.string.dialog_error) + "\n" + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -360,7 +362,7 @@ public class StartActivity extends Activity {
 
             /* 失敗 */
             @Override
-            public void onFailure() {
+            public void onFailure(String str) {
                 progressDialog.dismiss();
                 try {
                     /* 一時ファイルを消去 */
@@ -368,7 +370,7 @@ public class StartActivity extends Activity {
                 } catch (IOException ignored) {
                 }
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(R.string.dialog_failure_silent_install)
+                        .setMessage(getString(R.string.dialog_failure_silent_install) + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -383,7 +385,7 @@ public class StartActivity extends Activity {
                 } catch (IOException ignored) {
                 }
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(str)
+                        .setMessage(getString(R.string.dialog_error) + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -493,5 +495,20 @@ public class StartActivity extends Activity {
                 finish();
             }
         }
+    }
+
+    @Override
+    public void onInstallSuccess() {
+        DeviceOwnerFragment.OwnerInstallTask.mListener.onSuccess();
+    }
+
+    @Override
+    public void onInstallFailure(String str) {
+        DeviceOwnerFragment.OwnerInstallTask.mListener.onFailure("\n" + str);
+    }
+
+    @Override
+    public void onInstallError(String str) {
+        DeviceOwnerFragment.OwnerInstallTask.mListener.onError("\n" + str);
     }
 }

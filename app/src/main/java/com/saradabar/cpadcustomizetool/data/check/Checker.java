@@ -1,11 +1,11 @@
-package com.saradabar.cpadcustomizetool.check;
+package com.saradabar.cpadcustomizetool.data.check;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.AsyncTask;
 
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListener;
-import com.saradabar.cpadcustomizetool.check.event.UpdateEventListenerList;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListenerList;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

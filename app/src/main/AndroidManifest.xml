@@ -57,7 +57,7 @@
             android:theme="@style/MainPreference" />
 
         <activity
-            android:name=".check.UpdateActivity"
+            android:name=".data.check.UpdateActivity"
             android:label="@string/app_update_activity"
             android:theme="@style/MainTheme"
             tools:ignore="InnerclassSeparator" />
@@ -117,23 +117,28 @@
             android:label="クラッシュ履歴" />
 
         <service
-            android:name=".service.KeepService"
+            android:name=".data.service.KeepService"
             android:label="@string/service_keep_service"
             tools:ignore="InnerclassSeparator" />
 
         <service
-            android:name=".service.ProtectKeepService"
+            android:name=".data.service.ProtectKeepService"
             android:label="@string/service_protect_keep_service"
             android:process=":protect"
             tools:ignore="InnerclassSeparator" />
 
-        <service android:name=".service.DeviceOwnerService" android:label="@string/app_name" android:permission="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
-            android:exported="false">
+        <service android:name=".data.service.DeviceOwnerService"
+            android:label="@string/app_name"
+            android:permission="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.saradabar.cpadcustomizetool.service.DeviceOwnerService"/>
+                <action android:name="com.saradabar.cpadcustomizetool.data.service.DeviceOwnerService"/>
             </intent-filter>
         </service>
 
+        <service android:name=".data.service.InstallService"
+            android:label="@string/app_name"
+            android:exported="false" />
 
         <receiver
             android:name=".Receiver.UpdateReceiver"
@@ -151,15 +156,6 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".Receiver.InstallReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <data android:scheme="package"/>
             </intent-filter>
         </receiver>
 

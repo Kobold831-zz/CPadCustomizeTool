@@ -2,8 +2,12 @@ package com.saradabar.cpadcustomizetool;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+
+import com.saradabar.cpadcustomizetool.data.service.DeviceOwnerService;
+import com.saradabar.cpadcustomizetool.data.service.InstallService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,8 +49,8 @@ public class Installer {
         return new Result(true, "", writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile), 0);
     }
 
-    public Result splitCommitSession(Context context, PendingIntent pendingIntent, int sessionId) {
-        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, pendingIntent), "", 0, 0);
+    public Result splitCommitSession(Context context, int sessionId) {
+        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, context), "", 0, 0);
     }
 
     private int createSession(PackageInstaller packageInstaller) throws IOException {
@@ -87,10 +91,17 @@ public class Installer {
         }
     }
 
-    private boolean commitSession(PackageInstaller packageInstaller, int sessionId, PendingIntent pendingIntent) {
+    private boolean commitSession(PackageInstaller packageInstaller, int sessionId, Context context) {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
+            Intent intent = new Intent(context, InstallService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(
+                    context,
+                    sessionId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            );
             session.commit(pendingIntent.getIntentSender());
             return true;
         } catch (Exception ignored) {
