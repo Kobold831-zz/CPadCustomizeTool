@@ -1,8 +1,5 @@
 package com.saradabar.cpadcustomizetool;
 
-import static com.saradabar.cpadcustomizetool.Common.*;
-import static com.saradabar.cpadcustomizetool.Common.Variable.*;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -22,14 +19,19 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.data.check.AsyncFileDownload;
-import com.saradabar.cpadcustomizetool.data.check.Checker;
-import com.saradabar.cpadcustomizetool.data.check.ProgressHandler;
-import com.saradabar.cpadcustomizetool.data.check.Updater;
+import com.saradabar.cpadcustomizetool.data.connection.AsyncFileDownload;
+import com.saradabar.cpadcustomizetool.data.connection.Checker;
+import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
+import com.saradabar.cpadcustomizetool.data.connection.Updater;
 import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
-import com.saradabar.cpadcustomizetool.menu.CrashDetection;
+import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.util.Constants;
+import com.saradabar.cpadcustomizetool.util.Preferences;
+import com.saradabar.cpadcustomizetool.util.Toast;
+import com.saradabar.cpadcustomizetool.util.Variables;
+import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
+import com.saradabar.cpadcustomizetool.view.activity.WelAppActivity;
 import com.stephentuso.welcome.WelcomeHelper;
 
 import java.io.File;
@@ -43,7 +45,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(this));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
         /* ネットワークチェック */
         if (!isNetWork()) {
             netWorkError();
@@ -51,7 +53,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
         }
 
         /* アップデートチェックの可否を確認 */
-        if (GET_UPDATE_FLAG(this)) updateCheck();
+        if (Preferences.GET_UPDATE_FLAG(this)) updateCheck();
         else supportCheck();
     }
 
@@ -72,7 +74,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     result = false;
-                    if (GET_SETTINGS_FLAG(this)) {
+                    if (Preferences.GET_SETTINGS_FLAG(this)) {
                         if (checkModel()) checkDcha();
                         else errorNotTab2Or3();
                     } else new WelcomeHelper(this, WelAppActivity.class).forceShow();
@@ -82,17 +84,17 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     private void updateCheck() {
         showLoadingDialog();
-        new Updater(this, UPDATE_CHECK_URL, 1).updateCheck();
+        new Updater(this, Constants.URL_UPDATE_CHECK, 1).updateCheck();
     }
 
     private void supportCheck() {
-        if (!GET_UPDATE_FLAG(this)) showLoadingDialog();
-        new Checker(this, SUPPORT_CHECK_URL).supportCheck();
+        if (!Preferences.GET_UPDATE_FLAG(this)) showLoadingDialog();
+        new Checker(this, Constants.URL_SUPPORT_CHECK).supportCheck();
     }
 
     @Override
     public void onUpdateApkDownloadComplete() {
-        new Handler().post(() -> new Updater(this, UPDATE_CHECK_URL, 1).installApk(this));
+        new Handler().post(() -> new Updater(this, Constants.URL_UPDATE_CHECK, 1).installApk(this));
     }
 
     @Override
@@ -110,7 +112,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     public void onSupportUnavailable() {
         cancelLoadingDialog();
-        if (GET_SETTINGS_FLAG(this)) {
+        if (Preferences.GET_SETTINGS_FLAG(this)) {
             if (checkModel()) checkDcha();
             else errorNotTab2Or3();
         } else {
@@ -154,24 +156,22 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void showUpdateDialog(String string) {
-        if (!GET_SETTINGS_FLAG(this)) {
+        if (!Preferences.GET_SETTINGS_FLAG(this)) {
             switch (Build.MODEL) {
                 case "TAB-A05-BD":
                 case "TAB-A05-BA1":
-                    SET_MODEL_ID(2, this);
+                    Preferences.SET_MODEL_ID(2, this);
                     break;
             }
         }
-        View view = getLayoutInflater().inflate(R.layout.update_dialog, null);
+        View view = getLayoutInflater().inflate(R.layout.view_update, null);
         TextView mTextView = view.findViewById(R.id.update_information);
         mTextView.setText(string);
         view.findViewById(R.id.update_info_button).setOnClickListener(v -> {
             try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(UPDATE_INFO_URL)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_UPDATE_INFO)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
             } catch (ActivityNotFoundException ignored) {
-                if (toast != null) toast.cancel();
-                toast = Toast.makeText(this, R.string.toast_unknown_activity, Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.toast(this, R.string.toast_unknown_activity);
             }
         });
 
@@ -180,7 +180,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    if (GET_MODEL_ID(this) != 2) {
+                    if (Preferences.GET_MODEL_ID(this) != 2) {
                         AsyncFileDownload asyncFileDownload = initFileLoader();
                         ProgressDialog progressDialog = new ProgressDialog(this);
                         progressDialog.setTitle(R.string.dialog_title_update);
@@ -205,11 +205,9 @@ public class MainActivity extends Activity implements UpdateEventListener {
                                 .setMessage(R.string.dialog_update_caution)
                                 .setPositiveButton(R.string.dialog_common_yes, (dialog2, which2) -> {
                                     try {
-                                        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(UPDATE_URL)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), REQUEST_UPDATE);
+                                        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_UPDATE)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), Constants.REQUEST_UPDATE);
                                     } catch (ActivityNotFoundException ignored) {
-                                        if (toast != null) toast.cancel();
-                                        toast = Toast.makeText(this, R.string.toast_unknown_activity, Toast.LENGTH_SHORT);
-                                        toast.show();
+                                        Toast.toast(this, R.string.toast_unknown_activity);
                                         if (isNetWork()) {
                                             showLoadingDialog();
                                             supportCheck();
@@ -229,7 +227,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private AsyncFileDownload initFileLoader() {
-        AsyncFileDownload asyncfiledownload = new AsyncFileDownload(this, DOWNLOAD_FILE_URL, new File(new File(getExternalCacheDir(), "update.apk").getPath()));
+        AsyncFileDownload asyncfiledownload = new AsyncFileDownload(this, Variables.DOWNLOAD_FILE_URL, new File(new File(getExternalCacheDir(), "update.apk").getPath()));
         asyncfiledownload.execute();
         return asyncfiledownload;
     }
@@ -243,7 +241,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     result = false;
-                    if (GET_SETTINGS_FLAG(this)) {
+                    if (Preferences.GET_SETTINGS_FLAG(this)) {
                         if (checkModel()) checkDcha();
                         else errorNotTab2Or3();
                     } else new WelcomeHelper(this, WelAppActivity.class).forceShow();
@@ -283,7 +281,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* DchaService動作チェック */
     private void checkDcha() {
-        if (!GET_DCHASERVICE_FLAG(this)) {
+        if (!Preferences.GET_DCHASERVICE_FLAG(this)) {
             switch (Build.MODEL) {
                 case "TAB-A03-BR3":
                 case "TAB-A04-BR3":
@@ -309,7 +307,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     .setIcon(R.drawable.alert)
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                     .setNeutralButton(R.string.dialog_common_continue, (dialogInterface, i) -> {
-                        SET_DCHASERVICE_FLAG(false, this);
+                        Preferences.SET_DCHASERVICE_FLAG(false, this);
                         switch (Build.MODEL) {
                             case "TAB-A03-BR3":
                             case "TAB-A04-BR3":
@@ -345,8 +343,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* Pad2起動設定チェック */
     private void checkSettingsTab2() {
-        SET_MODEL_ID(0, this);
-        if (GET_SETTINGS_FLAG(this)) {
+        Preferences.SET_MODEL_ID(0, this);
+        if (Preferences.GET_SETTINGS_FLAG(this)) {
             startActivity(new Intent(this, StartActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", result));
             overridePendingTransition(0, 0);
             finish();
@@ -355,8 +353,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* Pad3起動設定チェック */
     private void checkSettingsTab3() {
-        SET_MODEL_ID(1, this);
-        if (GET_SETTINGS_FLAG(this)) {
+        Preferences.SET_MODEL_ID(1, this);
+        if (Preferences.GET_SETTINGS_FLAG(this)) {
             if (permissionSettings()) {
                 startActivity(new Intent(this, StartActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", result));
                 overridePendingTransition(0, 0);
@@ -367,8 +365,8 @@ public class MainActivity extends Activity implements UpdateEventListener {
 
     /* PadNeo起動設定チェック */
     private void checkSettingsTabNeo() {
-        SET_MODEL_ID(2, this);
-        if (GET_SETTINGS_FLAG(this)) {
+        Preferences.SET_MODEL_ID(2, this);
+        if (Preferences.GET_SETTINGS_FLAG(this)) {
             if (permissionSettings()) {
                 startActivity(new Intent(this, StartActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", result));
                 overridePendingTransition(0, 0);
@@ -385,7 +383,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setMessage(R.string.dialog_notice_start)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> {
                     if (permissionSettings()) {
-                        SET_SETTINGS_FLAG(true, this);
+                        Preferences.SET_SETTINGS_FLAG(true, this);
                         startActivity(new Intent(this, StartActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", result));
                         overridePendingTransition(0, 0);
                         finish();
@@ -404,7 +402,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     .setIcon(R.drawable.alert)
                     .setPositiveButton(R.string.dialog_common_settings, (dialog, which) -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                            startActivityForResult(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", getPackageName(), null)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), REQUEST_PERMISSION);
+                            startActivityForResult(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.fromParts("package", getPackageName(), null)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), Constants.REQUEST_PERMISSION);
                     })
                     .setNeutralButton(R.string.dialog_common_exit, (dialogInterface, i) -> finishAndRemoveTask())
                     .show();
@@ -423,7 +421,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private boolean bindDchaService() {
-        return bindService(new Intent(DCHA_SERVICE).setPackage(PACKAGE_DCHASERVICE), new ServiceConnection() {
+        return bindService(new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE), new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 unbindService(this);
@@ -440,14 +438,14 @@ public class MainActivity extends Activity implements UpdateEventListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_UPDATE:
+            case Constants.REQUEST_UPDATE:
                 if (isNetWork()) {
                     showLoadingDialog();
                     supportCheck();
                 } else netWorkError();
                 break;
             case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
-            case REQUEST_PERMISSION:
+            case Constants.REQUEST_PERMISSION:
                 if (checkModel()) checkDcha();
                 else errorNotTab2Or3();
                 break;

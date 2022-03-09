@@ -1,60 +1,90 @@
 <resources>
     <!-- アプリ・アクティビティ -->
     <string name="app_name">CPad Customize Tool</string>
-    <string name="start_check_activity">カスタマイズツール</string>
-    <string name="main_normal_settings_activity">設定</string>
-    <string name="service_keep_service">維持サービス</string>
-    <string name="service_protect_keep_service">停止防御サービス</string>
-    <string name="app_home_activity">ホーム</string>
-    <string name="emergency_activity">緊急モード</string>
-    <string name="normal_mode_activity">通常モード</string>
-    <string name="app_info_activity">アプリの情報</string>
-    <string name="app_update_activity">アップデート</string>
-    <string name="select_home_launcher">ホームを選択してください</string>
-    <string name="reboot">再起動</string>
-    <string name="block_to_uninstall">アンインストールブロック設定</string>
+    <string name="permission_group_label">デバイスオーナーへのアクセス</string>
+    <string name="permission_group_description">Device OwnerのAPIを提供します。</string>
+    <string name="activity_start_check">カスタマイズツール</string>
+    <string name="activity_main_normal_settings">設定</string>
+    <string name="activity_emergency">緊急モード</string>
+    <string name="activity_normal">通常モード</string>
+    <string name="activity_app_info">アプリの情報</string>
+    <string name="activity_app_update">アップデート</string>
+    <string name="activity_reboot">再起動</string>
+    <string name="activity_uninstall_block">アンインストールブロック設定</string>
+    <string name="activity_crash_log">クラッシュ履歴</string>
+    <string name="service_keep">維持サービス</string>
+    <string name="service_protect_keep">停止防御サービス</string>
 
     <!-- welcome -->
     <string name="wel_title">利用規約</string>
-    <string name="wel_not_agree">同意しない</string>
+    <string name="wel_disagree">同意しない</string>
     <string name="wel_agree">同意する</string>
-    <string name="wel_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、https://ctabwiki.nerrog.net/の許諾契約およびこの規約に同意するものとし、\n開発者は一切の問題において責任を負わないものとします</string>
+    <string name="wel_terms_of_service">このアプリを利用する場合、「同意する」を押した時点で、%1$sの許諾契約およびこの規約に同意するものとし、開発者は一切の問題において責任を負わないものとします</string>
 
     <!-- メイン設定 -->
-    <string name="main_pre_category_system_ui">システムUI設定</string>
-    <string name="main_pre_title_system_ui">システムUIを学習用に変更</string>
-    <string name="main_pre_title_keep_system_ui">システムUIを通常用に維持</string>
-    <string name="main_pre_title_navigation_bar">ナビゲーションバーを非表示</string>
-    <string name="main_pre_title_keep_navigation_bar">ナビゲーションバーの表示を維持</string>
-    <string name="main_pre_category_android_settings">システム設定</string>
-    <string name="main_pre_title_usb_debug">USBデバッグ</string>
-    <string name="main_pre_title_keep_usb_debug">USBデバッグの有効を維持</string>
-    <string name="main_pre_title_non_market">提供元不明のアプリを許可</string>
-    <string name="main_pre_title_keep_non_market">提供元不明のアプリの許可を維持</string>
-    <string name="main_pre_title_change_home">ホームを変更</string>
-    <string name="main_pre_title_keep_home">ホームを維持</string>
-    <string name="main_pre_sum_keep_home">設定中のホームランチャーを維持します</string>
-    <string name="main_pre_title_other_settings">その他の設定</string>
-    <string name="main_pre_category_emergency_mode">緊急モード</string>
-    <string name="main_pre_title_select_course">受講中の講座を選択</string>
-    <string name="main_pre_title_change_settings">緊急モード実行時に変更する設定を変更</string>
-    <string name="main_pre_sum_change_settings">デフォルトではすべての設定が変更されます</string>
-    <string name="main_pre_title_manual">緊急モードの説明</string>
-    <string name="main_pre_category_change_to_normal_mode">通常モード</string>
-    <string name="main_pre_title_change_to_normal_mode_settings">通常モード実行時に変更する設定を変更</string>
-    <string name="main_pre_sum_change_to_normal_mode_settings">デフォルトではすべての設定が変更されます</string>
-    <string name="main_pre_title_normal_mode_manual">通常モードの説明</string>
-    <string name="main_pre_category_other_settings">その他の機能</string>
-    <string name="main_pre_title_reboot">再起動</string>
-    <string name="main_pre_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
-    <string name="main_pre_title_silent_install">サイレントインストール</string>
-    <string name="main_pre_title_resolution">解像度を変更</string>
-    <string name="main_pre_title_resolution_reset">解像度をリセット</string>
-    <string name="main_pre_title_use_dcha">DchaServiceを使用</string>
-    <string name="main_pre_sum_use_dcha">この機能を使用するには、\n表示されるダイアログの内容を確認してください</string>
-    <string name="main_pre_title_device_admin">デバイス管理者を有効にする</string>
-    <string name="main_pre_sum_device_admin">このアプリがアンインストールされないようにします</string>
-    <string name="main_pre_title_launcher">変更するランチャーを設定</string>
+    <string name="pre_main_category_system_ui">システムUI設定</string>
+    <string name="pre_main_category_system">システム設定</string>
+    <string name="pre_main_category_emergency_mode">緊急モード</string>
+    <string name="pre_main_category_change_to_normal_mode">通常モード</string>
+    <string name="pre_main_category_other_settings">その他の機能</string>
+    <string name="pre_main_title_system_ui">システムUIを学習用に変更</string>
+    <string name="pre_main_title_keep_system_ui">システムUIを通常用に維持</string>
+    <string name="pre_main_title_navigation_bar">ナビゲーションバーを非表示</string>
+    <string name="pre_main_title_keep_navigation_bar">ナビゲーションバーの表示を維持</string>
+    <string name="pre_main_title_usb_debug">USBデバッグ</string>
+    <string name="pre_main_title_keep_usb_debug">USBデバッグの有効を維持</string>
+    <string name="pre_main_title_non_market">提供元不明のアプリを許可</string>
+    <string name="pre_main_title_keep_non_market">提供元不明のアプリの許可を維持</string>
+    <string name="pre_main_title_change_home">ホームを変更</string>
+    <string name="pre_main_title_keep_home">ホームを維持</string>
+    <string name="pre_main_title_other_settings">その他の設定</string>
+    <string name="pre_main_title_select_course">受講中の講座を選択</string>
+    <string name="pre_main_title_change_settings">緊急モード実行時に変更する設定を変更</string>
+    <string name="pre_main_title_manual">緊急モードの説明</string>
+    <string name="pre_main_title_change_to_normal_mode_settings">通常モード実行時に変更する設定を変更</string>
+    <string name="pre_main_title_normal_mode_manual">通常モードの説明</string>
+    <string name="pre_main_title_reboot">再起動</string>
+    <string name="pre_main_title_reboot_shortcut">再起動のショートカットをホームに追加</string>
+    <string name="pre_main_title_silent_install">サイレントインストール</string>
+    <string name="pre_main_title_resolution">解像度を変更</string>
+    <string name="pre_main_title_resolution_reset">解像度をリセット</string>
+    <string name="pre_main_title_use_dcha">DchaServiceを使用</string>
+    <string name="pre_main_title_device_admin">デバイス管理者を有効にする</string>
+    <string name="pre_main_title_launcher">変更するランチャーを設定</string>
+    <string name="pre_main_title_device_owner">デバイスオーナーの機能</string>
+    <string name="pre_main_sum_keep_home">設定中のホームランチャーを維持します</string>
+    <string name="pre_main_sum_change_settings">デフォルトではすべての設定が変更されます</string>
+    <string name="pre_main_sum_change_to_normal_mode_settings">デフォルトではすべての設定が変更されます</string>
+    <string name="pre_main_sum_use_dcha">この機能を使用するには、\n表示されるダイアログの内容を確認してください</string>
+    <string name="pre_main_sum_device_admin">このアプリがアンインストールされないようにします</string>
+    <string name="pre_main_sum_silent_install">分割Apkには対応していません\n分割Apkは「デバイスオーナーの機能」にあるサイレントインストールからできます</string>
+
+    <!-- アプリ設定 -->
+    <string name="pre_app_category_start_settings">起動設定</string>
+    <string name="pre_app_category_settings">アプリ設定</string>
+    <string name="pre_app_category_update">アップデート設定</string>
+    <string name="pre_app_category_log">アプリログ</string>
+    <string name="pre_app_title_update_check">起動時のアップデートチェックを無効</string>
+    <string name="pre_app_title_dcha">DchaServiceによる設定変更</string>
+    <string name="pre_app_title_usb">デバイス起動時のUSBデバッグを有効</string>
+    <string name="pre_app_title_update">アップデートモードを選択</string>
+    <string name="pre_app_title_crash_history">クラッシュ履歴</string>
+    <string name="pre_app_title_delete_crash_history">クラッシュ履歴消去</string>
+    <string name="pre_app_sum_dcha">DchaServiceによってシステム設定を変更します</string>
+    <string name="pre_app_sum_usb">有効にすると、デバイス起動時にUSBデバッグが自動的に無効にされるのを防ぎます</string>
+    
+    <!-- デバイスオーナー設定 -->
+    <string name="pre_owner_title_uninstall_block">ユーザーアプリのアンインストールを無効</string>
+    <string name="pre_owner_title_permission">パーミッションポリシー</string>
+    <string name="pre_owner_title_silent_install">サイレントインストール</string>
+    <string name="pre_owner_title_device_owner">DeviceOwnerを解除</string>
+    <string name="pre_owner_sum_uninstall_block">ユーザーアプリのアンインストールをブロックします</string>
+    <string name="pre_owner_sum_silent_install">「xApk・apks」のインストールに対応しています\n「apks」をインストールするにはファイルを長押しして選択してください</string>
+
+    <!-- その他の設定 -->
+    <string name="pre_other_title_settings">設定を起動</string>
+    <string name="pre_other_title_development">開発者向けオプションを開く</string>
+    <string name="pre_other_title_adjustment">システムUI調整ツールを起動</string>
 
     <!-- メイン設定エラー -->
     <string name="main_error_message_enable_own">このアプリは現在使用できません\n\nDeviceOwnerを解除する場合は、\"DeviceOwnerを解除\"を押してください\n\nアンインストールブロックを解除する場合は、\"アンインストールブロックを開く\"を押してください\n\n\"デフォルト設定に戻す\"を押すと実行中の維持サービスが停止し、今まで操作した設定がデフォルト状態にクリアされます</string>
@@ -68,14 +98,11 @@
     <string name="un_text_2">すべて有効</string>
 
     <!-- メニュー -->
-    <string name="menu_select_app_info">アプリ情報</string>
-    <string name="menu_select_app_settings">アプリ設定</string>
-    <string name="menu_select_update">アップデートの確認</string>
+    <string name="menu_app_info">アプリ情報</string>
+    <string name="menu_app_settings">アプリ設定</string>
+    <string name="menu_app_update">アップデートの確認</string>
 
     <!-- ダイアログ -->
-    <string name="dialog_title_update">アプリの更新</string>
-    <string name="dialog_title_common_error">起動エラー</string>
-    <string name="dialog_title_error">エラー</string>
     <string name="dialog_common_ok">OK</string>
     <string name="dialog_common_yes">はい</string>
     <string name="dialog_common_no">いいえ</string>
@@ -84,24 +111,29 @@
     <string name="dialog_common_exit">終了</string>
     <string name="dialog_common_cancel">キャンセル</string>
     <string name="dialog_common_continue">続行</string>
+    <string name="dialog_title_update">アプリの更新</string>
+    <string name="dialog_title_common_error">起動エラー</string>
+    <string name="dialog_title_error">エラー</string>
     <string name="dialog_title_reboot">再起動しますか？</string>
+    <string name="dialog_title_notice_start">利用上の注意</string>
+    <string name="dialog_title_grant_permission">権限設定</string>
+    <string name="dialog_title_dcha_service">以下の内容を確認してください</string>
+    <string name="dialog_title_emergency_manual">緊急モードの説明</string>
+    <string name="dialog_title_normal_manual">通常モードの説明</string>
+    <string name="dialog_title_resolution">解像度の設定</string>
+    <string name="dialog_title_launcher">ランチャーを選択</string>
     <string name="dialog_error_not_pad2">この端末は”チャレンジパッド2・3・NEO”ではありません\nこのアプリは使用できません</string>
     <string name="dialog_error_not_dchaservice">”DchaService”が動作していません\nこのアプリは使用できません\n\n”DchaService”を使用しない場合、”続行”を押してください</string>
-    <string name="dialog_title_notice_start">お知らせ</string>
     <string name="dialog_notice_start">このアプリはアンチウイルスソフトに不審なプログラムとして誤検知される場合があります\n詳しくは、CTabLaboに所属している開発者に問い合わせてください\nこのダイアログは次回起動以降表示しません</string>
-    <string name="dialog_title_grant_permission">権限設定</string>
     <string name="dialog_no_update">アップデートはありません</string>
     <string name="dialog_emergency_select_course">受講中の講座を選択してください</string>
     <string name="dialog_mode_select_settings">実行時に変更する設定を選択してください\n設定変更後は”OK”を押してください</string>
-    <string name="dialog_title_dcha_service">以下の内容を確認してください</string>
     <string name="dialog_dcha_service">この機能を使用したことによるすべての問題を開発者は一切責任を負いません\nDchaServiceの機能を使用しますか?</string>
-    <string name="dialog_title_emergency_manual">緊急モードの説明</string>
     <string name="dialog_emergency_manual">\nこの機能はアクティビティを呼び出して使用します\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します\n\n使用する場合ホームランチャーなどから”.mode.emergency.EmergencyActivity”を追加し、タップしてください\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします\n\n＊ナビゲーションバーを隠す＊\n\n＊アプリ履歴を全消去＊\n\n＊ホームを勉強ホームに変更＊\n\n＊システムUIを学習用に変更＊</string>
     <string name="dialog_emergency_manual_red">\nシステムUIを変更するためOneToucher等のアクティビティや他のアプリを起動させるアプリをインストールしておかないと初期化以外に勉強ホームから抜け出すことができなくなります\n\nアプリ履歴を全消去はナビゲーションバーの□ボタンを押すと表示されるアプリ履歴のアプリを終了するだけであり、バックグランド上で動いているOneToucher等のアプリは停止しません</string>
-    <string name="dialog_title_normal_manual">通常モードの説明</string>
     <string name="dialog_normal_manual">\nこの機能はアクティビティを呼び出して使用します\n\nOneToucherのようにアクティビティを呼び出すアプリで使用します\n\n使用する場合ホームランチャーなどから”.mode.normal.NormalActivity”を追加し、タップしてください\n\nこのアクティビティが呼び出されると即座に次の通りの動作をします\n\n＊ナビゲーションバーを表示＊\n\n＊ホームを変更＊\n\n＊システムUIを通常用に変更＊\n\n＊ホームを起動＊</string>
     <string name="dialog_error_not_grant_permission">システム設定の変更が許可されていません\n”設定”を押した後に表示されるスイッチを有効にし許可してください</string>
-    <string name="dialog_question_device_owner">DeviceOwnerを無効にしますか？</string>
+    <string name="dialog_question_device_owner">DeviceOwnerを解除しますか？</string>
     <string name="dialog_question_device_admin">デバイス管理者を無効にしますか？\nこの操作を行うとDchaServiceによってアプリがアンインストールされる可能性があります</string>
     <string name="dialog_question_are_you_sure">本当によろしいですか？</string>
     <string name="dialog_no_permission">システム設定の変更が許可されていません\n”設定”を押した後に表示されるスイッチを有効にし許可してください</string>
@@ -109,11 +141,9 @@
     <string name="dialog_connection_error">サーバーと接続できませんでした\n通信状態を確認してください</string>
     <string name="dialog_wifi_error">通信エラーが発生しました\nネットワークに接続してください\n続行する場合機能が制限されます</string>
     <string name="dialog_error">エラーが発生しました</string>
-    <string name="dialog_title_resolution">解像度の設定</string>
     <string name="dialog_failure_silent_install">サイレントインストールに失敗しました</string>
     <string name="dialog_success_silent_install">サイレントインストールに成功しました</string>
     <string name="dialog_illegal_value">不正な値です</string>
-    <string name="dialog_title_launcher">ランチャーを選択</string>
     <string name="dialog_error_no_work_dcha">DchaServiceが動作していないためこの機能は使用できません</string>
     <string name="dialog_error_no_work_dcha_util">DchaUtilServiceが動作していないためこの機能は使用できません</string>
     <string name="dialog_update_caution">ご利用のデバイスではコンピュータ経由でアップデートする必要があります\n遷移先のページより新しいバージョンのapkファイルをダウンロードしてadbでインストールしてください</string>
@@ -130,17 +160,25 @@
     <string name="toast_no_development_option">開発者向けオプションは有効になっていません</string>
 
     <!-- アプリ情報 -->
-    <string name="info_text_1">アプリの情報</string>
-    <string name="info_text_2">CTabLaboに参加して提案・不具合報告をしてください\n下のボタンより参加可能です</string>
-    <string name="info_text_3">・YiB-PC\ncpadmaterial.png\nex.png\nnavigationbar.png\nウォークスルーの追加</string>
-    <string name="info_text_4">・Copyright 2015\-2017 Stephen Tuso\nwelcome-android</string>
-    <string name="info_button">参加</string>
+    <string name="info_app_info">アプリの情報</string>
     <string name="info_app_state_not_use">アプリの状態：このアプリは使用できません / このアプリは開発者により使用制限が行われているか、開発が停止した可能性があります</string>
     <string name="info_app_state_use">アプリの状態：リリースバージョン / このアプリはサポートされており、使用可能です</string>
+    <string name="info_development">開発者</string>
+    <string name="info_development_label">Kobold</string>
+    <string name="info_organization">CTabLab</string>
+    <string name="info_organization_label">CTabLabに参加して提案・不具合報告をしてください\n下のボタンより参加可能です</string>
+    <string name="info_organization_button">参加</string>
+    <string name="info_library">外部ライブラリー</string>
+    <string name="info_library_wel_label">・Copyright 2015\-2017 Stephen Tuso\nwelcome-android</string>
+    <string name="info_library_yib_label">・YiB-PC\ncpadmaterial.png\nex.png\nnavigationbar.png\nウォークスルーの追加</string>
+    <string name="info_github">GitHub</string>
+    <string name="info_github_label">このアプリのソースコードを取得できます</string>
+    <string name="info_github_button">取得</string>
     
     <!-- レイアウト -->
-    <string name="layout_update_dialog_update_info">アップデートがあります\nアップデートしますか？\n\n更新情報：\n</string>
-    <string name="layout_update_dialog_update_detail_info">詳細な更新情報</string>
+    <string name="layout_img_content_description">icon</string>
+    <string name="layout_update_info">アップデートがあります\nアップデートしますか？\n\n更新情報：\n</string>
+    <string name="layout_update_detail_info">詳細な更新情報</string>
     <string name="layout_resolution_width">横の解像度</string>
     <string name="layout_resolution_x">x</string>
     <string name="layout_resolution_height">縦の解像度</string>

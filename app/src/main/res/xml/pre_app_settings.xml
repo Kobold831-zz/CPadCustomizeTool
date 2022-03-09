@@ -1,60 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <PreferenceCategory app:iconSpaceReserved="false" android:title="起動設定">
-
-        <SwitchPreference
+        <PreferenceCategory
             app:iconSpaceReserved="false"
-            android:key="switch_auto_update_check"
-            android:title="起動時のアップデートチェックを無効" />
+            android:title="@string/pre_app_category_start_settings">
+                <SwitchPreference
+                    app:iconSpaceReserved="false"
+                    android:key="switch_auto_update_check"
+                    android:title="@string/pre_app_title_update_check" />
+        </PreferenceCategory>
 
-    </PreferenceCategory>
-
-    <PreferenceCategory app:iconSpaceReserved="false" android:title="アプリ設定">
-
-        <SwitchPreference
+        <PreferenceCategory
             app:iconSpaceReserved="false"
-            android:key="switch_is_change_settings_use_dcha"
-            android:title="DchaServiceによる設定変更"
-            android:summary="DchaServiceによってシステム設定を変更します" />
+            android:title="@string/pre_app_category_settings">
+                <SwitchPreference
+                    app:iconSpaceReserved="false"
+                    android:key="switch_is_change_settings_use_dcha"
+                    android:title="@string/pre_app_title_dcha"
+                    android:summary="@string/pre_app_sum_dcha" />
 
-        <SwitchPreference
+                <SwitchPreference
+                    app:iconSpaceReserved="false"
+                    android:key="switch_auto_usb_debug"
+                    android:title="@string/pre_app_title_usb"
+                    android:summary="@string/pre_app_sum_usb" />
+        </PreferenceCategory>
+
+        <PreferenceCategory
             app:iconSpaceReserved="false"
-            android:key="switch_auto_usb_debug"
-            android:title="デバイス起動時のUSBデバッグを有効"
-            android:summary="有効にすると、デバイス起動時にUSBデバッグが自動的に無効にされるのを防ぎます" />
+            android:title="@string/pre_app_category_update">
+                <ListPreference
+                    app:iconSpaceReserved="false"
+                    android:enabled="false"
+                    android:selectable="false"
+                    android:key="app_update_mode"
+                    android:title="@string/pre_app_title_update"
+                    android:dialogTitle="モードを選択してください"
+                    android:defaultValue="1"
+                    android:entries="@array/app_update_mode_text"
+                    android:entryValues="@array/app_update_mode_value" />
+        </PreferenceCategory>
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:iconSpaceReserved="false" android:title="アップデート設定">
-
-        <ListPreference
+        <PreferenceCategory
             app:iconSpaceReserved="false"
-            android:enabled="false"
-            android:selectable="false"
-            android:key="app_update_mode"
-            android:title="アップデートモードを選択"
-            android:dialogTitle="モードを選択してください"
-            android:defaultValue="1"
-            android:entries="@array/app_update_mode_text"
-            android:entryValues="@array/app_update_mode_value" />
+            android:title="@string/pre_app_category_log">
+                <Preference
+                    app:iconSpaceReserved="false"
+                    android:key="debug_log"
+                    android:title="@string/pre_app_title_crash_history" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory app:iconSpaceReserved="false" android:title="アプリログ">
-
-        <Preference
-            app:iconSpaceReserved="false"
-            android:key="debug_log"
-            android:title="クラッシュ履歴" />
-
-        <Preference
-            app:iconSpaceReserved="false"
-            android:key="debug_log_remove"
-            android:title="クラッシュ履歴消去" />
-
-    </PreferenceCategory>
-
+                <Preference
+                    app:iconSpaceReserved="false"
+                    android:key="debug_log_remove"
+                    android:title="@string/pre_app_title_delete_crash_history" />
+        </PreferenceCategory>
 </PreferenceScreen>

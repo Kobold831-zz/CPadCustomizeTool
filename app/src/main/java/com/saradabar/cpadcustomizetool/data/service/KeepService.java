@@ -1,10 +1,5 @@
 package com.saradabar.cpadcustomizetool.data.service;
 
-import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_SERVICE;
-import static com.saradabar.cpadcustomizetool.Common.Variable.DCHA_STATE;
-import static com.saradabar.cpadcustomizetool.Common.Variable.HIDE_NAVIGATION_BAR;
-import static com.saradabar.cpadcustomizetool.Common.Variable.PACKAGE_DCHASERVICE;
-
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,10 +14,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.widget.Toast;
 
-import com.saradabar.cpadcustomizetool.Common;
-import com.saradabar.cpadcustomizetool.menu.CrashDetection;
+import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.util.Constants;
+import com.saradabar.cpadcustomizetool.util.Preferences;
+import com.saradabar.cpadcustomizetool.util.Toast;
 
 import java.util.Objects;
 
@@ -50,9 +46,9 @@ public class KeepService extends Service {
         mRunnable = new Runnable() {
             @Override
             public void run() {
-                SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-                if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
-                    if (!getHome().equals(sp.getString(Common.Variable.KEY_SAVE_KEEP_HOME, null))) {
+                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    if (!getHome().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null))) {
                         bindDchaService();
                     }
                     mHandler.postDelayed(this, 5000);
@@ -61,8 +57,8 @@ public class KeepService extends Service {
                 }
             }
         };
-        SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             mHandler.post(mRunnable);
         }else {
             mHandler.removeCallbacks(mRunnable);
@@ -79,8 +75,8 @@ public class KeepService extends Service {
     }
 
     private void bindDchaService() {
-        Intent intent = new Intent(DCHA_SERVICE);
-        intent.setPackage(PACKAGE_DCHASERVICE);
+        Intent intent = new Intent(Constants.DCHA_SERVICE);
+        intent.setPackage(Constants.PACKAGE_DCHA_SERVICE);
         bindService(intent, dchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -89,10 +85,10 @@ public class KeepService extends Service {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
-            SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+            SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
             try {
                 mDchaService.clearDefaultPreferredApp(getHome());
-                mDchaService.setDefaultPreferredHomeApp(sp.getString(Common.Variable.KEY_SAVE_KEEP_HOME, null));
+                mDchaService.setDefaultPreferredHomeApp(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null));
             } catch (RemoteException ignored) {
             }
             unbindService(this);
@@ -109,8 +105,8 @@ public class KeepService extends Service {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                if (Settings.System.getInt(getContentResolver(), DCHA_STATE) == 3) {
-                    Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
+                if (Settings.System.getInt(getContentResolver(), Constants.DCHA_STATE) == 3) {
+                    Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 0);
                 }
             } catch (Settings.SettingNotFoundException ignored) {
             }
@@ -122,8 +118,8 @@ public class KeepService extends Service {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             try {
-                if (Settings.System.getInt(getContentResolver(), HIDE_NAVIGATION_BAR) == 1) {
-                    Settings.System.putInt(getContentResolver(), HIDE_NAVIGATION_BAR, 0);
+                if (Settings.System.getInt(getContentResolver(), Constants.HIDE_NAVIGATION_BAR) == 1) {
+                    Settings.System.putInt(getContentResolver(), Constants.HIDE_NAVIGATION_BAR, 0);
                 }
             } catch (Settings.SettingNotFoundException ignored) {
             }
@@ -140,11 +136,10 @@ public class KeepService extends Service {
                 }
             } catch (SecurityException | Settings.SettingNotFoundException e) {
                 e.printStackTrace();
-                Common.Variable.toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);
-                Common.Variable.toast.show();
-                SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                Toast.toast(getApplicationContext(), "権限を付与してから再試行してください");
+                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
                 SharedPreferences.Editor spe = sp.edit();
-                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false);
+                spe.putBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false);
                 spe.apply();
                 stopSelf();
             }
@@ -157,25 +152,24 @@ public class KeepService extends Service {
             super.onChange(selfChange);
             try {
                 if (Settings.Global.getInt(getContentResolver(), Settings.Global.ADB_ENABLED) == 0) {
-                    if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                        Settings.System.putInt(getContentResolver(), DCHA_STATE, 3);
+                    if (Preferences.GET_MODEL_ID(getApplicationContext()) == 2) {
+                        Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 3);
                     }
                     Thread.sleep(100);
                     Settings.Global.putInt(getContentResolver(), Settings.Global.ADB_ENABLED, 1);
-                    if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                        Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
+                    if (Preferences.GET_MODEL_ID(getApplicationContext()) == 2) {
+                        Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 0);
                     }
                 }
             } catch (SecurityException | Settings.SettingNotFoundException | InterruptedException e) {
                 e.printStackTrace();
-                if (Common.GET_MODEL_ID(getApplicationContext()) == 2) {
-                    Settings.System.putInt(getContentResolver(), DCHA_STATE, 0);
+                if (Preferences.GET_MODEL_ID(getApplicationContext()) == 2) {
+                    Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 0);
                 }
-                Common.Variable.toast = Toast.makeText(getApplication(), "権限を付与してから再試行してください", Toast.LENGTH_SHORT);
-                Common.Variable.toast.show();
-                SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                Toast.toast(getApplicationContext(), "権限を付与してから再試行してください");
+                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
                 SharedPreferences.Editor spe = sp.edit();
-                spe.putBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false);
+                spe.putBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false);
                 spe.apply();
                 stopSelf();
             }
@@ -184,31 +178,31 @@ public class KeepService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(getApplicationContext()));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
         instance = this;
-        SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false)) {
             isObserberHideEnable = true;
-            getContentResolver().registerContentObserver(Settings.System.getUriFor(HIDE_NAVIGATION_BAR), false, NavigationObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
             isObserberStateEnable = true;
-            getContentResolver().registerContentObserver(Settings.System.getUriFor(DCHA_STATE), false, DchaStateObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, DchaStateObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
             isObserberMarketEnable = true;
             getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
             isObserberUsbEnable = true;
             getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             isObserberHomeEnable = true;
             loopKeepHome();
         }
-        if (!sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             return START_NOT_STICKY;
         }
         return START_STICKY;
@@ -217,9 +211,9 @@ public class KeepService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(getApplicationContext()));
-        SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             startService(new Intent(getApplicationContext(), KeepService.class));
         }
     }
@@ -230,34 +224,34 @@ public class KeepService extends Service {
     }
 
     public void startService() {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(getApplicationContext()));
-        SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false)) {
             isObserberHideEnable = true;
-            getContentResolver().registerContentObserver(Settings.System.getUriFor(HIDE_NAVIGATION_BAR), false, NavigationObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
             isObserberStateEnable = true;
-            getContentResolver().registerContentObserver(Settings.System.getUriFor(DCHA_STATE), false, DchaStateObserver);
+            getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, DchaStateObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
             isObserberMarketEnable = true;
             getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
             isObserberUsbEnable = true;
             getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
-        if (sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             isObserberHomeEnable = true;
             loopKeepHome();
         }
     }
 
     public void stopService(int stopCode) {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashDetection(getApplicationContext()));
-        SharedPreferences sp = getSharedPreferences(Common.Variable.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブサーバーを無効化 */
         switch (stopCode) {
             case 1:
@@ -315,7 +309,7 @@ public class KeepService extends Service {
                 stopSelf();
                 break;
         }
-        if (!sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Common.Variable.KEY_ENABLED_KEEP_HOME, false)) {
+        if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             stopService(new Intent(getApplicationContext(), ProtectKeepService.class));
             stopSelf();
         }

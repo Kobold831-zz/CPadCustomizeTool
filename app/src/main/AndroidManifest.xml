@@ -5,13 +5,14 @@
     package="com.saradabar.cpadcustomizetool">
 
     <permission-group
-        android:label="CPad Customize Tool"
+        android:label="@string/app_name"
         android:name="android.permission-group.KOBOLD" />
 
     <permission
         android:permissionGroup="android.permission-group.KOBOLD"
         android:name="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
-        android:label="デバイスオーナーへのアクセス"
+        android:label="@string/permission_group_label"
+        android:description="@string/permission_group_description"
         android:protectionLevel="dangerous" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -32,15 +33,16 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        tools:ignore="GoogleAppIndexingWarning"
         android:allowBackup="false">
 
-        <activity android:name=".WelAppActivity" android:theme="@style/WelcomeScreenTheme.Light"/>
+        <activity
+            android:name=".view.activity.WelAppActivity"
+            android:theme="@style/WelcomeScreenTheme.Light"/>
 
         <activity
             android:clearTaskOnLaunch="true"
             android:name=".MainActivity"
-            android:label="@string/start_check_activity"
+            android:label="@string/activity_start_check"
             android:theme="@style/StartTheme"
             android:exported="true">
             <intent-filter>
@@ -52,27 +54,27 @@
         </activity>
 
         <activity
-            android:name=".StartActivity"
-            android:label="@string/main_normal_settings_activity"
-            android:theme="@style/MainPreference" />
+            android:name=".view.activity.StartActivity"
+            android:label="@string/activity_main_normal_settings"
+            android:theme="@style/MainPreferenceTheme" />
 
         <activity
-            android:name=".data.check.UpdateActivity"
-            android:label="@string/app_update_activity"
+            android:name=".view.activity.UpdateActivity"
+            android:label="@string/activity_app_update"
             android:theme="@style/MainTheme"
             tools:ignore="InnerclassSeparator" />
 
         <activity
-            android:name=".menu.InformationActivity"
-            android:label="@string/app_info_activity"
+            android:name=".view.activity.InformationActivity"
+            android:label="@string/activity_app_info"
             android:theme="@style/MainTheme"
             tools:ignore="InnerclassSeparator" />
 
         <activity
             android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
-            android:name=".mode.emergency.EmergencyActivity"
-            android:label="@string/emergency_activity"
+            android:name=".view.activity.EmergencyActivity"
+            android:label="@string/activity_emergency"
             android:theme="@style/ActivityTheme"
             android:exported="true">
             <intent-filter>
@@ -83,8 +85,8 @@
         <activity
             android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
-            android:name=".mode.normal.NormalActivity"
-            android:label="@string/normal_mode_activity"
+            android:name=".view.activity.NormalActivity"
+            android:label="@string/activity_normal"
             android:theme="@style/ActivityTheme"
             android:exported="true">
             <intent-filter>
@@ -95,8 +97,8 @@
         <activity
             android:clearTaskOnLaunch="true"
             android:documentLaunchMode="always"
-            android:name=".RebootActivity"
-            android:label="@string/reboot"
+            android:name=".view.activity.RebootActivity"
+            android:label="@string/activity_reboot"
             android:icon="@drawable/reboot"
             android:theme="@style/ActivityTheme"
             android:exported="true">
@@ -106,28 +108,26 @@
         </activity>
 
         <activity
-            android:name=".set.BlockerActivity"
+            android:name=".view.activity.BlockerActivity"
             android:theme="@style/MainTheme"
-            tools:ignore="InnerclassSeparator"
-            android:label="@string/block_to_uninstall" />
+            android:label="@string/activity_uninstall_block" />
 
         <activity
-            android:name=".menu.CrashLog"
+            android:name=".view.activity.CrashLogActivity"
             android:theme="@style/MainTheme"
-            android:label="クラッシュ履歴" />
+            android:label="@string/activity_crash_log" />
 
         <service
             android:name=".data.service.KeepService"
-            android:label="@string/service_keep_service"
-            tools:ignore="InnerclassSeparator" />
+            android:label="@string/service_keep" />
 
         <service
             android:name=".data.service.ProtectKeepService"
-            android:label="@string/service_protect_keep_service"
-            android:process=":protect"
-            tools:ignore="InnerclassSeparator" />
+            android:label="@string/service_protect_keep"
+            android:process=":protect" />
 
-        <service android:name=".data.service.DeviceOwnerService"
+        <service
+            android:name=".data.service.DeviceOwnerService"
             android:label="@string/app_name"
             android:permission="com.saradabar.cpadcustomizetool.permission.ACCESS_DEVICE_OWNER"
             android:exported="true">
@@ -136,13 +136,13 @@
             </intent-filter>
         </service>
 
-        <service android:name=".data.service.InstallService"
+        <service
+            android:name=".data.service.InstallService"
             android:label="@string/app_name"
             android:exported="false" />
 
         <receiver
             android:name=".Receiver.UpdateReceiver"
-            tools:ignore="InnerclassSeparator"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
@@ -152,7 +152,6 @@
         <receiver
             android:name=".Receiver.BootCompletedReceiver"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
-            tools:ignore="InnerclassSeparator"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
