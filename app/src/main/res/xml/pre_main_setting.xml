@@ -18,5 +18,10 @@
                     app:iconSpaceReserved="false"
                     android:key="intent_sys_ui_adjustment"
                     android:title="@string/pre_other_title_adjustment" />
+
+                <Preference
+                    app:iconSpaceReserved="false"
+                    android:key="android_screen_off_time"
+                    android:title="@string/pre_other_title_screen_off_time" />
         </PreferenceCategory>
 </PreferenceScreen>

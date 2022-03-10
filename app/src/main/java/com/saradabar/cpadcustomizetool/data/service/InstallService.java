@@ -8,9 +8,8 @@ import android.os.IBinder;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.data.connection.Updater;
-import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
-import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListenerList;
+import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 
 public class InstallService extends Service {
 

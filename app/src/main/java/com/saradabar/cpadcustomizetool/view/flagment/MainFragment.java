@@ -61,7 +61,7 @@ public class MainFragment extends PreferenceFragment {
     private boolean isObserverMarketEnable = false;
     private boolean isObserverUsbEnable = false;
 
-    private String setLauncherPackage, installData;
+    private String setLauncherPackage, installData, systemUpdateFilePath;
     private ListView mListView;
     private IDchaService mDchaService;
     private IDchaUtilService mIDchaUtilService;
@@ -88,7 +88,8 @@ public class MainFragment extends PreferenceFragment {
             preferenceChangeHome,
             preferenceResolution,
             preferenceResolutionReset,
-            preferenceDeviceOwner;
+            preferenceDeviceOwner,
+            preferenceSystemUpdate;
 
     @SuppressLint("StaticFieldLeak")
     private static MainFragment instance = null;
@@ -181,6 +182,10 @@ public class MainFragment extends PreferenceFragment {
                                 /* listviewの更新 */
                                 mListView.invalidateViews();
                                 setCheckedSwitch();
+                                break;
+                            case Constants.FLAG_SYSTEM_UPDATE:
+                                mDchaService.copyUpdateImage(systemUpdateFilePath, "/cache/update.zip");
+                                mDchaService.rebootPad(2, "/cache/update.zip");
                                 break;
                             case Constants.FLAG_CHECK:
                             case Constants.FLAG_TEST:
@@ -277,6 +282,7 @@ public class MainFragment extends PreferenceFragment {
         preferenceResolution = findPreference("android_resolution");
         preferenceResolutionReset = findPreference("android_resolution_reset");
         preferenceDeviceOwner = findPreference("device_owner");
+        preferenceSystemUpdate = findPreference("android_update");
 
         /* オブサーバーを有効化 */
         isObserverStateEnable = true;
@@ -761,6 +767,20 @@ public class MainFragment extends PreferenceFragment {
             return false;
         });
 
+        preferenceSystemUpdate.setOnPreferenceClickListener(preference -> {
+            preferenceSystemUpdate.setEnabled(false);
+            try {
+                startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("application/zip").addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false), ""), Constants.REQUEST_SYSTEM_UPDATE);
+            } catch (ActivityNotFoundException ignored) {
+                preferenceSystemUpdate.setEnabled(true);
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("ファイルブラウザがインストールされていません")
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+            return false;
+        });
+
         switch (Preferences.GET_MODEL_ID(getActivity())) {
             case 0:
                 preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
@@ -989,29 +1009,52 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.REQUEST_INSTALL) {
-            preferenceSilentInstall.setEnabled(true);
-            /* シングルApk */
-            try {
-                installData = getInstallData(getActivity(), data.getData());
-            } catch (NullPointerException ignored) {
-                installData = null;
-            }
-            if (installData != null) {
-                silentInstallTask silent = new silentInstallTask();
-                silent.setListener(StartActivity.getInstance().createListener());
-                silent.execute();
-            } else {
-                new AlertDialog.Builder(getActivity())
-                        .setMessage("ファイルデータを取得できませんでした")
-                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                        .show();
-            }
+        switch (requestCode) {
+            case Constants.REQUEST_INSTALL:
+                preferenceSilentInstall.setEnabled(true);
+                /* シングルApk */
+                try {
+                    installData = getFilePath(getActivity(), data.getData());
+                } catch (NullPointerException ignored) {
+                    installData = null;
+                }
+                if (installData != null) {
+                    silentInstallTask silent = new silentInstallTask();
+                    silent.setListener(StartActivity.getInstance().createListener());
+                    silent.execute();
+                } else {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage("ファイルデータを取得できませんでした")
+                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                            .show();
+                }
+                break;
+            case Constants.REQUEST_SYSTEM_UPDATE:
+                preferenceSystemUpdate.setEnabled(true);
+                try {
+                    systemUpdateFilePath = getFilePath(getActivity(), data.getData());
+                } catch (Exception ignored) {
+                    systemUpdateFilePath = null;
+                }
+                if (systemUpdateFilePath != null) {
+                    if (bindDchaService(Constants.FLAG_SYSTEM_UPDATE, true)) {
+                        new AlertDialog.Builder(getActivity())
+                                .setMessage(R.string.dialog_error)
+                                .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                                .show();
+                    }
+                } else {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage("ファイルデータを取得できませんでした")
+                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                            .show();
+                }
+                break;
         }
     }
 
     /* 選択したファイルデータを取得 */
-    private String getInstallData(Context context, Uri uri) {
+    private String getFilePath(Context context, Uri uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
             String[] str = DocumentsContract.getDocumentId(uri).split(":");
             switch (uri.getAuthority()) {

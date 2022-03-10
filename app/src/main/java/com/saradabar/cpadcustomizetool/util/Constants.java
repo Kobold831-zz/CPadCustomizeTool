@@ -15,12 +15,14 @@ public class Constants {
     public static final int FLAG_MARKET_APP_TRUE = 8;
     public static final int FLAG_MARKET_APP_FALSE = 9;
     public static final int FLAG_SET_LAUNCHER = 10;
+    public static final int FLAG_SYSTEM_UPDATE= 11;
     public static final int FLAG_RESOLUTION = 20;
 
     public static final int REQUEST_UPDATE = 0;
     public static final int REQUEST_ADMIN = 1;
     public static final int REQUEST_INSTALL = 2;
     public static final int REQUEST_PERMISSION = 3;
+    public static final int REQUEST_SYSTEM_UPDATE = 4;
 
     public static final String URL_UPDATE_CHECK = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Update.xml";
     public static final String URL_SUPPORT_CHECK = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Support.xml";

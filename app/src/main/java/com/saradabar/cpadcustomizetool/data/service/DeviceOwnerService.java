@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.aurora.store.data.service.IInstallResult;
 import com.saradabar.cpadcustomizetool.R;
@@ -103,26 +102,20 @@ public class DeviceOwnerService extends Service {
     private void postStatus(int status, String packageName, String extra) {
         switch (status) {
             case PackageInstaller.STATUS_SUCCESS:
-                if (bindInstallResult(0, packageName, null, null)) {
-                    Log.v("TAG", "Success");
-                } else Log.v("TAG", "失敗");
+                bindInstallResult(0, packageName, null, null);
                 break;
             case PackageInstaller.STATUS_FAILURE_ABORTED:
-                if (bindInstallResult(1, packageName, getErrorMessage(this, status), null)) {
-                    Log.v("TAG", "Success");
-                } else Log.v("TAG", "失敗");
+                bindInstallResult(1, packageName, getErrorMessage(this, status), null);
                 break;
             default:
-                if (bindInstallResult(2, packageName, getErrorMessage(this, status), extra)) {
-                    Log.v("TAG", "Success");
-                } else Log.v("TAG", "失敗");
+                bindInstallResult(2, packageName, getErrorMessage(this, status), extra);
                 break;
         }
     }
 
-    private boolean bindInstallResult(int flag, String packageName, String errorString, String extra) {
+    private void bindInstallResult(int flag, String packageName, String errorString, String extra) {
         Intent intent = new Intent("com.aurora.store.data.service.ResultService").setPackage("com.aurora.store");
-        return bindService(intent, new ServiceConnection() {
+        bindService(intent, new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 IInstallResult mIInstallResult = IInstallResult.Stub.asInterface(iBinder);

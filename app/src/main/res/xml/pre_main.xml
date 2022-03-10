@@ -161,6 +161,11 @@
 
         <Preference
             app:iconSpaceReserved="false"
+            android:key="android_update"
+            android:title="@string/pre_main_title_system_update" />
+
+        <Preference
+            app:iconSpaceReserved="false"
             android:key="device_owner"
             android:title="@string/pre_main_title_device_owner" />
 
