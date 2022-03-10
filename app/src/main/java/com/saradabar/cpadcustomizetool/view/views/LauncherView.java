@@ -63,7 +63,7 @@ public class LauncherView {
 
         /* ランチャーに設定されているかの確認 */
         private boolean isLauncher(String s) {
-            return Objects.equals(s, StartActivity.getInstance().getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0).activityInfo.packageName);
+            return Objects.equals(s, getContext().getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0).activityInfo.packageName);
         }
     }
 

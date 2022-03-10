@@ -180,42 +180,24 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    if (Preferences.GET_MODEL_ID(this) != 2) {
-                        AsyncFileDownload asyncFileDownload = initFileLoader();
-                        ProgressDialog progressDialog = new ProgressDialog(this);
-                        progressDialog.setTitle(R.string.dialog_title_update);
-                        progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialog.setProgress(0);
-                        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog2, which2) -> {
-                            asyncFileDownload.cancel(true);
-                            if (isNetWork()) {
-                                showLoadingDialog();
-                                supportCheck();
-                            } else netWorkError();
-                        });
-                        ProgressHandler progressHandler = new ProgressHandler();
-                        progressHandler.progressDialog = progressDialog;
-                        progressHandler.asyncfiledownload = asyncFileDownload;
-                        progressHandler.sendEmptyMessage(0);
-                    } else {
-                        new AlertDialog.Builder(this)
-                                .setCancelable(false)
-                                .setTitle(R.string.dialog_title_update)
-                                .setMessage(R.string.dialog_update_caution)
-                                .setPositiveButton(R.string.dialog_common_yes, (dialog2, which2) -> {
-                                    try {
-                                        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_UPDATE)).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION), Constants.REQUEST_UPDATE);
-                                    } catch (ActivityNotFoundException ignored) {
-                                        Toast.toast(this, R.string.toast_unknown_activity);
-                                        if (isNetWork()) {
-                                            showLoadingDialog();
-                                            supportCheck();
-                                        } else netWorkError();
-                                    }
-                                })
-                                .show();
-                    }
+                    AsyncFileDownload asyncFileDownload = initFileLoader();
+                    ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setTitle(R.string.dialog_title_update);
+                    progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    progressDialog.setProgress(0);
+                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog2, which2) -> {
+                        asyncFileDownload.cancel(true);
+                        if (isNetWork()) {
+                            showLoadingDialog();
+                            supportCheck();
+                        } else netWorkError();
+                    });
+                    progressDialog.show();
+                    ProgressHandler progressHandler = new ProgressHandler();
+                    progressHandler.progressDialog = progressDialog;
+                    progressHandler.asyncfiledownload = asyncFileDownload;
+                    progressHandler.sendEmptyMessage(0);
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> {
                     if (isNetWork()) {

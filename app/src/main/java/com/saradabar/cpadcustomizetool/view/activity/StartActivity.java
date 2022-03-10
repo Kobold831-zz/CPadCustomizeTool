@@ -246,6 +246,7 @@ public class StartActivity extends Activity implements InstallEventListener {
     public DeviceOwnerFragment.TryXApkTask.Listener XApkListener() {
         return new DeviceOwnerFragment.TryXApkTask.Listener() {
             AlertDialog alertDialog;
+
             @Override
             public void onShow() {
                 View view = getLayoutInflater().inflate(R.layout.view_progress, null);
@@ -361,7 +362,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 }
                 new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(getString(R.string.dialog_failure_silent_install) + str)
+                        .setMessage(getString(R.string.dialog_failure_silent_install) + "\n" + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -377,7 +378,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 }
                 new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(getString(R.string.dialog_error) + str)
+                        .setMessage(getString(R.string.dialog_error) + "\n" + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -448,6 +449,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 mHandler = new Handler();
                 mRunnable = new Runnable() {
                     int i = 10;
+
                     @Override
                     public void run() {
                         AlertDialog.setMessage("変更を適用しますか？\n" + i + "秒後に元の設定に戻ります");
@@ -496,11 +498,11 @@ public class StartActivity extends Activity implements InstallEventListener {
 
     @Override
     public void onInstallFailure(String str) {
-        DeviceOwnerFragment.OwnerInstallTask.mListener.onFailure("\n" + str);
+        DeviceOwnerFragment.OwnerInstallTask.mListener.onFailure(str);
     }
 
     @Override
     public void onInstallError(String str) {
-        DeviceOwnerFragment.OwnerInstallTask.mListener.onError("\n" + str);
+        DeviceOwnerFragment.OwnerInstallTask.mListener.onError(str);
     }
 }

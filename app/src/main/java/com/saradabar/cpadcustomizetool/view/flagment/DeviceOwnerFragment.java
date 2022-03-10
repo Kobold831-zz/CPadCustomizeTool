@@ -501,7 +501,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             try {
-                return splitInstaller.splitCommitSession(getInstance().getActivity(), sessionId).bl;
+                return splitInstaller.splitCommitSession(getInstance().getActivity(), sessionId, 0).bl;
             } catch (Exception e) {
                 return e.getMessage();
             }

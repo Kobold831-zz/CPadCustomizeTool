@@ -49,8 +49,8 @@ public class SplitInstaller {
         return new Result(true, "", writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile), 0);
     }
 
-    public Result splitCommitSession(Context context, int sessionId) {
-        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, context), "", 0, 0);
+    public Result splitCommitSession(Context context, int sessionId, int code) {
+        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, context, code), "", 0, 0);
     }
 
     private int createSession(PackageInstaller packageInstaller) throws IOException {
@@ -91,11 +91,22 @@ public class SplitInstaller {
         }
     }
 
-    private boolean commitSession(PackageInstaller packageInstaller, int sessionId, Context context) {
+    private boolean commitSession(PackageInstaller packageInstaller, int sessionId, Context context, int code) {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
-            Intent intent = new Intent(context, InstallService.class).putExtra("isAuroraInstall", false);
+            Intent intent;
+            switch (code) {
+                case 0:
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0);
+                    break;
+                case 1:
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 1);
+                    break;
+                default:
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0);
+                    break;
+            }
             PendingIntent pendingIntent = PendingIntent.getService(
                     context,
                     sessionId,

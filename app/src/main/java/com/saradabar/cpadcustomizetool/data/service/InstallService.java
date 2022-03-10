@@ -7,6 +7,8 @@ import android.content.pm.PackageInstaller;
 import android.os.IBinder;
 
 import com.saradabar.cpadcustomizetool.R;
+import com.saradabar.cpadcustomizetool.data.connection.Updater;
+import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
 import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListenerList;
 
@@ -19,14 +21,20 @@ public class InstallService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        postStatus(intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
+        postStatus(intent.getIntExtra("REQUEST_CODE", 0), intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
         stopSelf();
         return START_NOT_STICKY;
     }
 
-    private void postStatus(int status, String packageName, String extra) {
+    private void postStatus(int code, int status, String packageName, String extra) {
         InstallEventListenerList installEventListener = new InstallEventListenerList();
-        installEventListener.addEventListener(StartActivity.getInstance());
+        switch (code) {
+            case 0:
+                installEventListener.addEventListener(StartActivity.getInstance());
+                break;
+            case 1:
+                installEventListener.addEventListener(Updater.getInstance());
+        }
         switch (status) {
             case PackageInstaller.STATUS_SUCCESS:
                 installEventListener.installSuccessNotify();

@@ -155,6 +155,16 @@ public class Preferences {
         return string;
     }
 
+    public static void SET_UPDATE_MODE(Context context, int i) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putInt("update_mode", i).apply();
+    }
+
+    public static int GET_UPDATE_MODE(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt("update_mode", 1);
+    }
+
     public static void SET_CONFIRMATION(boolean bl, Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean("confirmation", bl).apply();

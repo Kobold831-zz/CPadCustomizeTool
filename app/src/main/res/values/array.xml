@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="app_update_mode_text" >
-        <item>adb</item>
-        <item>DchaService</item>
-        <item>DeviceOwner</item>
-    </string-array>
-
-    <string-array name="app_update_mode_value" >
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
     <string-array name="mode_text" >
         <item>小学講座</item>
         <item>中学講座・その他</item>

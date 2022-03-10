@@ -1,13 +1,20 @@
 package com.saradabar.cpadcustomizetool.view.flagment;
 
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
@@ -17,6 +24,12 @@ import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
+import com.saradabar.cpadcustomizetool.view.views.LauncherView;
+import com.saradabar.cpadcustomizetool.view.views.SingleListView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ApplicationSettingsFragment extends PreferenceFragment {
 
@@ -25,7 +38,8 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
             autoUsbDebug;
 
     Preference crashLog,
-            crashLogRemove;
+            crashLogRemove,
+            updateMode;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -38,6 +52,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         autoUsbDebug = findPreference("switch_auto_usb_debug");
         crashLog = findPreference("debug_log");
         crashLogRemove = findPreference("debug_log_remove");
+        updateMode = findPreference("app_update_mode");
 
         autoUpdateCheck.setChecked(!Preferences.GET_UPDATE_FLAG(getActivity()));
         changeSettingsDcha.setChecked(Preferences.GET_CHANGE_SETTINGS_DCHA_FLAG(getActivity()));
@@ -99,6 +114,74 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                         }
                     })
                     .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
+                    .show();
+            return false;
+        });
+
+        updateMode.setOnPreferenceClickListener(preference -> {
+            View v = getActivity().getLayoutInflater().inflate(R.layout.layout_update_list, null);
+            List<String> list = new ArrayList<>();
+            list.add("パッケージインストーラ");
+            list.add("ADB");
+            list.add("DchaService");
+            list.add("DeviceOwner");
+            List<SingleListView.AppData> dataList = new ArrayList<>();
+            int i = 0;
+            for (String str : list) {
+                SingleListView.AppData data = new SingleListView.AppData();
+                data.label = str;
+                data.updateMode = i;
+                dataList.add(data);
+                i++;
+            }
+            ListView listView = v.findViewById(R.id.update_list);
+            listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+            listView.setAdapter(new SingleListView.AppListAdapter(getActivity(), dataList));
+            listView.setOnItemClickListener((parent, mView, position, id) -> {
+                switch (position) {
+                    case 0:
+                        if (Preferences.GET_MODEL_ID(getActivity()) != 2) {
+                            Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
+                            listView.invalidateViews();
+                        } else {
+                            new AlertDialog.Builder(getActivity())
+                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                                    .show();
+                        }
+                        break;
+                    case 1:
+                        Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
+                        listView.invalidateViews();
+                        break;
+                    case 2:
+                        if (!MainFragment.getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
+                            Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
+                            listView.invalidateViews();
+                        } else {
+                            new AlertDialog.Builder(getActivity())
+                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                                    .show();
+                        }
+                        break;
+                    case 3:
+                        if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
+                            Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
+                            listView.invalidateViews();
+                        } else {
+                            new AlertDialog.Builder(getActivity())
+                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                                    .show();
+                        }
+                        break;
+                }
+            });
+            new AlertDialog.Builder(getActivity())
+                    .setView(v)
+                    .setTitle("モードを選択してください")
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
         });

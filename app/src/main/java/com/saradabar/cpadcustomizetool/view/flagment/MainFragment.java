@@ -567,7 +567,7 @@ public class MainFragment extends PreferenceFragment {
             textView.setText(R.string.dialog_emergency_manual_red);
             textView.setTextSize(16);
             textView.setTextColor(Color.RED);
-            textView.setPadding(20, 0, 40, 20);
+            textView.setPadding(35, 0, 35, 0);
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_emergency_manual)
                     .setMessage(R.string.dialog_emergency_manual)
@@ -587,7 +587,7 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceNormalLauncher.setOnPreferenceClickListener(preference -> {
-            View view = getActivity().getLayoutInflater().inflate(R.layout.layout_normal_launcher, null);
+            View view = getActivity().getLayoutInflater().inflate(R.layout.layout_normal_launcher_list, null);
             List<ResolveInfo> installedAppList = getActivity().getPackageManager().queryIntentActivities(new Intent().setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
             List<NormalModeView.AppData> dataList = new ArrayList<>();
             for (ResolveInfo resolveInfo : installedAppList) {
@@ -644,7 +644,7 @@ public class MainFragment extends PreferenceFragment {
                     .setTitle(R.string.dialog_title_dcha_service)
                     .setMessage(R.string.dialog_dcha_service)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        if (StartActivity.getInstance().bindDchaService()) {
+                        if (bindDchaService(Constants.FLAG_CHECK, true)) {
                             new AlertDialog.Builder(getActivity())
                                     .setMessage(R.string.dialog_error_no_work_dcha)
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())

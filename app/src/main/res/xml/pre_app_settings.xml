@@ -30,16 +30,10 @@
         <PreferenceCategory
             app:iconSpaceReserved="false"
             android:title="@string/pre_app_category_update">
-                <ListPreference
+                <Preference
                     app:iconSpaceReserved="false"
-                    android:enabled="false"
-                    android:selectable="false"
                     android:key="app_update_mode"
-                    android:title="@string/pre_app_title_update"
-                    android:dialogTitle="モードを選択してください"
-                    android:defaultValue="1"
-                    android:entries="@array/app_update_mode_text"
-                    android:entryValues="@array/app_update_mode_value" />
+                    android:title="@string/pre_app_title_update" />
         </PreferenceCategory>
 
         <PreferenceCategory

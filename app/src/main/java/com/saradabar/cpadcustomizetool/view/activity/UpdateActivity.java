@@ -114,36 +114,21 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    if (Preferences.GET_MODEL_ID(this) != 2) {
-                        AsyncFileDownload asyncFileDownload = initFileLoader();
-                        ProgressDialog progressDialog = new ProgressDialog(this);
-                        progressDialog.setTitle(R.string.dialog_title_update);
-                        progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialog.setProgress(0);
-                        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog2, which2) -> {
-                            asyncFileDownload.cancel(true);
-                            finish();
-                        });
-                        ProgressHandler progressHandler = new ProgressHandler();
-                        progressHandler.progressDialog = progressDialog;
-                        progressHandler.asyncfiledownload = asyncFileDownload;
-                        progressHandler.sendEmptyMessage(0);
-                    } else {
-                        new AlertDialog.Builder(this)
-                                .setCancelable(false)
-                                .setTitle(R.string.dialog_title_update)
-                                .setMessage(R.string.dialog_update_caution)
-                                .setPositiveButton(R.string.dialog_common_yes, (dialog2, which2) -> {
-                                    try {
-                                        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_UPDATE)), Constants.REQUEST_UPDATE);
-                                    } catch (ActivityNotFoundException ignored) {
-                                        Toast.toast(this, R.string.toast_unknown_activity);
-                                        finish();
-                                    }
-                                })
-                                .show();
-                    }
+                    AsyncFileDownload asyncFileDownload = initFileLoader();
+                    ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setTitle(R.string.dialog_title_update);
+                    progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    progressDialog.setProgress(0);
+                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog2, which2) -> {
+                        asyncFileDownload.cancel(true);
+                        finish();
+                    });
+                    progressDialog.show();
+                    ProgressHandler progressHandler = new ProgressHandler();
+                    progressHandler.progressDialog = progressDialog;
+                    progressHandler.asyncfiledownload = asyncFileDownload;
+                    progressHandler.sendEmptyMessage(0);
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finish())
                 .show();
