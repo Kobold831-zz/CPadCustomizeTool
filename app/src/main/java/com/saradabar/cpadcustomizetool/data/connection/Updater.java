@@ -117,7 +117,7 @@ public class Updater implements InstallEventListener {
     @Override
     public void onInstallFailure(String str) {
         new AlertDialog.Builder(activity)
-                .setMessage(activity.getString(R.string.dialog_failure_silent_install) + "\n" + str)
+                .setMessage(activity.getString(R.string.dialog_info_failure_silent_install) + "\n" + str)
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> activity.finish())
                 .show();
@@ -171,7 +171,7 @@ public class Updater implements InstallEventListener {
                 new AlertDialog.Builder(activity)
                         .setCancelable(false)
                         .setTitle(R.string.dialog_title_update)
-                        .setMessage(R.string.dialog_update_caution)
+                        .setMessage(R.string.dialog_info_update_caution)
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which2) -> {
                             try {
                                 activity.startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_UPDATE)), Constants.REQUEST_UPDATE);
@@ -214,7 +214,7 @@ public class Updater implements InstallEventListener {
                     } else Preferences.SET_UPDATE_MODE(activity, 0);
                     new AlertDialog.Builder(activity)
                             .setCancelable(false)
-                            .setMessage("DeviceOwnerではありません\nアップデートモードをリセットしました")
+                            .setMessage(activity.getString(R.string.dialog_error_reset_update_mode))
                             .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> activity.finish())
                             .show();
                 }

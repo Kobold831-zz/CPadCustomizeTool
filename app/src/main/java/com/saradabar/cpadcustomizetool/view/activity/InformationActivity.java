@@ -24,7 +24,7 @@ public class InformationActivity extends Activity {
         showInformation();
         findViewById(R.id.info_button).setOnClickListener(view -> {
             try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_WIKI)));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URL_WIKI_DISCORD)));
             } catch (ActivityNotFoundException ignored) {
                 Toast.toast(this, R.string.toast_unknown_activity);
             }

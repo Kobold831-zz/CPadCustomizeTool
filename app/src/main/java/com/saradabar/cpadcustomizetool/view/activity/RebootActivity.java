@@ -37,7 +37,7 @@ public class RebootActivity extends Activity {
     private void startReboot() {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
-                .setMessage(R.string.dialog_title_reboot)
+                .setMessage(R.string.dialog_question_reboot)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                     try {
                         mDchaService.rebootPad(0, null);

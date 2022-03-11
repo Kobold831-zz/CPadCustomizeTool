@@ -19,7 +19,6 @@ import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
 import com.saradabar.cpadcustomizetool.data.connection.Updater;
 import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 import com.saradabar.cpadcustomizetool.util.Constants;
-import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
 import com.saradabar.cpadcustomizetool.util.Variables;
 
@@ -93,7 +92,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
                 .setIcon(R.drawable.alert)
-                .setMessage(R.string.dialog_connection_error)
+                .setMessage(R.string.dialog_error_start_connection)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finish())
                 .show();
     }
@@ -138,7 +137,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_update)
-                .setMessage(R.string.dialog_no_update)
+                .setMessage(R.string.dialog_info_no_update)
                 .setPositiveButton(R.string.dialog_common_ok,
                         (dialog, which) -> finish())
                 .show();
@@ -151,7 +150,7 @@ public class UpdateActivity extends Activity implements UpdateEventListener {
     }
 
     private void showLoadingDialog() {
-        loadingDialog = ProgressDialog.show(this, "", "アプリの更新を確認中・・・", true);
+        loadingDialog = ProgressDialog.show(this, "", getString(R.string.progress_state_update_check), true);
     }
 
     private void cancelLoadingDialog() {

@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
                 .setIcon(R.drawable.alert)
-                .setMessage(R.string.dialog_wifi_error)
+                .setMessage(R.string.dialog_error_start_wifi)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     result = false;
@@ -150,7 +150,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
                 .setIcon(R.drawable.alert)
-                .setMessage(R.string.dialog_connection_error)
+                .setMessage(R.string.dialog_error_start_connection)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> finishAndRemoveTask())
                 .show();
     }
@@ -183,10 +183,10 @@ public class MainActivity extends Activity implements UpdateEventListener {
                     AsyncFileDownload asyncFileDownload = initFileLoader();
                     ProgressDialog progressDialog = new ProgressDialog(this);
                     progressDialog.setTitle(R.string.dialog_title_update);
-                    progressDialog.setMessage("アップデートファイルをサーバーからダウンロード中・・・");
+                    progressDialog.setMessage(getString(R.string.progress_state_downloading_update_file));
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                     progressDialog.setProgress(0);
-                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "キャンセル", (dialog2, which2) -> {
+                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dialog_common_cancel), (dialog2, which2) -> {
                         asyncFileDownload.cancel(true);
                         if (isNetWork()) {
                             showLoadingDialog();
@@ -219,7 +219,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
                 .setIcon(R.drawable.alert)
-                .setMessage(R.string.dialog_not_use)
+                .setMessage(R.string.dialog_error_start_use)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .setNeutralButton(R.string.dialog_common_continue, (dialog, which) -> {
                     result = false;
@@ -232,7 +232,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     }
 
     private void showLoadingDialog() {
-        loadingDialog = ProgressDialog.show(this, "", "通信中です・・・", true);
+        loadingDialog = ProgressDialog.show(this, "", getString(R.string.progress_state_connecting), true);
         loadingDialog.show();
     }
 
@@ -255,7 +255,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle(R.string.dialog_title_common_error)
-                .setMessage(R.string.dialog_error_not_pad2)
+                .setMessage(R.string.dialog_error_start_cpad)
                 .setIcon(R.drawable.alert)
                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                 .show();
@@ -285,7 +285,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
             new AlertDialog.Builder(this)
                     .setCancelable(false)
                     .setTitle(R.string.dialog_title_common_error)
-                    .setMessage(R.string.dialog_error_not_dchaservice)
+                    .setMessage(R.string.dialog_error_start_dcha_service)
                     .setIcon(R.drawable.alert)
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> finishAndRemoveTask())
                     .setNeutralButton(R.string.dialog_common_continue, (dialogInterface, i) -> {
@@ -380,7 +380,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
             new AlertDialog.Builder(this)
                     .setCancelable(false)
                     .setTitle(R.string.dialog_title_grant_permission)
-                    .setMessage(R.string.dialog_no_permission)
+                    .setMessage(R.string.dialog_error_start_permission)
                     .setIcon(R.drawable.alert)
                     .setPositiveButton(R.string.dialog_common_settings, (dialog, which) -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)

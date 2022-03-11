@@ -113,7 +113,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             } catch (ActivityNotFoundException ignored) {
                 preferenceOwnerSilentInstall.setEnabled(true);
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("ファイルブラウザがインストールされていません")
+                        .setMessage(getString(R.string.dialog_error_no_file_browse))
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
             }
@@ -121,26 +121,26 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         });
 
         if (getNowOwnerPackage() != null) {
-            preferenceNowSetOwnerApp.setSummary("DeviceOwnerは" + getNowOwnerPackage() + "に設定されています");
-        } else preferenceNowSetOwnerApp.setSummary("DeviceOwnerはデバイスに設定されていません");
+            preferenceNowSetOwnerApp.setSummary(getString(R.string.pre_owner_sum_message_1) + getNowOwnerPackage() + getString(R.string.pre_owner_sum_message_2));
+        } else preferenceNowSetOwnerApp.setSummary(getString(R.string.pre_owner_sum_no_device_owner));
 
         switch (Preferences.GET_MODEL_ID(getActivity())) {
             case 0:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchPreferencePermissionForced.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceOwnerSilentInstall.setEnabled(false);
-                preferenceOwnerSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceOwnerSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 setPreferenceSettings();
                 break;
             case 1:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
+                switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
                 preferenceBlockToUninstallSettings.setEnabled(false);
-                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceDisableDeviceOwner.setEnabled(false);
-                preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceDisableDeviceOwner.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceOwnerSilentInstall.setEnabled(false);
-                preferenceOwnerSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceOwnerSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 break;
             case 2:
                 setPreferenceSettings();
@@ -155,10 +155,10 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             preferenceDisableDeviceOwner.setEnabled(false);
             switchPreferencePermissionForced.setEnabled(false);
             preferenceOwnerSilentInstall.setEnabled(false);
-            preferenceBlockToUninstallSettings.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-            preferenceDisableDeviceOwner.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-            switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-            preferenceOwnerSilentInstall.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
+            preferenceBlockToUninstallSettings.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+            preferenceDisableDeviceOwner.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+            switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+            preferenceOwnerSilentInstall.setSummary(getString(R.string.pre_owner_sum_not_use_function));
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
@@ -195,20 +195,20 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         switch (Preferences.GET_MODEL_ID(getActivity())) {
             case 0:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchPreferencePermissionForced.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceOwnerSilentInstall.setEnabled(false);
-                preferenceOwnerSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceOwnerSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 setPreferenceSettings();
                 break;
             case 1:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary("DeviceOwnerではないためこの機能は使用できません\nこの機能を使用するにはADBでDeviceOwnerを許可してください");
-                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + "ではこの機能は使用できません");
-                preferenceDisableDeviceOwner.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+                preferenceBlockToUninstallSettings.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
+                preferenceDisableDeviceOwner.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceBlockToUninstallSettings.setEnabled(false);
                 preferenceDisableDeviceOwner.setEnabled(false);
                 preferenceOwnerSilentInstall.setEnabled(false);
-                preferenceOwnerSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceOwnerSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 break;
             case 2:
                 setPreferenceSettings();
@@ -239,7 +239,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             new AlertDialog.Builder(getActivity())
-                    .setMessage("ファイルデータを取得できませんでした")
+                    .setMessage(getString(R.string.dialog_error_no_file_data))
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
         }
@@ -337,19 +337,19 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         protected Object doInBackground(Object... value) {
             String str = new File(getInstance().splitInstallData[0]).getParent() + File.separator + new File(getInstance().splitInstallData[0]).getName().replaceFirst("\\..*", ".zip");
             /* 拡張子.xapkを.zipに変更 */
-            onProgressUpdate("拡張子を変更しています・・・");
+            onProgressUpdate(getInstance().getString(R.string.progress_state_rename));
             new File(getInstance().splitInstallData[0]).renameTo(new File(str));
             File file = new File(Path.getTemporaryPath(getInstance().getActivity()));
             /* zipを展開して外部ディレクトリに一時保存 */
-            onProgressUpdate("圧縮ファイルを展開しています・・・");
+            onProgressUpdate(getInstance().getString(R.string.progress_state_unpack));
             getInstance().totalByte = new File(str).length();
             try {
                 ZipUtil.unpack(new File(str), file);
             } catch (Exception e) {
-                return "ストレージの空き容量が不足している可能性があります\n" + e.getMessage();
+                return getInstance().getString(R.string.installer_status_no_allocatable_space) + e.getMessage();
             }
             /* 拡張子.zipを.xapkに変更 */
-            onProgressUpdate("拡張子を変更しています・・・");
+            onProgressUpdate(getInstance().getString(R.string.progress_state_rename));
             new File(str).renameTo(new File(new File(str).getParent() + File.separator + new File(str).getName().replaceFirst("\\..*", ".xapk")));
             File[] list = file.listFiles();
             if (list != null) {
@@ -361,7 +361,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                         c++;
                         try {
                             /* obbデータをコピー */
-                            onProgressUpdate("obbデータをコピーしています・・・");
+                            onProgressUpdate(getInstance().getString(R.string.progress_state_copy_file));
                             File[] obbName = new File(list[i].getPath() + "/obb").listFiles();
                             File[] obbFile = obbName != null ? obbName[0].listFiles() : new File[0];
                             getInstance().totalByte = obbFile != null ? obbFile[0].length() : 0;
@@ -369,10 +369,10 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                             obbPath2 = obbFile != null ? obbFile[0].getName() : null;
                             FileUtils.copyDirectory(new File(list[i].getPath() + "/obb/"), new File(Environment.getExternalStorageDirectory() + "/Android/obb"));
                         } catch (Exception e) {
-                            return "ストレージの空き容量が不足している可能性があります\n" + e.getMessage();
+                            return getInstance().getString(R.string.installer_status_no_allocatable_space) + e.getMessage();
                         }
                     } else {
-                        onProgressUpdate("ファイルを確認しています・・・");
+                        onProgressUpdate(getInstance().getString(R.string.progress_state_check_file));
                         str = list[i].getName();
                         /* apkファイルならパスをインストールデータへ */
                         if (str.substring(str.lastIndexOf(".")).equalsIgnoreCase(".apk")) {
@@ -396,7 +396,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         @Override
         protected void onPostExecute(Object result) {
             if (result == null) {
-                mListener.onError("エラー\n不明なエラーが発生しました");
+                mListener.onError(getInstance().getString(R.string.installer_status_unknown_error));
                 return;
             }
             if (result.equals(true)) {
@@ -510,7 +510,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         @Override
         protected void onPostExecute(Object result) {
             if (result == null) {
-                mListener.onError("エラー\n不明なエラーが発生しました");
+                mListener.onError(getInstance().getString(R.string.installer_status_unknown_error));
                 return;
             }
             if (result.equals(true)) {

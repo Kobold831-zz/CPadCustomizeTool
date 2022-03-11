@@ -149,6 +149,7 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
+    /* Dchaサービスコネクション */
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -161,6 +162,7 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
+    /* DchaUtilサービスコネクション */
     ServiceConnection mDchaUtilServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -173,7 +175,7 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
-
+    /* Dcha・UtilServiceにバインド */
     public boolean bindDchaService(int flag, boolean isDchaService) {
         try {
             if (isDchaService) {
@@ -269,6 +271,7 @@ public class MainFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         instance = this;
+        /* サービスのインターフェースを取得 */
         bindDchaService(Constants.FLAG_CHECK, true);
         bindDchaService(Constants.FLAG_CHECK, false);
     }
@@ -276,7 +279,6 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_main, rootKey);
-
         switchDchaState = findPreference("switch1");
         switchKeepDchaState = findPreference("switch2");
         switchHideBar = findPreference("switch3");
@@ -624,7 +626,7 @@ public class MainFragment extends PreferenceFragment {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
             listView.setAdapter(new NormalModeView.AppListAdapter(getActivity(), dataList));
             listView.setOnItemClickListener((parent, mView, position, id) -> {
-                Preferences.SET_NORMAL_LAUNCHER(Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", ""), new StartActivity().getInstance());
+                Preferences.SET_NORMAL_LAUNCHER(Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", ""), getActivity());
                 /* listviewの更新 */
                 listView.invalidateViews();
                 setCheckedSwitch();
@@ -639,7 +641,7 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceReboot.setOnPreferenceClickListener(preference -> {
             new AlertDialog.Builder(getActivity())
-                    .setMessage(R.string.dialog_title_reboot)
+                    .setMessage(R.string.dialog_question_reboot)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindDchaService(Constants.FLAG_REBOOT, true))
                     .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> dialog.dismiss())
                     .show();
@@ -648,8 +650,8 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceRebootShortCut.setOnPreferenceClickListener(preference -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getActivity().getSystemService(ShortcutManager.class).requestPinShortcut(new ShortcutInfo.Builder(getActivity(), "再起動")
-                        .setShortLabel("再起動")
+                getActivity().getSystemService(ShortcutManager.class).requestPinShortcut(new ShortcutInfo.Builder(getActivity(), getString(R.string.shortcut_reboot))
+                        .setShortLabel(getString(R.string.shortcut_reboot))
                         .setIcon(Icon.createWithResource(getActivity(), R.drawable.reboot))
                         .setIntent(new Intent(Intent.ACTION_MAIN).setClassName(getActivity(), "com.saradabar.cpadcustomizetool.view.activity.RebootActivity"))
                         .build(), null);
@@ -665,11 +667,11 @@ public class MainFragment extends PreferenceFragment {
             }
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.dialog_title_dcha_service)
-                    .setMessage(R.string.dialog_dcha_service)
+                    .setMessage(R.string.dialog_question_dcha_service)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
                         if (!bindDchaService(Constants.FLAG_CHECK, true)) {
                             new AlertDialog.Builder(getActivity())
-                                    .setMessage(R.string.dialog_error_no_work_dcha)
+                                    .setMessage(R.string.dialog_error_not_work_dcha)
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                     .show();
                         } else {
@@ -722,7 +724,7 @@ public class MainFragment extends PreferenceFragment {
             } catch (ActivityNotFoundException ignored) {
                 preferenceSilentInstall.setEnabled(true);
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("ファイルブラウザがインストールされていません")
+                        .setMessage(getString(R.string.dialog_error_no_file_browse))
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
             }
@@ -733,7 +735,7 @@ public class MainFragment extends PreferenceFragment {
             /* DchaUtilServiceが機能しているか */
             if (!bindDchaService(Constants.FLAG_CHECK, false)) {
                 new AlertDialog.Builder(getActivity())
-                        .setMessage(R.string.dialog_error_no_work_dcha_util)
+                        .setMessage(R.string.dialog_error_not_work_dcha_util)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
                 return false;
@@ -753,7 +755,7 @@ public class MainFragment extends PreferenceFragment {
                             if (width < 300 || height < 300) {
                                 new AlertDialog.Builder(getActivity())
                                         .setTitle(R.string.dialog_title_error)
-                                        .setMessage(R.string.dialog_illegal_value)
+                                        .setMessage(R.string.dialog_error_illegal_value)
                                         .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                         .show();
                             } else {
@@ -764,7 +766,7 @@ public class MainFragment extends PreferenceFragment {
                         } catch (NumberFormatException ignored) {
                             new AlertDialog.Builder(getActivity())
                                     .setTitle(R.string.dialog_title_error)
-                                    .setMessage(R.string.dialog_illegal_value)
+                                    .setMessage(R.string.dialog_error_illegal_value)
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                     .show();
                         }
@@ -775,6 +777,14 @@ public class MainFragment extends PreferenceFragment {
         });
 
         preferenceResolutionReset.setOnPreferenceClickListener(preference -> {
+            /* DchaUtilServiceが機能しているか */
+            if (!bindDchaService(Constants.FLAG_CHECK, false)) {
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.dialog_error_not_work_dcha_util)
+                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                        .show();
+                return false;
+            }
             resetResolution();
             return false;
         });
@@ -791,27 +801,28 @@ public class MainFragment extends PreferenceFragment {
             } catch (ActivityNotFoundException ignored) {
                 preferenceSystemUpdate.setEnabled(true);
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("ファイルブラウザがインストールされていません")
+                        .setMessage(getString(R.string.dialog_error_no_file_browse))
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
             }
             return false;
         });
 
+        /* 端末ごとにPreferenceの状態を設定 */
         switch (Preferences.GET_MODEL_ID(getActivity())) {
             case 0:
-                preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceSilentInstall.setEnabled(false);
                 break;
             case 1:
-                preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceSilentInstall.setEnabled(false);
-                switchDeviceAdministrator.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchDeviceAdministrator.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 switchDeviceAdministrator.setEnabled(false);
                 break;
             case 2:
-                switchMarketApp.setSummary(Build.MODEL + "ではこの機能は使用できません");
-                switchKeepMarketApp.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
+                switchKeepMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 switchMarketApp.setEnabled(false);
                 switchKeepMarketApp.setEnabled(false);
                 break;
@@ -819,7 +830,7 @@ public class MainFragment extends PreferenceFragment {
 
         if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
+            switchDeviceAdministrator.setSummary(getString(R.string.pre_main_sum_already_device_owner));
         }
 
         /* DchaServiceを使用するか */
@@ -845,13 +856,13 @@ public class MainFragment extends PreferenceFragment {
             if (Preferences.GET_CONFIRMATION(getActivity())) {
                 new AlertDialog.Builder(getActivity())
                         .setCancelable(false)
-                        .setTitle("本当によろしいですか？")
-                        .setMessage("このデバイスのシステム領域にDchaServiceが恒久的な変更を加えていないことを検出しました\n続行すると一部の動作がAndroidシステムによって制限される可能性があります")
+                        .setTitle(getString(R.string.dialog_question_are_you_sure))
+                        .setMessage(getString(R.string.dialog_confirmation))
                         .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
                             new AlertDialog.Builder(getActivity())
                                     .setCancelable(false)
-                                    .setTitle("最終確認")
-                                    .setMessage("続行するとこの操作は取り消せません\n初期化をおこなってもシステム領域の変更、Androidシステムによる制限はもとには戻りません\n続行すると警告は無効になり、設定変更が可能になります")
+                                    .setTitle(getString(R.string.dialog_title_final_confirmation))
+                                    .setMessage(getString(R.string.dialog_final_confirmation))
                                     .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
                                         Preferences.SET_CONFIRMATION(true, getActivity());
                                         dialog1.dismiss();
@@ -882,10 +893,8 @@ public class MainFragment extends PreferenceFragment {
 
     /* 再起動ショートカットを作成 */
     private void makeRebootShortcut() {
-        getActivity().sendBroadcast(new Intent("com.android.launcher.action.INSTALL_SHORTCUT")
-                .putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(Intent.ACTION_MAIN)
-                        .setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.view.activity.RebootActivity")
-                        .setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.view.activity.RebootActivity"))
+        getActivity().sendBroadcast(new Intent("com.android.launcher.action.INSTALL_SHORTCUT").putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(Intent.ACTION_MAIN)
+                .setClassName("com.saradabar.cpadcustomizetool", "com.saradabar.cpadcustomizetool.view.activity.RebootActivity"))
                 .putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(getActivity(), R.drawable.reboot))
                 .putExtra(Intent.EXTRA_SHORTCUT_NAME, R.string.activity_reboot));
         Toast.toast(getActivity(), R.string.toast_common_success);
@@ -923,11 +932,12 @@ public class MainFragment extends PreferenceFragment {
         } catch (PackageManager.NameNotFoundException ignored) {
         }
         if (normalLauncherName == null) {
-            preferenceNormalLauncher.setSummary("変更するランチャーは設定されていません");
+            preferenceNormalLauncher.setSummary(getString(R.string.pre_main_sum_no_setting_launcher));
         } else {
-            preferenceNormalLauncher.setSummary("変更するランチャーは" + normalLauncherName + "に設定されています");
+            preferenceNormalLauncher.setSummary(getString(R.string.pre_main_sum_message_2) + normalLauncherName + getString(R.string.pre_main_sum_message_3));
         }
 
+        /* 維持スイッチが有効のときサービスが停止していたら起動 */
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             getActivity().startService(new Intent(getActivity(), KeepService.class));
             for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
@@ -967,7 +977,6 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-
         if (getActivity().getActionBar() != null) getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         if (!preferenceChangeHome.isEnabled()) preferenceChangeHome.setEnabled(true);
 
@@ -986,18 +995,18 @@ public class MainFragment extends PreferenceFragment {
 
         switch (Preferences.GET_MODEL_ID(getActivity())) {
             case 0:
-                preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceSilentInstall.setEnabled(false);
                 break;
             case 1:
-                preferenceSilentInstall.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                preferenceSilentInstall.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceSilentInstall.setEnabled(false);
-                switchDeviceAdministrator.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchDeviceAdministrator.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 switchDeviceAdministrator.setEnabled(false);
                 break;
             case 2:
-                switchMarketApp.setSummary(Build.MODEL + "ではこの機能は使用できません");
-                switchKeepMarketApp.setSummary(Build.MODEL + "ではこの機能は使用できません");
+                switchMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
+                switchKeepMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 switchMarketApp.setEnabled(false);
                 switchKeepMarketApp.setEnabled(false);
                 break;
@@ -1005,7 +1014,7 @@ public class MainFragment extends PreferenceFragment {
 
         if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
             switchDeviceAdministrator.setEnabled(false);
-            switchDeviceAdministrator.setSummary("DeviceOwnerのためこの機能は使用できません");
+            switchDeviceAdministrator.setSummary(getString(R.string.pre_main_sum_already_device_owner));
         }
     }
 
@@ -1037,7 +1046,7 @@ public class MainFragment extends PreferenceFragment {
                     silent.execute();
                 } else {
                     new AlertDialog.Builder(getActivity())
-                            .setMessage("ファイルデータを取得できませんでした")
+                            .setMessage(getString(R.string.dialog_error_no_file_data))
                             .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                             .show();
                 }
@@ -1058,7 +1067,7 @@ public class MainFragment extends PreferenceFragment {
                     }
                 } else {
                     new AlertDialog.Builder(getActivity())
-                            .setMessage("ファイルデータを取得できませんでした")
+                            .setMessage(getString(R.string.dialog_error_no_file_data))
                             .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                             .show();
                 }
@@ -1211,7 +1220,7 @@ public class MainFragment extends PreferenceFragment {
         }
         if (!bindDchaService(Constants.FLAG_RESOLUTION, false)) {
             new AlertDialog.Builder(getActivity())
-                    .setMessage(R.string.dialog_error_no_work_dcha_util)
+                    .setMessage(R.string.dialog_error)
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
         }

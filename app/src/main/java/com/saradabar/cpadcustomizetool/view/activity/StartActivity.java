@@ -206,7 +206,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onShow() {
                 progressDialog = new ProgressDialog(StartActivity.this);
                 progressDialog.setTitle("");
-                progressDialog.setMessage("コピー中・・・");
+                progressDialog.setMessage(getString(R.string.progress_state_copy_file));
                 progressDialog.setCancelable(false);
                 progressDialog.show();
             }
@@ -216,7 +216,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onSuccess() {
                 progressDialog.dismiss();
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage("成功しました")
+                        .setMessage(getString(R.string.dialog_info_success))
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -227,7 +227,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onFailure() {
                 progressDialog.dismiss();
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage("失敗しました")
+                        .setMessage(getString(R.string.dialog_info_failure))
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -246,7 +246,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 progressBar.setProgress(0);
                 TextView textPercent = view.findViewById(R.id.progress_percent);
                 TextView textByte = view.findViewById(R.id.progress_byte);
-                textPercent.setText(progressBar.getProgress() + "%");
+                textPercent.setText(String.format(getString(progressBar.getProgress()), getString(R.string.percent)));
                 alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setView(view)
                         .setMessage("")
@@ -280,7 +280,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 }
                 new DeviceOwnerFragment.TryXApkTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage("コピーに失敗しました")
+                        .setMessage(getString(R.string.dialog_info_failure))
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -318,7 +318,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onShow() {
                 progressDialog = new ProgressDialog(StartActivity.this);
                 progressDialog.setTitle("");
-                progressDialog.setMessage("インストール中・・・");
+                progressDialog.setMessage(getString(R.string.progress_state_installing));
                 progressDialog.setCancelable(false);
                 progressDialog.show();
             }
@@ -334,7 +334,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 }
                 new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(R.string.dialog_success_silent_install)
+                        .setMessage(R.string.dialog_info_success_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .create();
@@ -354,7 +354,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 }
                 new DeviceOwnerFragment.OwnerInstallTask().cancel(true);
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(getString(R.string.dialog_failure_silent_install) + "\n" + str)
+                        .setMessage(getString(R.string.dialog_info_failure_silent_install) + "\n" + str)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -387,7 +387,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onShow() {
                 progressDialog = new ProgressDialog(StartActivity.this);
                 progressDialog.setTitle("");
-                progressDialog.setMessage("インストール中・・・");
+                progressDialog.setMessage(getString(R.string.progress_state_installing));
                 progressDialog.setCancelable(false);
                 progressDialog.show();
             }
@@ -397,7 +397,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onSuccess() {
                 progressDialog.dismiss();
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(R.string.dialog_success_silent_install)
+                        .setMessage(R.string.dialog_info_success_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -408,7 +408,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             public void onFailure() {
                 progressDialog.dismiss();
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(R.string.dialog_failure_silent_install)
+                        .setMessage(R.string.dialog_info_failure_silent_install)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
@@ -462,7 +462,7 @@ public class StartActivity extends Activity implements InstallEventListener {
             @Override
             public void onFailure() {
                 new AlertDialog.Builder(StartActivity.this)
-                        .setMessage("解像度設定に失敗しました")
+                        .setMessage(getString(R.string.dialog_info_failure))
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                         .show();
             }

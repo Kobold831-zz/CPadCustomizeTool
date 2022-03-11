@@ -28,7 +28,7 @@ public class CrashLogActivity extends Activity {
         if (Preferences.GET_CRASH_LOG(this) != null) {
             addText(String.join(",", Preferences.GET_CRASH_LOG(this)));
         } else {
-            addText("Empty crash log");
+            addText(getString(R.string.logger_empty));
         }
     }
 

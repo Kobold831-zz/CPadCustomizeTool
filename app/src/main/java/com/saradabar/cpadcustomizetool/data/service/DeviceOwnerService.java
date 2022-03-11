@@ -17,6 +17,7 @@ import android.os.RemoteException;
 import com.aurora.store.data.service.IInstallResult;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
+import com.saradabar.cpadcustomizetool.util.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,8 +115,7 @@ public class DeviceOwnerService extends Service {
     }
 
     private void bindInstallResult(int flag, String packageName, String errorString, String extra) {
-        Intent intent = new Intent("com.aurora.store.data.service.ResultService").setPackage("com.aurora.store");
-        bindService(intent, new ServiceConnection() {
+        bindService(Constants.AURORA_SERVICE, new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 IInstallResult mIInstallResult = IInstallResult.Stub.asInterface(iBinder);

@@ -32,7 +32,8 @@ public class Constants {
     public static final String URL_SUPPORT_CHECK = "https://github.com/Kobold831/Server/raw/main/CPadCustomizeTool_Support.xml";
     public static final String URL_UPDATE_INFO = "https://docs.google.com/document/d/1uh-FrHM5o84uh7zXw3W_FRIDuzJo8NcVnUD8Rrw4CMQ/";
     public static final String URL_UPDATE = "https://is.gd/W5XR2Z";
-    public static final String URL_WIKI = "https://ctabwiki.nerrog.net/?Discord";
+    public static final String URL_WIKI_DISCORD = "https://ctabwiki.nerrog.net/?Discord";
+    public static final String URL_WIKI_MAIN = "https://ctabwiki.nerrog.net/";
     public static final String URL_GITHUB = "https://github.com/Kobold831/CPadCustomizeTool";
 
     public static final String DCHA_STATE = "dcha_state";
@@ -50,6 +51,7 @@ public class Constants {
 
     public static final Intent DCHA_SERVICE = new Intent("jp.co.benesse.dcha.dchaservice.DchaService").setPackage("jp.co.benesse.dcha.dchaservice");
     public static final Intent DCHA_UTIL_SERVICE = new Intent("jp.co.benesse.dcha.dchautilservice.DchaUtilService").setPackage("jp.co.benesse.dcha.dchautilservice");
+    public static final Intent AURORA_SERVICE = new Intent("com.aurora.store.data.service.ResultService").setPackage("com.aurora.store");
 
     public static final File IGNORE_DCHA_COMPLETED_FILE = new File("/factory/ignore_dcha_completed");
     public static final File COUNT_DCHA_COMPLETED_FILE = new File("/factory/count_dcha_completed");

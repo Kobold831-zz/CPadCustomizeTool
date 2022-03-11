@@ -71,12 +71,7 @@ public class KeepService extends Service {
     }
 
     private String getHome() {
-        Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
-        PackageManager pm = getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(home, 0);
-        ActivityInfo activityInfo = Objects.requireNonNull(resolveInfo).activityInfo;
-        return activityInfo.packageName;
+        return getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0).activityInfo.packageName;
     }
 
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
@@ -129,13 +124,8 @@ public class KeepService extends Service {
                 if (Settings.Secure.getInt(getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) == 0) {
                     Settings.Secure.putInt(getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 1);
                 }
-            } catch (SecurityException | Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-                Toast.toast(getApplicationContext(), "権限を付与してから再試行してください");
-                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-                SharedPreferences.Editor spe = sp.edit();
-                spe.putBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false);
-                spe.apply();
+            } catch (Exception ignored) {
+                getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).edit().putBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false).apply();
                 stopSelf();
             }
         }
@@ -156,16 +146,11 @@ public class KeepService extends Service {
                         Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 0);
                     }
                 }
-            } catch (SecurityException | Settings.SettingNotFoundException | InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
                 if (Preferences.GET_MODEL_ID(getApplicationContext()) == 2) {
                     Settings.System.putInt(getContentResolver(), Constants.DCHA_STATE, 0);
                 }
-                Toast.toast(getApplicationContext(), "権限を付与してから再試行してください");
-                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-                SharedPreferences.Editor spe = sp.edit();
-                spe.putBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false);
-                spe.apply();
+                getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).edit().putBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false).apply();
                 stopSelf();
             }
         }

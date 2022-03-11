@@ -55,16 +55,12 @@ public class EmergencyActivity extends Activity {
             case "1":
                 if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) {
                     Toast.toast(this, R.string.toast_execution);
-                } else {
-                    Toast.toast(this, "エラー");
                 }
                 finishAndRemoveTask();
                 break;
             case "2":
                 if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) {
                     Toast.toast(this, R.string.toast_execution);
-                } else {
-                    Toast.toast(this, "エラー");
                 }
                 finishAndRemoveTask();
                 break;

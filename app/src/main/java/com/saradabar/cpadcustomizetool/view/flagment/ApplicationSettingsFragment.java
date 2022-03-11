@@ -2,36 +2,28 @@ package com.saradabar.cpadcustomizetool.view.flagment;
 
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
-import com.saradabar.cpadcustomizetool.view.activity.CrashLogActivity;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
-import com.saradabar.cpadcustomizetool.view.views.LauncherView;
+import com.saradabar.cpadcustomizetool.view.activity.CrashLogActivity;
 import com.saradabar.cpadcustomizetool.view.views.SingleListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ApplicationSettingsFragment extends PreferenceFragment {
@@ -163,7 +155,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                             listView.invalidateViews();
                         } else {
                             new AlertDialog.Builder(getActivity())
-                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setMessage(getString(R.string.dialog_error_not_work_mode))
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                                     .show();
                         }
@@ -174,7 +166,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                             listView.invalidateViews();
                         } else {
                             new AlertDialog.Builder(getActivity())
-                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setMessage(getString(R.string.dialog_error_not_work_mode))
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                                     .show();
                         }
@@ -183,7 +175,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
             });
             new AlertDialog.Builder(getActivity())
                     .setView(v)
-                    .setTitle("モードを選択してください")
+                    .setTitle(getString(R.string.dialog_title_select_mode))
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                     .show();
             return false;
@@ -192,7 +184,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         if (!Preferences.GET_DCHASERVICE_FLAG(getActivity())) {
             Preferences.SET_CHANGE_SETTINGS_DCHA_FLAG(false, getActivity());
             changeSettingsDcha.setChecked(false);
-            changeSettingsDcha.setSummary("この機能を使用するには、\"DchaServiceを使用\"を押して内容を確認してください");
+            changeSettingsDcha.setSummary(getString(R.string.pre_app_sum_confirmation_dcha));
             changeSettingsDcha.setEnabled(false);
         }
     }
@@ -203,13 +195,13 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
             if (Preferences.GET_CONFIRMATION(getActivity())) {
                 new AlertDialog.Builder(getActivity())
                         .setCancelable(false)
-                        .setTitle("本当によろしいですか？")
-                        .setMessage("このデバイスのシステム領域にDchaServiceが恒久的な変更を加えていないことを検出しました\n続行すると一部の動作がAndroidシステムによって制限される可能性があります")
+                        .setTitle(getString(R.string.dialog_question_are_you_sure))
+                        .setMessage(getString(R.string.dialog_confirmation))
                         .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
                             new AlertDialog.Builder(getActivity())
                                     .setCancelable(false)
-                                    .setTitle("最終確認")
-                                    .setMessage("続行するとこの操作は取り消せません\n初期化をおこなってもシステム領域の変更、Androidシステムによる制限はもとには戻りません\n続行すると警告は無効になり、設定変更が可能になります")
+                                    .setTitle(getString(R.string.dialog_title_final_confirmation))
+                                    .setMessage(getString(R.string.dialog_final_confirmation))
                                     .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
                                         Preferences.SET_CONFIRMATION(true, getActivity());
                                         dialog1.dismiss();
