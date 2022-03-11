@@ -28,6 +28,7 @@ public class KeepService extends Service {
 
     private Handler mHandler;
     private Runnable mRunnable;
+    IDchaService mDchaService;
 
     private boolean isObserberHideEnable = false;
     private boolean isObserberStateEnable = false;
@@ -74,31 +75,26 @@ public class KeepService extends Service {
         return activityInfo.packageName;
     }
 
-    private void bindDchaService() {
-        Intent intent = new Intent(Constants.DCHA_SERVICE);
-        intent.setPackage(Constants.PACKAGE_DCHA_SERVICE);
-        bindService(intent, dchaServiceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private final ServiceConnection dchaServiceConnection = new ServiceConnection() {
-        IDchaService mDchaService;
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
-            SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
             try {
                 mDchaService.clearDefaultPreferredApp(getHome());
-                mDchaService.setDefaultPreferredHomeApp(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null));
+                mDchaService.setDefaultPreferredHomeApp(getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).getString(Constants.KEY_SAVE_KEEP_HOME, null));
             } catch (RemoteException ignored) {
             }
-            unbindService(this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            unbindService(this);
+            mDchaService = null;
         }
     };
+
+    public void bindDchaService() {
+        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+    }
 
     private final ContentObserver DchaStateObserver = new ContentObserver(new Handler()) {
         @Override

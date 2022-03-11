@@ -155,7 +155,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                         listView.invalidateViews();
                         break;
                     case 2:
-                        if (!MainFragment.getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
+                        if (new MainFragment().getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
                             Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
                             listView.invalidateViews();
                         } else {

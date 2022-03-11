@@ -26,6 +26,8 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class NormalActivity extends Activity {
 
+    IDchaService mDchaService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,11 +45,9 @@ public class NormalActivity extends Activity {
             return;
         }
 
-        if (!setDchaSettings()) {
-            finishAndRemoveTask();
-            return;
+        if (setDchaSettings()) {
+            Toast.toast(this, R.string.toast_execution);
         }
-        Toast.toast(this, R.string.toast_execution);
         finishAndRemoveTask();
     }
 
@@ -77,17 +77,17 @@ public class NormalActivity extends Activity {
     }
 
     private boolean setDchaSettings() {
-        ResolveInfo resolveInfo = getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
-
         if (!Preferences.GET_DCHASERVICE_FLAG(getApplicationContext())) {
             Toast.toast(getApplicationContext(), R.string.toast_use_not_dcha);
             return false;
         }
 
-        bindService(new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE), new ServiceConnection() {
-            public void onServiceConnected(ComponentName name, IBinder service) {
+        ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                mDchaService = IDchaService.Stub.asInterface(iBinder);
                 ActivityInfo activityInfo = null;
-                IDchaService mDchaService = IDchaService.Stub.asInterface(service);
+                ResolveInfo resolveInfo = getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
 
                 if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
 
@@ -102,14 +102,13 @@ public class NormalActivity extends Activity {
                         finishAndRemoveTask();
                     }
                 }
-                unbindService(this);
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName name) {
-                unbindService(this);
+            public void onServiceDisconnected(ComponentName componentName) {
+                mDchaService = null;
             }
-        }, Context.BIND_AUTO_CREATE);
-        return true;
+        };
+        return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 }

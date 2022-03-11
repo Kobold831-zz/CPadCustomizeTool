@@ -1,5 +1,7 @@
 package com.saradabar.cpadcustomizetool.util;
 
+import android.content.Intent;
+
 import java.io.File;
 
 public class Constants {
@@ -16,6 +18,8 @@ public class Constants {
     public static final int FLAG_MARKET_APP_FALSE = 9;
     public static final int FLAG_SET_LAUNCHER = 10;
     public static final int FLAG_SYSTEM_UPDATE= 11;
+    public static final int FLAG_INSTALL_PACKAGE = 12;
+    public static final int FLAG_COPY_UPDATE_IMAGE = 13;
     public static final int FLAG_RESOLUTION = 20;
 
     public static final int REQUEST_UPDATE = 0;
@@ -31,10 +35,6 @@ public class Constants {
     public static final String URL_WIKI = "https://ctabwiki.nerrog.net/?Discord";
     public static final String URL_GITHUB = "https://github.com/Kobold831/CPadCustomizeTool";
 
-    public static final String DCHA_SERVICE = "jp.co.benesse.dcha.dchaservice.DchaService";
-    public static final String PACKAGE_DCHA_SERVICE = "jp.co.benesse.dcha.dchaservice";
-    public static final String DCHA_UTIL_SERVICE = "jp.co.benesse.dcha.dchautilservice.DchaUtilService";
-    public static final String PACKAGE_DCHA_UTIL_SERVICE = "jp.co.benesse.dcha.dchautilservice";
     public static final String DCHA_STATE = "dcha_state";
     public static final String HIDE_NAVIGATION_BAR = "hide_navigation_bar";
     public static final String KEY_EMERGENCY_SETTINGS = "emergency_settings";
@@ -47,6 +47,9 @@ public class Constants {
     public static final String KEY_ENABLED_KEEP_HOME = "enabled_keep_home";
     public static final String KEY_SAVE_KEEP_HOME = "save_keep_home";
     public static final String KEY_ENABLED_AUTO_USB_DEBUG = "enabled_auto_usb_debug";
+
+    public static final Intent DCHA_SERVICE = new Intent("jp.co.benesse.dcha.dchaservice.DchaService").setPackage("jp.co.benesse.dcha.dchaservice");
+    public static final Intent DCHA_UTIL_SERVICE = new Intent("jp.co.benesse.dcha.dchautilservice.DchaUtilService").setPackage("jp.co.benesse.dcha.dchautilservice");
 
     public static final File IGNORE_DCHA_COMPLETED_FILE = new File("/factory/ignore_dcha_completed");
     public static final File COUNT_DCHA_COMPLETED_FILE = new File("/factory/count_dcha_completed");

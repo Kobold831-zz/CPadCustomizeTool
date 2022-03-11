@@ -37,6 +37,8 @@ import com.stephentuso.welcome.WelcomeHelper;
 import java.io.File;
 import java.util.Objects;
 
+import jp.co.benesse.dcha.dchaservice.IDchaService;
+
 public class MainActivity extends Activity implements UpdateEventListener {
 
     ProgressDialog loadingDialog;
@@ -402,18 +404,18 @@ public class MainActivity extends Activity implements UpdateEventListener {
         return !canWrite;
     }
 
-    private boolean bindDchaService() {
-        return bindService(new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE), new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                unbindService(this);
-            }
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                unbindService(this);
-            }
-        }, Context.BIND_AUTO_CREATE);
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+        }
+    };
+
+    public boolean bindDchaService() {
+        return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override

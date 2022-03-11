@@ -49,10 +49,8 @@ public class StartActivity extends Activity implements InstallEventListener {
     private Menu menu;
     public IDchaService mDchaService;
 
-    private static StartActivity instance = null;
-
-    public static StartActivity getInstance() {
-        return instance;
+    public StartActivity getInstance() {
+        return this;
     }
 
     /* 設定画面表示 */
@@ -60,7 +58,6 @@ public class StartActivity extends Activity implements InstallEventListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        instance = this;
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
@@ -190,19 +187,20 @@ public class StartActivity extends Activity implements InstallEventListener {
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    public boolean bindDchaService() {
-        return !bindService(new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE), new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mDchaService = IDchaService.Stub.asInterface(service);
-                unbindService(this);
-            }
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
+        }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                unbindService(this);
-            }
-        }, Context.BIND_AUTO_CREATE);
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
+        }
+    };
+
+    public boolean bindDchaService() {
+        return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public MainFragment.CopyTask.Listener CopyListener() {
@@ -433,14 +431,14 @@ public class StartActivity extends Activity implements InstallEventListener {
             @Override
             public void onSuccess() {
                 /* 設定変更カウントダウンダイアログ表示 */
-                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(StartActivity.getInstance());
+                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(getInstance());
                 mAlertDialog.setTitle(R.string.dialog_title_resolution)
                         .setCancelable(false)
                         .setMessage("")
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
                         .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
                             mHandler.removeCallbacks(mRunnable);
-                            MainFragment.getInstance().resetResolution();
+                            new MainFragment().getInstance().resetResolution();
                         });
                 AlertDialog AlertDialog = mAlertDialog.create();
                 AlertDialog.show();
@@ -457,7 +455,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                         if (i <= 0) {
                             AlertDialog.dismiss();
                             mHandler.removeCallbacks(this);
-                            MainFragment.getInstance().resetResolution();
+                            new MainFragment().getInstance().resetResolution();
                         }
                         i--;
                     }
@@ -480,11 +478,10 @@ public class StartActivity extends Activity implements InstallEventListener {
     @Override
     public void onResume() {
         super.onResume();
-        instance = this;
         /* DchaServiceの使用可否を確認 */
         if (Preferences.GET_DCHASERVICE_FLAG(this)) {
             //DchaServiceが機能していないなら終了
-            if (bindDchaService()) {
+            if (!bindDchaService()) {
                 startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 finish();
             }

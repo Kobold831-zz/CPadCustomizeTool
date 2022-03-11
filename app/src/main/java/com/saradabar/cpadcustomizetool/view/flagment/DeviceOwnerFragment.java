@@ -227,13 +227,13 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 switch (str.substring(str.lastIndexOf("."))) {
                     case ".apk":
                         DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
-                        ownerInstallTask.setListener(StartActivity.getInstance().OwnerInstallCreateListener());
+                        ownerInstallTask.setListener(new StartActivity().getInstance().OwnerInstallCreateListener());
                         ownerInstallTask.execute();
                         return;
                     case ".XAPK":
                     case ".xapk":
                         TryXApkTask tryXApkTask = new TryXApkTask();
-                        tryXApkTask.setListener(StartActivity.getInstance().XApkListener());
+                        tryXApkTask.setListener(new StartActivity().getInstance().XApkListener());
                         tryXApkTask.execute();
                         return;
                 }

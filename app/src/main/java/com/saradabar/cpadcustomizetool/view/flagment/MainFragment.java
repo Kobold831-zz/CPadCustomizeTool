@@ -55,16 +55,21 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 import jp.co.benesse.dcha.dchautilservice.IDchaUtilService;
 
 public class MainFragment extends PreferenceFragment {
-    private int width, height;
-    private boolean isObserverStateEnable = false;
-    private boolean isObserverHideEnable = false;
-    private boolean isObserverMarketEnable = false;
-    private boolean isObserverUsbEnable = false;
 
-    private String setLauncherPackage, installData, systemUpdateFilePath;
-    private ListView mListView;
-    private IDchaService mDchaService;
-    private IDchaUtilService mIDchaUtilService;
+    int width, height;
+
+    boolean isObserverStateEnable = false,
+            isObserverHideEnable = false,
+            isObserverMarketEnable = false,
+            isObserverUsbEnable = false;
+
+    ListView mListView;
+    IDchaService mDchaService;
+    IDchaUtilService mDchaUtilService;
+
+    String setLauncherPackage,
+            installData,
+            systemUpdateFilePath;
 
     SwitchPreference switchDchaState,
             switchKeepDchaState,
@@ -91,15 +96,12 @@ public class MainFragment extends PreferenceFragment {
             preferenceDeviceOwner,
             preferenceSystemUpdate;
 
-    @SuppressLint("StaticFieldLeak")
-    private static MainFragment instance = null;
-
-    public static MainFragment getInstance() {
-        return instance;
+    public MainFragment getInstance() {
+        return this;
     }
 
     /* システムUIオブザーバー */
-    private final ContentObserver observerState = new ContentObserver(new Handler()) {
+    ContentObserver observerState = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -111,7 +113,7 @@ public class MainFragment extends PreferenceFragment {
     };
 
     /* ナビゲーションバーオブザーバー */
-    private final ContentObserver observerHide = new ContentObserver(new Handler()) {
+    ContentObserver observerHide = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -123,7 +125,7 @@ public class MainFragment extends PreferenceFragment {
     };
 
     /* 提供元オブザーバー */
-    private final ContentObserver observerMarket = new ContentObserver(new Handler()) {
+    ContentObserver observerMarket = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -134,8 +136,8 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
-    /* UsbDebugオブザーバー */
-    private final ContentObserver observerUsb = new ContentObserver(new Handler()) {
+    /* USBデバッグオブザーバー */
+    ContentObserver observerUsb = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -146,74 +148,86 @@ public class MainFragment extends PreferenceFragment {
         }
     };
 
-    public boolean bindDchaService(int flag, boolean isDchaService) {
-        Intent intent;
-        if (isDchaService) intent = new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE);
-        else intent = new Intent(Constants.DCHA_UTIL_SERVICE).setPackage(Constants.PACKAGE_DCHA_UTIL_SERVICE);
-        return !getActivity().bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder iBinder) {
-                if (isDchaService) {
-                    mDchaService = IDchaService.Stub.asInterface(iBinder);
-                    try {
-                        switch (flag) {
-                            case Constants.FLAG_SET_DCHA_STATE_0:
-                                if (!confirmationDialog()) {
-                                    mDchaService.setSetupStatus(0);
-                                }
-                                break;
-                            case Constants.FLAG_SET_DCHA_STATE_3:
-                                if (!confirmationDialog()) {
-                                    mDchaService.setSetupStatus(3);
-                                }
-                                break;
-                            case Constants.FLAG_HIDE_NAVIGATION_BAR:
-                                mDchaService.hideNavigationBar(true);
-                                break;
-                            case Constants.FLAG_VIEW_NAVIGATION_BAR:
-                                mDchaService.hideNavigationBar(false);
-                                break;
-                            case Constants.FLAG_REBOOT:
-                                mDchaService.rebootPad(0, null);
-                                break;
-                            case Constants.FLAG_SET_LAUNCHER:
-                                mDchaService.clearDefaultPreferredApp(getLauncherPackage());
-                                mDchaService.setDefaultPreferredHomeApp(setLauncherPackage);
-                                /* listviewの更新 */
-                                mListView.invalidateViews();
-                                setCheckedSwitch();
-                                break;
-                            case Constants.FLAG_SYSTEM_UPDATE:
-                                mDchaService.copyUpdateImage(systemUpdateFilePath, "/cache/update.zip");
-                                mDchaService.rebootPad(2, "/cache/update.zip");
-                                break;
-                            case Constants.FLAG_CHECK:
-                            case Constants.FLAG_TEST:
-                                break;
-                        }
-                    } catch (RemoteException ignored) {
-                    }
-                } else {
-                    mIDchaUtilService = IDchaUtilService.Stub.asInterface(iBinder);
-                    try {
-                        switch (flag) {
-                            case Constants.FLAG_CHECK:
-                                break;
-                            case Constants.FLAG_RESOLUTION:
-                                mIDchaUtilService.setForcedDisplaySize(width, height);
-                                break;
-                        }
-                    } catch (RemoteException ignored) {
-                    }
-                }
-                getActivity().unbindService(this);
-            }
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
+        }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                getActivity().unbindService(this);
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
+        }
+    };
+
+    ServiceConnection mDchaUtilServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaUtilService = IDchaUtilService.Stub.asInterface(iBinder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaUtilService = null;
+        }
+    };
+
+
+    public boolean bindDchaService(int flag, boolean isDchaService) {
+        try {
+            if (isDchaService) {
+                switch (flag) {
+                    case Constants.FLAG_SET_DCHA_STATE_0:
+                        if (!confirmationDialog()) {
+                            mDchaService.setSetupStatus(0);
+                        }
+                        break;
+                    case Constants.FLAG_SET_DCHA_STATE_3:
+                        if (!confirmationDialog()) {
+                            mDchaService.setSetupStatus(3);
+                        }
+                        break;
+                    case Constants.FLAG_HIDE_NAVIGATION_BAR:
+                        mDchaService.hideNavigationBar(true);
+                        break;
+                    case Constants.FLAG_VIEW_NAVIGATION_BAR:
+                        mDchaService.hideNavigationBar(false);
+                        break;
+                    case Constants.FLAG_REBOOT:
+                        mDchaService.rebootPad(0, null);
+                        break;
+                    case Constants.FLAG_SET_LAUNCHER:
+                        mDchaService.clearDefaultPreferredApp(getLauncherPackage());
+                        mDchaService.setDefaultPreferredHomeApp(setLauncherPackage);
+                        /* listviewの更新 */
+                        mListView.invalidateViews();
+                        setCheckedSwitch();
+                        break;
+                    case Constants.FLAG_SYSTEM_UPDATE:
+                        if (mDchaService.copyUpdateImage(systemUpdateFilePath, "/cache/update.zip")) {
+                            mDchaService.rebootPad(2, "/cache/update.zip");
+                            return true;
+                        } else return false;
+                    case Constants.FLAG_INSTALL_PACKAGE:
+                        return mDchaService.installApp(installData, 1);
+                    case Constants.FLAG_COPY_UPDATE_IMAGE:
+                        return mDchaService.copyUpdateImage("", "");
+                    case Constants.FLAG_CHECK:
+                        return getActivity().bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+                    case Constants.FLAG_TEST:
+                        break;
+                }
+            } else {
+                switch (flag) {
+                    case Constants.FLAG_CHECK:
+                        return getActivity().bindService(Constants.DCHA_UTIL_SERVICE, mDchaUtilServiceConnection, Context.BIND_AUTO_CREATE);
+                    case Constants.FLAG_RESOLUTION:
+                        return mDchaUtilService.setForcedDisplaySize(width, height);
+                }
             }
-        }, Context.BIND_AUTO_CREATE);
+        } catch (RemoteException ignored) {
+        }
+        return true;
     }
 
     /* 設定変更 */
@@ -254,12 +268,6 @@ public class MainFragment extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_main, rootKey);
 
-        instance = this;
-        Uri contentDchaState = Settings.System.getUriFor(Constants.DCHA_STATE);
-        Uri contentHideNavigationBar = Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR);
-        Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
-        Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
-
         switchDchaState = findPreference("switch1");
         switchKeepDchaState = findPreference("switch2");
         switchHideBar = findPreference("switch3");
@@ -286,13 +294,13 @@ public class MainFragment extends PreferenceFragment {
 
         /* オブサーバーを有効化 */
         isObserverStateEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentDchaState, false, observerState);
+        getActivity().getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, observerState);
         isObserverHideEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentHideNavigationBar, false, observerHide);
+        getActivity().getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, observerHide);
         isObserverMarketEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentMarketApp, false, observerMarket);
+        getActivity().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, observerMarket);
         isObserverUsbEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentUsbDebug, false, observerUsb);
+        getActivity().getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, observerUsb);
 
         /* 一括変更 */
         setCheckedSwitch();
@@ -607,7 +615,7 @@ public class MainFragment extends PreferenceFragment {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
             listView.setAdapter(new NormalModeView.AppListAdapter(getActivity(), dataList));
             listView.setOnItemClickListener((parent, mView, position, id) -> {
-                Preferences.SET_NORMAL_LAUNCHER(Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", ""), StartActivity.getInstance());
+                Preferences.SET_NORMAL_LAUNCHER(Uri.fromParts("package", installedAppList.get(position).activityInfo.packageName, null).toString().replace("package:", ""), new StartActivity().getInstance());
                 /* listviewの更新 */
                 listView.invalidateViews();
                 setCheckedSwitch();
@@ -650,7 +658,7 @@ public class MainFragment extends PreferenceFragment {
                     .setTitle(R.string.dialog_title_dcha_service)
                     .setMessage(R.string.dialog_dcha_service)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        if (bindDchaService(Constants.FLAG_CHECK, true)) {
+                        if (!bindDchaService(Constants.FLAG_CHECK, true)) {
                             new AlertDialog.Builder(getActivity())
                                     .setMessage(R.string.dialog_error_no_work_dcha)
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
@@ -714,7 +722,7 @@ public class MainFragment extends PreferenceFragment {
 
         preferenceResolution.setOnPreferenceClickListener(preference -> {
             /* DchaUtilServiceが機能しているか */
-            if (bindDchaService(Constants.FLAG_CHECK, false)) {
+            if (!bindDchaService(Constants.FLAG_CHECK, false)) {
                 new AlertDialog.Builder(getActivity())
                         .setMessage(R.string.dialog_error_no_work_dcha_util)
                         .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
@@ -741,7 +749,7 @@ public class MainFragment extends PreferenceFragment {
                                         .show();
                             } else {
                                 MainFragment.setResolutionTask resolutionTask = new MainFragment.setResolutionTask();
-                                resolutionTask.setListener(StartActivity.getInstance().mCreateListener());
+                                resolutionTask.setListener(new StartActivity().getInstance().mCreateListener());
                                 resolutionTask.execute();
                             }
                         } catch (NumberFormatException ignored) {
@@ -949,24 +957,19 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        instance = this;
-        Uri contentDchaState = Settings.System.getUriFor(Constants.DCHA_STATE);
-        Uri contentHideNavigationBar = Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR);
-        Uri contentMarketApp = Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS);
-        Uri contentUsbDebug = Settings.Global.getUriFor(Settings.Global.ADB_ENABLED);
 
         if (getActivity().getActionBar() != null) getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         if (!preferenceChangeHome.isEnabled()) preferenceChangeHome.setEnabled(true);
 
         /* オブザーバー有効 */
         isObserverStateEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentDchaState, false, observerState);
+        getActivity().getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, observerState);
         isObserverHideEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentHideNavigationBar, false, observerHide);
+        getActivity().getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, observerHide);
         isObserverMarketEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentMarketApp, false, observerMarket);
+        getActivity().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, observerMarket);
         isObserverUsbEnable = true;
-        getActivity().getContentResolver().registerContentObserver(contentUsbDebug, false, observerUsb);
+        getActivity().getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, observerUsb);
 
         /* 一括変更 */
         setCheckedSwitch();
@@ -1020,7 +1023,7 @@ public class MainFragment extends PreferenceFragment {
                 }
                 if (installData != null) {
                     silentInstallTask silent = new silentInstallTask();
-                    silent.setListener(StartActivity.getInstance().createListener());
+                    silent.setListener(new StartActivity().getInstance().createListener());
                     silent.execute();
                 } else {
                     new AlertDialog.Builder(getActivity())
@@ -1037,7 +1040,7 @@ public class MainFragment extends PreferenceFragment {
                     systemUpdateFilePath = null;
                 }
                 if (systemUpdateFilePath != null) {
-                    if (bindDchaService(Constants.FLAG_SYSTEM_UPDATE, true)) {
+                    if (!bindDchaService(Constants.FLAG_SYSTEM_UPDATE, true)) {
                         new AlertDialog.Builder(getActivity())
                                 .setMessage(R.string.dialog_error)
                                 .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
@@ -1070,7 +1073,7 @@ public class MainFragment extends PreferenceFragment {
     }
 
     /* コピータスク */
-    public static class CopyTask extends AsyncTask<Object, Void, Object> {
+    public static class CopyTask extends AsyncTask<Boolean, Void, Boolean> {
         private Listener mListener;
 
         @Override
@@ -1079,19 +1082,14 @@ public class MainFragment extends PreferenceFragment {
         }
 
         @Override
-        protected Object doInBackground(Object... value) {
-            if (MainFragment.getInstance().copySystemFile()) {
-                return new Object();
-            } else {
-                return null;
-            }
+        protected Boolean doInBackground(Boolean... value) {
+            return new MainFragment().getInstance().copySystemFile();
         }
 
         @Override
-        protected void onPostExecute(Object result) {
-            if (result != null) {
-                mListener.onSuccess();
-            } else mListener.onFailure();
+        protected void onPostExecute(Boolean result) {
+            if (result) mListener.onSuccess();
+            else mListener.onFailure();
         }
 
         public void setListener(Listener listener) {
@@ -1109,7 +1107,7 @@ public class MainFragment extends PreferenceFragment {
     }
 
     /* インストールタスク */
-    public static class silentInstallTask extends AsyncTask<Object, Void, Object> {
+    public static class silentInstallTask extends AsyncTask<Boolean, Void, Boolean> {
         private Listener mListener;
 
         @Override
@@ -1118,18 +1116,14 @@ public class MainFragment extends PreferenceFragment {
         }
 
         @Override
-        protected Object doInBackground(Object... value) {
-            if (MainFragment.getInstance().installApp()) {
-                return new Object();
-            }
-            return null;
+        protected Boolean doInBackground(Boolean... value) {
+            return new MainFragment().getInstance().installApp();
         }
 
         @Override
-        protected void onPostExecute(Object result) {
-            if (result != null) {
-                mListener.onSuccess();
-            } else mListener.onFailure();
+        protected void onPostExecute(Boolean result) {
+            if (result) mListener.onSuccess();
+            else mListener.onFailure();
         }
 
         public void setListener(Listener listener) {
@@ -1147,27 +1141,18 @@ public class MainFragment extends PreferenceFragment {
     }
 
     /* 解像度タスク */
-    public static class setResolutionTask extends AsyncTask<Object, Void, Object> {
+    public static class setResolutionTask extends AsyncTask<Boolean, Void, Boolean> {
         private Listener mListener;
 
         @Override
-        protected Object doInBackground(Object... value) {
-            if (MainFragment.getInstance().setResolution()) {
-                /* 待機 */
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                }
-                return new Object();
-            }
-            return null;
+        protected Boolean doInBackground(Boolean... value) {
+            return new MainFragment().getInstance().setResolution();
         }
 
         @Override
-        protected void onPostExecute(Object result) {
-            if (result != null) {
-                mListener.onSuccess();
-            } else mListener.onFailure();
+        protected void onPostExecute(Boolean result) {
+            if (result) mListener.onSuccess();
+            else mListener.onFailure();
         }
 
         public void setListener(Listener listener) {
@@ -1183,59 +1168,17 @@ public class MainFragment extends PreferenceFragment {
     }
 
     public boolean copySystemFile() {
-        if (!bindDchaService(Constants.FLAG_CHECK, true)) {
-            /* 一回目に失敗する問題を防ぐ */
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-
-            try {
-                return mDchaService.copyUpdateImage("", "");
-            } catch (RemoteException | NullPointerException ignored) {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return bindDchaService(Constants.FLAG_COPY_UPDATE_IMAGE, true);
     }
 
     /* サイレントインストール */
     public boolean installApp() {
-        if (!bindDchaService(Constants.FLAG_CHECK, true)) {
-            /* 一回目に失敗する問題を防ぐ */
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-
-            try {
-                return mDchaService.installApp(installData, 1);
-            } catch (RemoteException | NullPointerException ignored) {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return bindDchaService(Constants.FLAG_INSTALL_PACKAGE, true);
     }
 
     /* 解像度の変更 */
     public boolean setResolution() {
-        if (!bindDchaService(Constants.FLAG_CHECK, false)) {
-            /* 一回目に失敗する問題を防ぐ */
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-
-            try {
-                return mIDchaUtilService.setForcedDisplaySize(width, height);
-            } catch (RemoteException ignored) {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return bindDchaService(Constants.FLAG_RESOLUTION, false);
     }
 
     /* 解像度のリセット */
@@ -1245,23 +1188,17 @@ public class MainFragment extends PreferenceFragment {
             case 1:
                 width = 1280;
                 height = 800;
-                if (bindDchaService(Constants.FLAG_RESOLUTION, false)) {
-                    new AlertDialog.Builder(getActivity())
-                            .setMessage(R.string.dialog_error_no_work_dcha_util)
-                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                            .show();
-                }
                 break;
             case 2:
                 width = 1920;
                 height = 1200;
-                if (bindDchaService(Constants.FLAG_RESOLUTION, false)) {
-                    new AlertDialog.Builder(getActivity())
-                            .setMessage(R.string.dialog_error_no_work_dcha_util)
-                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                            .show();
-                }
                 break;
+        }
+        if (!bindDchaService(Constants.FLAG_RESOLUTION, false)) {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.dialog_error_no_work_dcha_util)
+                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
+                    .show();
         }
     }
 }

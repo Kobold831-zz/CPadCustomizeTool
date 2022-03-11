@@ -55,10 +55,10 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 public class Updater implements InstallEventListener {
 
     int code, currentVersionCode, latestVersionCode;
-    String latestDescription;
-    String updateCheckUrl;
+    String latestDescription, updateCheckUrl;
     UpdateEventListenerList updateListeners;
     Activity activity;
+    IDchaService mDchaService;
 
     @SuppressLint("StaticFieldLeak")
     private static Updater instance = null;
@@ -191,27 +191,14 @@ public class Updater implements InstallEventListener {
                 progressDialog.setMessage("インストール中・・・");
                 progressDialog.setCancelable(false);
                 progressDialog.show();
-                activity.bindService(new Intent(Constants.DCHA_SERVICE).setPackage(Constants.PACKAGE_DCHA_SERVICE), new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                        try {
-                            if (!IDchaService.Stub.asInterface(iBinder).installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 0)) {
-                                progressDialog.dismiss();
-                                new AlertDialog.Builder(activity)
-                                        .setCancelable(false)
-                                        .setMessage(R.string.dialog_error)
-                                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> activity.finish())
-                                        .show();
-                            }
-                        } catch (RemoteException ignored) {
-                        }
-                    }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName componentName) {
-                        activity.unbindService(this);
-                    }
-                }, Context.BIND_AUTO_CREATE);
+                if (!bindDchaService()) {
+                    progressDialog.dismiss();
+                    new AlertDialog.Builder(activity)
+                            .setCancelable(false)
+                            .setMessage(R.string.dialog_error)
+                            .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> activity.finish())
+                            .show();
+                }
                 break;
             case 3:
                 if (((DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(activity.getPackageName())) {
@@ -234,6 +221,26 @@ public class Updater implements InstallEventListener {
                 }
                 break;
         }
+    }
+
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
+            try {
+                mDchaService.installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 1);
+            } catch (RemoteException ignored) {
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
+        }
+    };
+
+    public boolean bindDchaService() {
+        return activity.bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private boolean trySessionInstall() {

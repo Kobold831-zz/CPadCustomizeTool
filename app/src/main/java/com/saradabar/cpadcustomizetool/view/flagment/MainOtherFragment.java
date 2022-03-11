@@ -106,9 +106,7 @@ public class MainOtherFragment extends PreferenceFragment {
                             .show();
                 }
             });
-            Runnable runnable = () -> {
-                ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
-            };
+            Runnable runnable = () -> ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
             new Handler().postDelayed(runnable, 10);
             return false;
         });
