@@ -22,10 +22,10 @@ import android.widget.TextView;
 
 import com.saradabar.cpadcustomizetool.data.connection.AsyncFileDownload;
 import com.saradabar.cpadcustomizetool.data.connection.Checker;
-import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
 import com.saradabar.cpadcustomizetool.data.connection.Updater;
-import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
+import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
@@ -36,8 +36,6 @@ import com.stephentuso.welcome.WelcomeHelper;
 
 import java.io.File;
 import java.util.Objects;
-
-import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class MainActivity extends Activity implements UpdateEventListener {
 

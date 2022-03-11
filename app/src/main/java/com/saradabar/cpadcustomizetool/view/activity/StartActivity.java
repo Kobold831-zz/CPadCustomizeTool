@@ -28,21 +28,19 @@ import androidx.preference.PreferenceFragment;
 
 import com.saradabar.cpadcustomizetool.MainActivity;
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.data.handler.ByteProgressHandler;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
-import com.saradabar.cpadcustomizetool.view.flagment.ApplicationSettingsFragment;
-import com.saradabar.cpadcustomizetool.view.flagment.DeviceOwnerFragment;
-import com.saradabar.cpadcustomizetool.view.flagment.MainFragment;
+import com.saradabar.cpadcustomizetool.data.handler.ByteProgressHandler;
 import com.saradabar.cpadcustomizetool.data.service.KeepService;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
+import com.saradabar.cpadcustomizetool.view.flagment.ApplicationSettingsFragment;
+import com.saradabar.cpadcustomizetool.view.flagment.DeviceOwnerFragment;
+import com.saradabar.cpadcustomizetool.view.flagment.MainFragment;
 
 import org.zeroturnaround.zip.commons.FileUtils;
 
 import java.io.IOException;
 import java.util.Objects;
-
-import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class StartActivity extends Activity implements InstallEventListener {
 
@@ -420,36 +418,37 @@ public class StartActivity extends Activity implements InstallEventListener {
 
     public MainFragment.setResolutionTask.Listener mCreateListener() {
         return new MainFragment.setResolutionTask.Listener() {
-            private Handler mHandler;
-            private Runnable mRunnable;
-
+            Handler mHandler;
+            Runnable mRunnable;
             /* 成功 */
             @Override
             public void onSuccess() {
                 /* 設定変更カウントダウンダイアログ表示 */
-                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(StartActivity.this);
-                mAlertDialog.setTitle(R.string.dialog_title_resolution)
+                AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this)
+                        .setTitle(R.string.dialog_title_resolution)
                         .setCancelable(false)
                         .setMessage("")
-                        .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
-                        .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
+                        .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                            dialog.dismiss();
+                            mHandler.removeCallbacks(mRunnable);
+                        })
+                        .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> {
+                            dialog.dismiss();
                             mHandler.removeCallbacks(mRunnable);
                             MainFragment.getInstance().resetResolution();
-                        });
-                AlertDialog AlertDialog = mAlertDialog.create();
-                AlertDialog.show();
-
+                        })
+                        .create();
+                if (!alertDialog.isShowing()) alertDialog.show();
                 /* カウント開始 */
                 mHandler = new Handler();
                 mRunnable = new Runnable() {
                     int i = 10;
-
                     @Override
                     public void run() {
-                        AlertDialog.setMessage("変更を適用しますか？\n" + i + "秒後に元の設定に戻ります");
+                        alertDialog.setMessage("変更を適用しますか？\n" + i + "秒後に元の設定に戻ります");
                         mHandler.postDelayed(this, 1000);
                         if (i <= 0) {
-                            AlertDialog.dismiss();
+                            alertDialog.dismiss();
                             mHandler.removeCallbacks(this);
                             MainFragment.getInstance().resetResolution();
                         }

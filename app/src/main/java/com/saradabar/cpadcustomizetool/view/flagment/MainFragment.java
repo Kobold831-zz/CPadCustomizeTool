@@ -833,6 +833,7 @@ public class MainFragment extends PreferenceFragment {
             getPreferenceScreen().removePreference(findPreference("android_reboot_shortcut"));
             getPreferenceScreen().removePreference(findPreference("android_resolution"));
             getPreferenceScreen().removePreference(findPreference("android_resolution_reset"));
+            getPreferenceScreen().removePreference(findPreference("android_update"));
         } else {
             getPreferenceScreen().removePreference(findPreference("dcha_service"));
         }
@@ -1155,7 +1156,12 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Boolean doInBackground(Boolean... value) {
-            return MainFragment.getInstance().setResolution();
+            boolean bl = MainFragment.getInstance().setResolution();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+            return bl;
         }
 
         @Override
