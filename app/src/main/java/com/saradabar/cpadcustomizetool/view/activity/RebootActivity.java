@@ -25,6 +25,7 @@ public class RebootActivity extends Activity {
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        bindDchaService();
         if (Preferences.GET_DCHASERVICE_FLAG(this)) {
             startReboot();
         } else {
@@ -37,7 +38,12 @@ public class RebootActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setMessage(R.string.dialog_title_reboot)
-                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> bindDchaService())
+                .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
+                    try {
+                        mDchaService.rebootPad(0, null);
+                    } catch (RemoteException ignored) {
+                    }
+                })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finishAndRemoveTask())
                 .show();
     }
@@ -46,10 +52,6 @@ public class RebootActivity extends Activity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
-            try {
-                mDchaService.rebootPad(0, null);
-            } catch (RemoteException ignored) {
-            }
         }
 
         @Override

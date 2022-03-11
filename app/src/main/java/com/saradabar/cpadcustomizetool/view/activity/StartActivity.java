@@ -46,28 +46,26 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class StartActivity extends Activity implements InstallEventListener {
 
-    private Menu menu;
-    public IDchaService mDchaService;
+    static StartActivity instance = null;
 
-    public StartActivity getInstance() {
-        return this;
+    Menu menu;
+
+    public static StartActivity getInstance() {//インスタンスを取得
+        return instance;
     }
 
     /* 設定画面表示 */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        instance = this;
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
-
         if (getIntent().getBooleanExtra("result", false)) {
             setContentView(R.layout.activity_main);
             transitionFragment(new MainFragment());
             return;
         }
-
         if (devicePolicyManager.isDeviceOwnerApp(getPackageName())) {
             setContentView(R.layout.activity_main_error_enable_own);
             findViewById(R.id.main_error_button_1).setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
@@ -190,12 +188,10 @@ public class StartActivity extends Activity implements InstallEventListener {
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mDchaService = IDchaService.Stub.asInterface(iBinder);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mDchaService = null;
         }
     };
 
@@ -272,7 +268,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 alertDialog.dismiss();
                 new DeviceOwnerFragment.TryXApkTask().cancel(true);
                 DeviceOwnerFragment.OwnerInstallTask ownerInstallTask = new DeviceOwnerFragment.OwnerInstallTask();
-                ownerInstallTask.setListener(getInstance().OwnerInstallCreateListener());
+                ownerInstallTask.setListener(OwnerInstallCreateListener());
                 ownerInstallTask.execute();
             }
 
@@ -431,14 +427,14 @@ public class StartActivity extends Activity implements InstallEventListener {
             @Override
             public void onSuccess() {
                 /* 設定変更カウントダウンダイアログ表示 */
-                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(getInstance());
+                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(StartActivity.this);
                 mAlertDialog.setTitle(R.string.dialog_title_resolution)
                         .setCancelable(false)
                         .setMessage("")
                         .setPositiveButton(R.string.dialog_common_yes, (dialog2, which1) -> mHandler.removeCallbacks(mRunnable))
                         .setNegativeButton(R.string.dialog_common_no, (dialog3, which2) -> {
                             mHandler.removeCallbacks(mRunnable);
-                            new MainFragment().getInstance().resetResolution();
+                            MainFragment.getInstance().resetResolution();
                         });
                 AlertDialog AlertDialog = mAlertDialog.create();
                 AlertDialog.show();
@@ -455,7 +451,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                         if (i <= 0) {
                             AlertDialog.dismiss();
                             mHandler.removeCallbacks(this);
-                            new MainFragment().getInstance().resetResolution();
+                            MainFragment.getInstance().resetResolution();
                         }
                         i--;
                     }

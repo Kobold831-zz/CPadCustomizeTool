@@ -2,13 +2,16 @@ package com.saradabar.cpadcustomizetool.view.flagment;
 
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.AbsListView;
@@ -155,7 +158,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                         listView.invalidateViews();
                         break;
                     case 2:
-                        if (new MainFragment().getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
+                        if (MainFragment.getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
                             Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
                             listView.invalidateViews();
                         } else {

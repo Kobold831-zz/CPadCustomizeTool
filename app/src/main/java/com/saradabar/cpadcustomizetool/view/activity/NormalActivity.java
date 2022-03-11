@@ -32,6 +32,7 @@ public class NormalActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
 
         if (!startCheck()) {
             Toast.toast(this, R.string.toast_not_completed_settings);
@@ -82,33 +83,34 @@ public class NormalActivity extends Activity {
             return false;
         }
 
-        ServiceConnection mDchaServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                mDchaService = IDchaService.Stub.asInterface(iBinder);
-                ActivityInfo activityInfo = null;
-                ResolveInfo resolveInfo = getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
+        ActivityInfo activityInfo = null;
+        ResolveInfo resolveInfo = getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0);
 
-                if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
+        if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
 
-                if (Preferences.isNormalModeSettingsLauncher(getApplicationContext())) {
-                    try {
-                        if (activityInfo != null) {
-                            mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
-                            mDchaService.setDefaultPreferredHomeApp(Preferences.GET_NORMAL_LAUNCHER(getApplicationContext()));
-                        }
-                    } catch (RemoteException ignored) {
-                        Toast.toast(getApplicationContext(), R.string.toast_not_install_launcher);
-                        finishAndRemoveTask();
-                    }
+        if (Preferences.isNormalModeSettingsLauncher(getApplicationContext())) {
+            try {
+                if (activityInfo != null) {
+                    mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
+                    mDchaService.setDefaultPreferredHomeApp(Preferences.GET_NORMAL_LAUNCHER(getApplicationContext()));
                 }
+            } catch (RemoteException ignored) {
+                Toast.toast(getApplicationContext(), R.string.toast_not_install_launcher);
+                finishAndRemoveTask();
             }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                mDchaService = null;
-            }
-        };
-        return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+        return true;
     }
+
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
+        }
+    };
 }

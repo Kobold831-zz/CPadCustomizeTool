@@ -35,6 +35,7 @@ public class EmergencyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
 
         String Course = PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "");
 
@@ -140,38 +141,39 @@ public class EmergencyActivity extends Activity {
             return false;
         }
 
-        ServiceConnection mDchaServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                mDchaService = IDchaService.Stub.asInterface(iBinder);
-                ActivityInfo activityInfo = null;
+        ActivityInfo activityInfo = null;
 
-                if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
-                if (Preferences.isEmergencySettingsLauncher(getApplicationContext())) {
-                    try {
-                        if (activityInfo != null) {
-                            mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
-                            mDchaService.setDefaultPreferredHomeApp(packageName);
-                        }
-                    } catch (RemoteException ignored) {
-                        Toast.toast(getApplicationContext(), R.string.toast_not_install_launcher);
-                        setSystemSettings(false);
-                        finishAndRemoveTask();
-                    }
+        if (resolveInfo != null) activityInfo = resolveInfo.activityInfo;
+        if (Preferences.isEmergencySettingsLauncher(getApplicationContext())) {
+            try {
+                if (activityInfo != null) {
+                    mDchaService.clearDefaultPreferredApp(activityInfo.packageName);
+                    mDchaService.setDefaultPreferredHomeApp(packageName);
                 }
-                if (Preferences.isEmergencySettingsRemoveTask(getApplicationContext())) {
-                    try {
-                        mDchaService.removeTask(null);
-                    } catch (RemoteException ignored) {
-                    }
-                }
+            } catch (RemoteException ignored) {
+                Toast.toast(getApplicationContext(), R.string.toast_not_install_launcher);
+                setSystemSettings(false);
+                finishAndRemoveTask();
             }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                mDchaService = null;
+        }
+        if (Preferences.isEmergencySettingsRemoveTask(getApplicationContext())) {
+            try {
+                mDchaService.removeTask(null);
+            } catch (RemoteException ignored) {
             }
-        };
-        return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+        return true;
     }
+
+    ServiceConnection mDchaServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
+        }
+    };
 }

@@ -36,7 +36,7 @@ public class KeepService extends Service {
     private boolean isObserberUsbEnable = false;
     private boolean isObserberHomeEnable = false;
 
-    private static KeepService instance = null;
+    static KeepService instance = null;
 
     public static KeepService getInstance() {
         return instance;
@@ -50,7 +50,11 @@ public class KeepService extends Service {
                 SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
                 if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
                     if (!getHome().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null))) {
-                        bindDchaService();
+                        try {
+                            mDchaService.clearDefaultPreferredApp(getHome());
+                            mDchaService.setDefaultPreferredHomeApp(getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).getString(Constants.KEY_SAVE_KEEP_HOME, null));
+                        } catch (RemoteException ignored) {
+                        }
                     }
                     mHandler.postDelayed(this, 5000);
                 }else {
@@ -79,11 +83,6 @@ public class KeepService extends Service {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
-            try {
-                mDchaService.clearDefaultPreferredApp(getHome());
-                mDchaService.setDefaultPreferredHomeApp(getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).getString(Constants.KEY_SAVE_KEEP_HOME, null));
-            } catch (RemoteException ignored) {
-            }
         }
 
         @Override
@@ -175,6 +174,7 @@ public class KeepService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        bindDchaService();
         instance = this;
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */

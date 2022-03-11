@@ -1,6 +1,5 @@
 package com.saradabar.cpadcustomizetool.view.flagment;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -40,13 +39,13 @@ import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
-import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 import com.saradabar.cpadcustomizetool.data.service.KeepService;
-import com.saradabar.cpadcustomizetool.view.views.LauncherView;
-import com.saradabar.cpadcustomizetool.view.views.NormalModeView;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
+import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
+import com.saradabar.cpadcustomizetool.view.views.LauncherView;
+import com.saradabar.cpadcustomizetool.view.views.NormalModeView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +54,8 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 import jp.co.benesse.dcha.dchautilservice.IDchaUtilService;
 
 public class MainFragment extends PreferenceFragment {
+
+    static MainFragment instance = null;
 
     int width, height;
 
@@ -96,8 +97,8 @@ public class MainFragment extends PreferenceFragment {
             preferenceDeviceOwner,
             preferenceSystemUpdate;
 
-    public MainFragment getInstance() {
-        return this;
+    public static MainFragment getInstance() {//インスタンスを取得
+        return instance;
     }
 
     /* システムUIオブザーバー */
@@ -262,6 +263,14 @@ public class MainFragment extends PreferenceFragment {
                 Settings.Secure.putInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 0);
                 break;
         }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        instance = this;
+        bindDchaService(Constants.FLAG_CHECK, true);
+        bindDchaService(Constants.FLAG_CHECK, false);
     }
 
     @Override
@@ -748,8 +757,8 @@ public class MainFragment extends PreferenceFragment {
                                         .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
                                         .show();
                             } else {
-                                MainFragment.setResolutionTask resolutionTask = new MainFragment.setResolutionTask();
-                                resolutionTask.setListener(new StartActivity().getInstance().mCreateListener());
+                                setResolutionTask resolutionTask = new setResolutionTask();
+                                resolutionTask.setListener(StartActivity.getInstance().mCreateListener());
                                 resolutionTask.execute();
                             }
                         } catch (NumberFormatException ignored) {
@@ -1023,7 +1032,7 @@ public class MainFragment extends PreferenceFragment {
                 }
                 if (installData != null) {
                     silentInstallTask silent = new silentInstallTask();
-                    silent.setListener(new StartActivity().getInstance().createListener());
+                    silent.setListener(StartActivity.getInstance().createListener());
                     silent.execute();
                 } else {
                     new AlertDialog.Builder(getActivity())
@@ -1083,7 +1092,7 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Boolean doInBackground(Boolean... value) {
-            return new MainFragment().getInstance().copySystemFile();
+            return MainFragment.getInstance().copySystemFile();
         }
 
         @Override
@@ -1117,7 +1126,7 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Boolean doInBackground(Boolean... value) {
-            return new MainFragment().getInstance().installApp();
+            return MainFragment.getInstance().installApp();
         }
 
         @Override
@@ -1146,7 +1155,7 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Boolean doInBackground(Boolean... value) {
-            return new MainFragment().getInstance().setResolution();
+            return MainFragment.getInstance().setResolution();
         }
 
         @Override

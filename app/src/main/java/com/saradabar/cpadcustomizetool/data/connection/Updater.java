@@ -25,15 +25,12 @@ import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
 import com.saradabar.cpadcustomizetool.util.Variables;
-import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
-import com.saradabar.cpadcustomizetool.view.flagment.DeviceOwnerFragment;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.zeroturnaround.zip.commons.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -60,8 +57,7 @@ public class Updater implements InstallEventListener {
     Activity activity;
     IDchaService mDchaService;
 
-    @SuppressLint("StaticFieldLeak")
-    private static Updater instance = null;
+    static Updater instance = null;
 
     public static Updater getInstance() {
         return instance;
@@ -74,6 +70,7 @@ public class Updater implements InstallEventListener {
         code = i;
         updateListeners = new UpdateEventListenerList();
         updateListeners.addEventListener((UpdateEventListener) activity);
+        bindDchaService();
     }
 
     private int updateAvailableCheck() {
@@ -191,7 +188,9 @@ public class Updater implements InstallEventListener {
                 progressDialog.setMessage("インストール中・・・");
                 progressDialog.setCancelable(false);
                 progressDialog.show();
-                if (!bindDchaService()) {
+                try {
+                    mDchaService.installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 1);
+                } catch (RemoteException ignored) {
                     progressDialog.dismiss();
                     new AlertDialog.Builder(activity)
                             .setCancelable(false)
@@ -227,10 +226,6 @@ public class Updater implements InstallEventListener {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mDchaService = IDchaService.Stub.asInterface(iBinder);
-            try {
-                mDchaService.installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 1);
-            } catch (RemoteException ignored) {
-            }
         }
 
         @Override
@@ -239,8 +234,8 @@ public class Updater implements InstallEventListener {
         }
     };
 
-    public boolean bindDchaService() {
-        return activity.bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+    public void bindDchaService() {
+        activity.bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private boolean trySessionInstall() {

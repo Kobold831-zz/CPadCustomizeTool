@@ -29,7 +29,7 @@ public class InstallService extends Service {
         InstallEventListenerList installEventListener = new InstallEventListenerList();
         switch (code) {
             case 0:
-                installEventListener.addEventListener(new StartActivity().getInstance());
+                installEventListener.addEventListener(StartActivity.getInstance());
                 break;
             case 1:
                 installEventListener.addEventListener(Updater.getInstance());
