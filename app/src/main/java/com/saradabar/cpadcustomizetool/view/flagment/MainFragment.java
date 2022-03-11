@@ -955,6 +955,8 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mDchaService != null) getActivity().unbindService(mDchaServiceConnection);
+        if (mDchaUtilService != null) getActivity().unbindService(mDchaUtilServiceConnection);
         if (isObserverStateEnable) {
             getActivity().getContentResolver().unregisterContentObserver(observerState);
             isObserverStateEnable = false;

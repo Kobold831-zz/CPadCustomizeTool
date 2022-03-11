@@ -13,8 +13,11 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListener;
@@ -70,7 +73,6 @@ public class Updater implements InstallEventListener {
         code = i;
         updateListeners = new UpdateEventListenerList();
         updateListeners.addEventListener((UpdateEventListener) activity);
-        bindDchaService();
     }
 
     private int updateAvailableCheck() {
@@ -188,9 +190,19 @@ public class Updater implements InstallEventListener {
                 progressDialog.setMessage("インストール中・・・");
                 progressDialog.setCancelable(false);
                 progressDialog.show();
-                try {
-                    mDchaService.installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 1);
-                } catch (RemoteException ignored) {
+                if (bindDchaService()) {
+                    Runnable runnable = () -> {
+                        if (!installPackage()) {
+                            progressDialog.dismiss();
+                            new AlertDialog.Builder(activity)
+                                    .setCancelable(false)
+                                    .setMessage(R.string.dialog_error)
+                                    .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> activity.finish())
+                                    .show();
+                        }
+                    };
+                    new Handler().postDelayed(runnable, 10);
+                } else {
                     progressDialog.dismiss();
                     new AlertDialog.Builder(activity)
                             .setCancelable(false)
@@ -201,7 +213,7 @@ public class Updater implements InstallEventListener {
                 break;
             case 3:
                 if (((DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(activity.getPackageName())) {
-                    if(!trySessionInstall()) {
+                    if (!trySessionInstall()) {
                         new AlertDialog.Builder(activity)
                                 .setCancelable(false)
                                 .setMessage(R.string.dialog_error)
@@ -234,8 +246,20 @@ public class Updater implements InstallEventListener {
         }
     };
 
-    public void bindDchaService() {
-        activity.bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+    public boolean bindDchaService() {
+        return activity.bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private boolean installPackage() {
+        if (mDchaService != null) {
+            try {
+                boolean bl = mDchaService.installApp(new File(activity.getExternalCacheDir(), "update.apk").getPath(), 1);
+                activity.unbindService(mDchaServiceConnection);
+                return bl;
+            } catch (RemoteException ignored) {
+            }
+        }
+        return false;
     }
 
     private boolean trySessionInstall() {

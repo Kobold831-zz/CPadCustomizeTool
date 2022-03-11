@@ -37,8 +37,11 @@ import com.stephentuso.welcome.WelcomeHelper;
 import java.io.File;
 import java.util.Objects;
 
+import jp.co.benesse.dcha.dchaservice.IDchaService;
+
 public class MainActivity extends Activity implements UpdateEventListener {
 
+    IDchaService mDchaService;
     ProgressDialog loadingDialog;
     boolean result = true;
 
@@ -405,10 +408,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
         }
     };
 
@@ -432,5 +437,11 @@ public class MainActivity extends Activity implements UpdateEventListener {
                 else errorNotTab2Or3();
                 break;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mDchaService != null) unbindService(mDchaServiceConnection);
     }
 }

@@ -304,18 +304,20 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     @SuppressLint("NewApi")
     private double getDirectorySize(File file) {
         double fileSize = 0;
-        try {
-            File[] list = file.listFiles();
-            for (File value : list != null ? list : new File[0]) {
-                if (!value.isDirectory()) {
-                    fileSize += Files.size(Paths.get(value.getPath()));
-                } else {
-                    File[] obbName = new File(value.getPath() + "/obb").listFiles();
-                    File[] obbFile = obbName != null ? obbName[0].listFiles() : new File[0];
-                    fileSize += Files.size(Paths.get(obbFile != null ? obbFile[0].getPath() : null));
+        if (file != null) {
+            try {
+                File[] list = file.listFiles();
+                for (File value : list != null ? list : new File[0]) {
+                    if (!value.isDirectory()) {
+                        fileSize += Files.size(Paths.get(value.getPath()));
+                    } else {
+                        File[] obbName = new File(value.getPath() + "/obb").listFiles();
+                        File[] obbFile = obbName != null ? obbName[0].listFiles() : new File[0];
+                        fileSize += Files.size(Paths.get(obbFile != null ? obbFile[0].getPath() : null));
+                    }
                 }
+            } catch (Exception ignored) {
             }
-        } catch (Exception ignored) {
         }
         return fileSize;
     }

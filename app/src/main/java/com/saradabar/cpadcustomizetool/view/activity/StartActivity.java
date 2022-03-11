@@ -42,10 +42,13 @@ import org.zeroturnaround.zip.commons.FileUtils;
 import java.io.IOException;
 import java.util.Objects;
 
+import jp.co.benesse.dcha.dchaservice.IDchaService;
+
 public class StartActivity extends Activity implements InstallEventListener {
 
     static StartActivity instance = null;
 
+    IDchaService mDchaService;
     Menu menu;
 
     public static StartActivity getInstance() {//インスタンスを取得
@@ -186,10 +189,12 @@ public class StartActivity extends Activity implements InstallEventListener {
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mDchaService = IDchaService.Stub.asInterface(iBinder);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            mDchaService = null;
         }
     };
 
@@ -239,6 +244,7 @@ public class StartActivity extends Activity implements InstallEventListener {
         return new DeviceOwnerFragment.TryXApkTask.Listener() {
             AlertDialog alertDialog;
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onShow() {
                 View view = getLayoutInflater().inflate(R.layout.view_progress, null);
@@ -246,7 +252,7 @@ public class StartActivity extends Activity implements InstallEventListener {
                 progressBar.setProgress(0);
                 TextView textPercent = view.findViewById(R.id.progress_percent);
                 TextView textByte = view.findViewById(R.id.progress_byte);
-                textPercent.setText(String.format(getString(progressBar.getProgress()), getString(R.string.percent)));
+                textPercent.setText(progressBar.getProgress() + getString(R.string.percent));
                 alertDialog = new AlertDialog.Builder(StartActivity.this)
                         .setView(view)
                         .setMessage("")
@@ -496,5 +502,11 @@ public class StartActivity extends Activity implements InstallEventListener {
     @Override
     public void onInstallError(String str) {
         DeviceOwnerFragment.OwnerInstallTask.mListener.onError(str);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mDchaService != null) unbindService(mDchaServiceConnection);
     }
 }
