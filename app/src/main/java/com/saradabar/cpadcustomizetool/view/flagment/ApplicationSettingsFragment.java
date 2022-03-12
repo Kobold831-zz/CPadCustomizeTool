@@ -119,7 +119,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
             list.add("パッケージインストーラ");
             list.add("ADB");
             list.add("DchaService");
-            list.add("DeviceOwner");
+            list.add("デバイスオーナー");
             List<SingleListView.AppData> dataList = new ArrayList<>();
             int i = 0;
             for (String str : list) {
@@ -140,7 +140,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                             listView.invalidateViews();
                         } else {
                             new AlertDialog.Builder(getActivity())
-                                    .setMessage("選択されたモードは機能していないため設定できません")
+                                    .setMessage(getString(R.string.dialog_error_not_work_mode))
                                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
                                     .show();
                         }

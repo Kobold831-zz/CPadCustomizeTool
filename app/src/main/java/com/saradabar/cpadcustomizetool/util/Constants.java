@@ -52,6 +52,8 @@ public class Constants {
     public static final Intent DCHA_SERVICE = new Intent("jp.co.benesse.dcha.dchaservice.DchaService").setPackage("jp.co.benesse.dcha.dchaservice");
     public static final Intent DCHA_UTIL_SERVICE = new Intent("jp.co.benesse.dcha.dchautilservice.DchaUtilService").setPackage("jp.co.benesse.dcha.dchautilservice");
     public static final Intent AURORA_SERVICE = new Intent("com.aurora.store.data.service.ResultService").setPackage("com.aurora.store");
+    public static final Intent KEEP_SERVICE = new Intent("com.saradabar.cpadcustomizetool.data.service.KeepService").setPackage("com.saradabar.cpadcustomizetool");
+    public static final Intent PROTECT_KEEP_SERVICE = new Intent("com.saradabar.cpadcustomizetool.data.service.ProtectKeepService").setPackage("com.saradabar.cpadcustomizetool");
 
     public static final File IGNORE_DCHA_COMPLETED_FILE = new File("/factory/ignore_dcha_completed");
     public static final File COUNT_DCHA_COMPLETED_FILE = new File("/factory/count_dcha_completed");

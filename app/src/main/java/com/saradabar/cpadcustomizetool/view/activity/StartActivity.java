@@ -113,6 +113,8 @@ public class StartActivity extends Activity implements InstallEventListener {
                             KeepService.getInstance().stopService(6);
                         }
                     }
+                    stopService(Constants.KEEP_SERVICE);
+                    stopService(Constants.PROTECT_KEEP_SERVICE);
                     /* 設定リセット */
                     Preferences.SET_UPDATE_FLAG(true, this);
                     Preferences.SET_DCHASERVICE_FLAG(false, this);

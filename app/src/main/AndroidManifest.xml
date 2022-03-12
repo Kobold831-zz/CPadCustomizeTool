@@ -119,12 +119,22 @@
 
         <service
             android:name=".data.service.KeepService"
-            android:label="@string/service_keep" />
+            android:label="@string/service_keep"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.saradabar.cpadcustomizetool.data.service.KeepService"/>
+            </intent-filter>
+        </service>
 
         <service
             android:name=".data.service.ProtectKeepService"
             android:label="@string/service_protect_keep"
-            android:process=":protect" />
+            android:process=":protect"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.saradabar.cpadcustomizetool.data.service.ProtectKeepService"/>
+            </intent-filter>
+        </service>
 
         <service
             android:name=".data.service.DeviceOwnerService"

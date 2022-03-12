@@ -6,9 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.IBinder;
@@ -18,9 +15,6 @@ import android.provider.Settings;
 import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
-import com.saradabar.cpadcustomizetool.util.Toast;
-
-import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
@@ -43,6 +37,7 @@ public class KeepService extends Service {
     }
 
     private void loopKeepHome() {
+        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
         mHandler = new Handler();
         mRunnable = new Runnable() {
             @Override
@@ -56,7 +51,7 @@ public class KeepService extends Service {
                         } catch (RemoteException ignored) {
                         }
                     }
-                    mHandler.postDelayed(this, 5000);
+                    mHandler.postDelayed(this, 10000);
                 }else {
                     mHandler.removeCallbacks(mRunnable);
                 }
@@ -85,10 +80,6 @@ public class KeepService extends Service {
             mDchaService = null;
         }
     };
-
-    public void bindDchaService() {
-        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
-    }
 
     private final ContentObserver DchaStateObserver = new ContentObserver(new Handler()) {
         @Override
@@ -159,7 +150,6 @@ public class KeepService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
-        bindDchaService();
         instance = this;
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
@@ -186,8 +176,27 @@ public class KeepService extends Service {
         if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             return START_NOT_STICKY;
         }
+        tryBind();
         return START_STICKY;
     }
+
+    private void tryBind() {
+        bindService(Constants.PROTECT_KEEP_SERVICE, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+            if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                startService(Constants.PROTECT_KEEP_SERVICE);
+            }
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -195,7 +204,7 @@ public class KeepService extends Service {
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            startService(new Intent(getApplicationContext(), KeepService.class));
+            startService(Constants.KEEP_SERVICE);
         }
     }
 
@@ -286,12 +295,14 @@ public class KeepService extends Service {
                     mHandler.removeCallbacks(mRunnable);
                     isObserberHomeEnable = false;
                 }
-                stopService(new Intent(getApplicationContext(), ProtectKeepService.class));
+                stopService(Constants.KEEP_SERVICE);
+                stopService(Constants.PROTECT_KEEP_SERVICE);
                 stopSelf();
                 break;
         }
         if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            stopService(new Intent(getApplicationContext(), ProtectKeepService.class));
+            stopService(Constants.KEEP_SERVICE);
+            stopService(Constants.PROTECT_KEEP_SERVICE);
             stopSelf();
         }
     }

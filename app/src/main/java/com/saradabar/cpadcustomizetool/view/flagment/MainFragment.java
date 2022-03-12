@@ -216,14 +216,14 @@ public class MainFragment extends PreferenceFragment {
                     case Constants.FLAG_COPY_UPDATE_IMAGE:
                         return mDchaService.copyUpdateImage("", "");
                     case Constants.FLAG_CHECK:
-                        return getActivity().bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+                        return getActivity().getApplicationContext().bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
                     case Constants.FLAG_TEST:
                         break;
                 }
             } else {
                 switch (flag) {
                     case Constants.FLAG_CHECK:
-                        return getActivity().bindService(Constants.DCHA_UTIL_SERVICE, mDchaUtilServiceConnection, Context.BIND_AUTO_CREATE);
+                        return getActivity().getApplicationContext().bindService(Constants.DCHA_UTIL_SERVICE, mDchaUtilServiceConnection, Context.BIND_AUTO_CREATE);
                     case Constants.FLAG_RESOLUTION:
                         return mDchaUtilService.setForcedDisplaySize(width, height);
                 }
@@ -268,17 +268,13 @@ public class MainFragment extends PreferenceFragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.pre_main, rootKey);
         instance = this;
         /* サービスのインターフェースを取得 */
         bindDchaService(Constants.FLAG_CHECK, true);
         bindDchaService(Constants.FLAG_CHECK, false);
-    }
 
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        setPreferencesFromResource(R.xml.pre_main, rootKey);
         switchDchaState = findPreference("switch1");
         switchKeepDchaState = findPreference("switch2");
         switchHideBar = findPreference("switch3");
@@ -356,6 +352,7 @@ public class MainFragment extends PreferenceFragment {
             if ((boolean) o) {
                 settingsFlag(Constants.FLAG_VIEW_NAVIGATION_BAR);
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
+                getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
@@ -365,6 +362,10 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
+                }
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(1);
@@ -381,6 +382,7 @@ public class MainFragment extends PreferenceFragment {
                 try {
                     Settings.Secure.putInt(getActivity().getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 1);
                     getActivity().startService(new Intent(getActivity(), KeepService.class));
+                    getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
                     for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                         if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                             try {
@@ -396,6 +398,10 @@ public class MainFragment extends PreferenceFragment {
                     return false;
                 }
             } else {
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
+                }
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(3);
@@ -422,6 +428,7 @@ public class MainFragment extends PreferenceFragment {
                         settingsFlag(Constants.FLAG_SET_DCHA_STATE_0);
                     }
                     getActivity().startService(new Intent(getActivity(), KeepService.class));
+                    getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
                     for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                         if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                             try {
@@ -440,6 +447,10 @@ public class MainFragment extends PreferenceFragment {
                     return false;
                 }
             } else {
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
+                }
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE))
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(4);
@@ -457,6 +468,7 @@ public class MainFragment extends PreferenceFragment {
             if ((boolean) o) {
                 settingsFlag(Constants.FLAG_SET_DCHA_STATE_0);
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
+                getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
@@ -466,6 +478,10 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
+                }
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(2);
@@ -481,6 +497,7 @@ public class MainFragment extends PreferenceFragment {
             if ((boolean) o) {
                 getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).edit().putString(Constants.KEY_SAVE_KEEP_HOME, getLauncherPackage()).apply();
                 getActivity().startService(new Intent(getActivity(), KeepService.class));
+                getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         try {
@@ -490,6 +507,10 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             } else {
+                SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+                if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+                    getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
+                }
                 for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                     if (KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                         KeepService.getInstance().stopService(5);
@@ -939,7 +960,8 @@ public class MainFragment extends PreferenceFragment {
 
         /* 維持スイッチが有効のときサービスが停止していたら起動 */
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            getActivity().startService(new Intent(getActivity(), KeepService.class));
+            getActivity().startService(Constants.KEEP_SERVICE);
+            getActivity().startService(Constants.PROTECT_KEEP_SERVICE);
             for (ActivityManager.RunningServiceInfo serviceInfo : ((ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) {
                 if (!KeepService.class.getName().equals(serviceInfo.service.getClassName())) {
                     try {
@@ -948,6 +970,8 @@ public class MainFragment extends PreferenceFragment {
                     }
                 }
             }
+        } else if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+            getActivity().stopService(Constants.PROTECT_KEEP_SERVICE);
         }
     }
 
@@ -955,8 +979,8 @@ public class MainFragment extends PreferenceFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mDchaService != null) getActivity().unbindService(mDchaServiceConnection);
-        if (mDchaUtilService != null) getActivity().unbindService(mDchaUtilServiceConnection);
+        if (mDchaService != null) getActivity().getApplicationContext().unbindService(mDchaServiceConnection);
+        if (mDchaUtilService != null) getActivity().getApplicationContext().unbindService(mDchaUtilServiceConnection);
         if (isObserverStateEnable) {
             getActivity().getContentResolver().unregisterContentObserver(observerState);
             isObserverStateEnable = false;
