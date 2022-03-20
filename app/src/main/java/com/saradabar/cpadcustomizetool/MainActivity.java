@@ -3,12 +3,16 @@ package com.saradabar.cpadcustomizetool;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,12 +24,17 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+
+import com.saradabar.cpadcustomizetool.Receiver.PackageAddedReceiver;
 import com.saradabar.cpadcustomizetool.data.connection.AsyncFileDownload;
 import com.saradabar.cpadcustomizetool.data.connection.Checker;
 import com.saradabar.cpadcustomizetool.data.connection.Updater;
 import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
 import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
+import com.saradabar.cpadcustomizetool.data.service.KeepService;
+import com.saradabar.cpadcustomizetool.util.Common;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
@@ -46,15 +55,52 @@ public class MainActivity extends Activity implements UpdateEventListener {
     boolean result = true;
 
     @Override
-    public final void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addDataScheme("package");
+        PackageAddedReceiver packageReceiver = new PackageAddedReceiver() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sp = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
+                if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
+                    if (intent.getData().toString().replace("package:", "").equals(context.getPackageName())) {
+                        context.startService(new Intent(context, KeepService.class));
+                    }
+                    if (sp.getBoolean("permission_forced", false)) {
+                        for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
+                            /* ユーザーアプリか確認 */
+                            if (app.sourceDir.startsWith("/data/app/")) {
+                                Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                            }
+                        }
+                    }
+                }
+                if (intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED)) {
+                    if (intent.getData().toString().replace("package:", "").equals(context.getPackageName())) {
+                        context.startService(new Intent(context, KeepService.class));
+                    }
+                    if (sp.getBoolean("permission_forced", false)) {
+                        for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
+                            /* ユーザーアプリか確認 */
+                            if (app.sourceDir.startsWith("/data/app/")) {
+                                Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        registerReceiver(packageReceiver, intentFilter);
         /* ネットワークチェック */
         if (!isNetWork()) {
             netWorkError();
             return;
         }
-
         /* アップデートチェックの可否を確認 */
         if (Preferences.GET_UPDATE_FLAG(this)) updateCheck();
         else supportCheck();

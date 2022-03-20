@@ -152,10 +152,12 @@
             android:exported="false" />
 
         <receiver
-            android:name=".Receiver.UpdateReceiver"
+            android:name=".Receiver.PackageAddedReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.ACTION_PACKAGE_REPLACED" />
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
 

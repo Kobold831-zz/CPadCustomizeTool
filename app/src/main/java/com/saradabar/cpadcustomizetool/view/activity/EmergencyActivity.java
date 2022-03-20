@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -36,35 +37,33 @@ public class EmergencyActivity extends Activity {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
         bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
-
-        String Course = PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "");
-
-        if (!startCheck()) {
-            Toast.toast(this, R.string.toast_not_completed_settings);
-            finishAndRemoveTask();
-            return;
-        }
-
-        if (!setSystemSettings(true)) {
-            Toast.toast(this, R.string.toast_not_change);
-            finishAndRemoveTask();
-            return;
-        }
-
-        switch (Course) {
-            case "1":
-                if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) {
-                    Toast.toast(this, R.string.toast_execution);
-                }
+        Runnable runnable = () -> {
+            if (!startCheck()) {
+                Toast.toast(this, R.string.toast_not_completed_settings);
                 finishAndRemoveTask();
-                break;
-            case "2":
-                if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) {
-                    Toast.toast(this, R.string.toast_execution);
-                }
+                return;
+            }
+            if (!setSystemSettings(true)) {
+                Toast.toast(this, R.string.toast_not_change);
                 finishAndRemoveTask();
-                break;
-        }
+                return;
+            }
+            switch (PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "")) {
+                case "1":
+                    if (setDchaSettings("jp.co.benesse.touch.allgrade.b003.touchhomelauncher", "jp.co.benesse.touch.allgrade.b003.touchhomelauncher.HomeLauncherActivity")) {
+                        Toast.toast(this, R.string.toast_execution);
+                    }
+                    finishAndRemoveTask();
+                    break;
+                case "2":
+                    if (setDchaSettings("jp.co.benesse.touch.home", "jp.co.benesse.touch.home.LoadingActivity")) {
+                        Toast.toast(this, R.string.toast_execution);
+                    }
+                    finishAndRemoveTask();
+                    break;
+            }
+        };
+        new Handler().postDelayed(runnable, 10);
     }
 
     private boolean startCheck() {
@@ -172,4 +171,10 @@ public class EmergencyActivity extends Activity {
             mDchaService = null;
         }
     };
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        finishAndRemoveTask();
+    }
 }

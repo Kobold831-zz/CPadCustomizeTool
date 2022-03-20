@@ -87,7 +87,7 @@
     
     <!-- デバイスオーナー設定 -->
     <string name="pre_owner_title_uninstall_block">ユーザーアプリのアンインストールを無効</string>
-    <string name="pre_owner_title_permission">パーミッションポリシー</string>
+    <string name="pre_owner_title_permission">権限の付与を強制</string>
     <string name="pre_owner_title_silent_install">サイレントインストール</string>
     <string name="pre_owner_title_device_owner">デバイスオーナーを解除</string>
     <string name="pre_owner_sum_message_1">デバイスオーナーは</string>
@@ -96,6 +96,8 @@
     <string name="pre_owner_sum_not_use_function">デバイスオーナーではないためこの機能は使用できません\nこの機能を使用するにはADBで許可してください</string>
     <string name="pre_owner_sum_uninstall_block">ユーザーアプリのアンインストールをブロックします</string>
     <string name="pre_owner_sum_silent_install">「xApk・SplitApk」のインストールに対応しています\n「SplitApk」をインストールするにはファイルを長押しして選択してください</string>
+    <string name="pre_owner_sum_permission_forced">\nDevicePolicyによりすべてのユーザーアプリのランタイム権限などは強制付与されます</string>
+    <string name="pre_owner_sum_permission_default">\nDevicePolicyはデフォルトです</string>
 
     <!-- その他の設定 -->
     <string name="pre_other_title_settings">設定を起動</string>
@@ -203,7 +205,7 @@
     <string name="info_library">外部ライブラリー</string>
     <string name="info_library_wel_label">・Copyright 2015\-2017 Stephen Tuso\nwelcome-android</string>
     <string name="info_library_zip_label">・Copyright 2012 ZeroTurnaround LLC.\nZeroTurnaround ZIP Library</string>
-    <string name="info_library_yib_label">・YiB-PC\ncpadmaterial.png\nex.png\nnavigationbar.png\nウォークスルーの追加</string>
+    <string name="info_library_yib_label">・YiB-PC\ncpadmaterial.png \\ ex.png \\ navigationbar.png\nウォークスルーの追加</string>
     <string name="info_github">GitHub</string>
     <string name="info_github_label">このアプリのソースコードを取得できます</string>
     <string name="info_github_button">取得</string>

@@ -20,15 +20,13 @@ import jp.co.benesse.dcha.dchaservice.IDchaService;
 
 public class KeepService extends Service {
 
-    private Handler mHandler;
-    private Runnable mRunnable;
     IDchaService mDchaService;
 
-    private boolean isObserberHideEnable = false;
-    private boolean isObserberStateEnable = false;
-    private boolean isObserberMarketEnable = false;
-    private boolean isObserberUsbEnable = false;
-    private boolean isObserberHomeEnable = false;
+    private boolean isNavigationObserverEnable = false;
+    private boolean isUiObserverEnable = false;
+    private boolean isUnknownObserverEnable = false;
+    private boolean isUsbObserverEnable = false;
+    private boolean isHomeObserverEnable = false;
 
     static KeepService instance = null;
 
@@ -36,36 +34,22 @@ public class KeepService extends Service {
         return instance;
     }
 
-    private void loopKeepHome() {
+    private void KeepHome() {
         bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
-        mHandler = new Handler();
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-                if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-                    if (!getHome().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null))) {
-                        try {
-                            mDchaService.clearDefaultPreferredApp(getHome());
-                            mDchaService.setDefaultPreferredHomeApp(getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE).getString(Constants.KEY_SAVE_KEEP_HOME, null));
-                        } catch (RemoteException ignored) {
-                        }
-                    }
-                    mHandler.postDelayed(this, 10000);
-                }else {
-                    mHandler.removeCallbacks(mRunnable);
+        Runnable runnable = () -> {
+            SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+            if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false) && !getHomePackageName().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null))) {
+                try {
+                    mDchaService.clearDefaultPreferredApp(getHomePackageName());
+                    mDchaService.setDefaultPreferredHomeApp(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null));
+                } catch (RemoteException ignored) {
                 }
             }
         };
-        SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-        if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            mHandler.post(mRunnable);
-        }else {
-            mHandler.removeCallbacks(mRunnable);
-        }
+        new Handler().postDelayed(runnable, 10);
     }
 
-    private String getHome() {
+    private String getHomePackageName() {
         return getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0).activityInfo.packageName;
     }
 
@@ -81,7 +65,7 @@ public class KeepService extends Service {
         }
     };
 
-    private final ContentObserver DchaStateObserver = new ContentObserver(new Handler()) {
+    ContentObserver DchaStateObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -94,7 +78,7 @@ public class KeepService extends Service {
         }
     };
 
-    private final ContentObserver NavigationObserver = new ContentObserver(new Handler()) {
+    ContentObserver NavigationObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -107,7 +91,7 @@ public class KeepService extends Service {
         }
     };
 
-    private final ContentObserver MarketObserver = new ContentObserver(new Handler()) {
+    ContentObserver MarketObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -122,7 +106,7 @@ public class KeepService extends Service {
         }
     };
 
-    private final ContentObserver UsbDebugObserver = new ContentObserver(new Handler()) {
+    ContentObserver UsbDebugObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
@@ -154,24 +138,24 @@ public class KeepService extends Service {
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false)) {
-            isObserberHideEnable = true;
+            isNavigationObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
-            isObserberStateEnable = true;
+            isUiObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, DchaStateObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
-            isObserberMarketEnable = true;
+            isUnknownObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
-            isObserberUsbEnable = true;
+            isUsbObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            isObserberHomeEnable = true;
-            loopKeepHome();
+            isHomeObserverEnable = true;
+            KeepHome();
         }
         if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             return START_NOT_STICKY;
@@ -218,24 +202,24 @@ public class KeepService extends Service {
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false)) {
-            isObserberHideEnable = true;
+            isNavigationObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.HIDE_NAVIGATION_BAR), false, NavigationObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false)) {
-            isObserberStateEnable = true;
+            isUiObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.System.getUriFor(Constants.DCHA_STATE), false, DchaStateObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false)) {
-            isObserberMarketEnable = true;
+            isUnknownObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.INSTALL_NON_MARKET_APPS), false, MarketObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false)) {
-            isObserberUsbEnable = true;
+            isUsbObserverEnable = true;
             getContentResolver().registerContentObserver(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED), false, UsbDebugObserver);
         }
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
-            isObserberHomeEnable = true;
-            loopKeepHome();
+            isHomeObserverEnable = true;
+            KeepHome();
         }
     }
 
@@ -245,55 +229,53 @@ public class KeepService extends Service {
         /* オブサーバーを無効化 */
         switch (stopCode) {
             case 1:
-                if (isObserberHideEnable) {
+                if (isNavigationObserverEnable) {
                     getContentResolver().unregisterContentObserver(NavigationObserver);
-                    isObserberHideEnable = false;
+                    isNavigationObserverEnable = false;
                 }
                 break;
             case 2:
-                if (isObserberStateEnable) {
+                if (isUiObserverEnable) {
                     getContentResolver().unregisterContentObserver(DchaStateObserver);
-                    isObserberStateEnable = false;
+                    isUiObserverEnable = false;
                 }
                 break;
             case 3:
-                if (isObserberMarketEnable) {
+                if (isUnknownObserverEnable) {
                     getContentResolver().unregisterContentObserver(MarketObserver);
-                    isObserberMarketEnable = false;
+                    isUnknownObserverEnable = false;
                 }
                 break;
             case 4:
-                if (isObserberUsbEnable) {
+                if (isUsbObserverEnable) {
                     getContentResolver().unregisterContentObserver(UsbDebugObserver);
-                    isObserberUsbEnable = false;
+                    isUsbObserverEnable = false;
                 }
                 break;
             case 5:
-                if (isObserberHomeEnable) {
-                    mHandler.removeCallbacks(mRunnable);
-                    isObserberHomeEnable = false;
+                if (isHomeObserverEnable) {
+                    isHomeObserverEnable = false;
                 }
                 break;
             case 6:
-                if (isObserberHideEnable) {
+                if (isNavigationObserverEnable) {
                     getContentResolver().unregisterContentObserver(NavigationObserver);
-                    isObserberHideEnable = false;
+                    isNavigationObserverEnable = false;
                 }
-                if (isObserberStateEnable) {
+                if (isUiObserverEnable) {
                     getContentResolver().unregisterContentObserver(DchaStateObserver);
-                    isObserberStateEnable = false;
+                    isUiObserverEnable = false;
                 }
-                if (isObserberMarketEnable) {
+                if (isUnknownObserverEnable) {
                     getContentResolver().unregisterContentObserver(MarketObserver);
-                    isObserberMarketEnable = false;
+                    isUnknownObserverEnable = false;
                 }
-                if (isObserberUsbEnable) {
+                if (isUsbObserverEnable) {
                     getContentResolver().unregisterContentObserver(UsbDebugObserver);
-                    isObserberUsbEnable = false;
+                    isUsbObserverEnable = false;
                 }
-                if (isObserberHomeEnable) {
-                    mHandler.removeCallbacks(mRunnable);
-                    isObserberHomeEnable = false;
+                if (isHomeObserverEnable) {
+                    isHomeObserverEnable = false;
                 }
                 stopService(Constants.KEEP_SERVICE);
                 stopService(Constants.PROTECT_KEEP_SERVICE);

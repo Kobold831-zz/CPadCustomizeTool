@@ -96,19 +96,31 @@ public class DeviceOwnerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) postStatus(intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
+        if (intent != null) postStatus(intent.getIntExtra("REQUEST_SESSION", -1), intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void postStatus(int status, String packageName, String extra) {
+    private void postStatus(int sessionId, int status, String packageName, String extra) {
         switch (status) {
             case PackageInstaller.STATUS_SUCCESS:
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).close();
+                } catch (Exception ignored) {
+                }
                 bindInstallResult(0, packageName, null, null);
                 break;
             case PackageInstaller.STATUS_FAILURE_ABORTED:
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).abandon();
+                } catch (Exception ignored) {
+                }
                 bindInstallResult(1, packageName, getErrorMessage(this, status), null);
                 break;
             default:
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).abandon();
+                } catch (Exception ignored) {
+                }
                 bindInstallResult(2, packageName, getErrorMessage(this, status), extra);
                 break;
         }
@@ -194,13 +206,11 @@ public class DeviceOwnerService extends Service {
             session.fsync(out);
             return true;
         } catch (Exception ignored) {
+            if (session != null) session.abandon();
             return false;
         } finally {
-            if (out != null) {
-                out.close();
-                in.close();
-                session.close();
-            }
+            if (out != null) out.close();
+            if (in != null) in.close();
         }
     }
 
@@ -208,21 +218,20 @@ public class DeviceOwnerService extends Service {
         PackageInstaller.Session session = null;
         try {
             session = packageInstaller.openSession(sessionId);
-            Intent intent = new Intent(context, DeviceOwnerService.class);
+            Intent intent = new Intent(context, DeviceOwnerService.class).putExtra("REQUEST_SESSION", sessionId);
             PendingIntent pendingIntent = PendingIntent.getService(
                     context,
                     sessionId,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_CANCEL_CURRENT
             );
             session.commit(pendingIntent.getIntentSender());
             return true;
         } catch (Exception ignored) {
+            if (session != null) session.abandon();
             return false;
         } finally {
-            if (session != null) {
-                session.close();
-            }
+            if (session != null) session.close();
         }
     }
 

@@ -10,6 +10,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -33,23 +34,25 @@ public class NormalActivity extends Activity {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
         bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+        Runnable runnable = () -> {
+            if (!startCheck()) {
+                Toast.toast(this, R.string.toast_not_completed_settings);
+                finishAndRemoveTask();
+                return;
+            }
 
-        if (!startCheck()) {
-            Toast.toast(this, R.string.toast_not_completed_settings);
+            if (!setSystemSettings()) {
+                Toast.toast(this, R.string.toast_not_install_launcher);
+                finishAndRemoveTask();
+                return;
+            }
+
+            if (setDchaSettings()) {
+                Toast.toast(this, R.string.toast_execution);
+            }
             finishAndRemoveTask();
-            return;
-        }
-
-        if (!setSystemSettings()) {
-            Toast.toast(this, R.string.toast_not_install_launcher);
-            finishAndRemoveTask();
-            return;
-        }
-
-        if (setDchaSettings()) {
-            Toast.toast(this, R.string.toast_execution);
-        }
-        finishAndRemoveTask();
+        };
+        new Handler().postDelayed(runnable, 10);
     }
 
     private boolean startCheck() {
@@ -113,4 +116,10 @@ public class NormalActivity extends Activity {
             mDchaService = null;
         }
     };
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        finishAndRemoveTask();
+    }
 }

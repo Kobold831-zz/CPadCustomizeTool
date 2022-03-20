@@ -9,6 +9,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -16,18 +18,20 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 
+import androidx.annotation.RequiresApi;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreference;
 
-import com.saradabar.cpadcustomizetool.data.installer.SplitInstaller;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver;
-import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
-import com.saradabar.cpadcustomizetool.view.activity.BlockerActivity;
+import com.saradabar.cpadcustomizetool.data.installer.SplitInstaller;
+import com.saradabar.cpadcustomizetool.util.Common;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Path;
 import com.saradabar.cpadcustomizetool.util.Preferences;
+import com.saradabar.cpadcustomizetool.view.activity.BlockerActivity;
+import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 
 import org.zeroturnaround.zip.ZipUtil;
 import org.zeroturnaround.zip.commons.FileUtils;
@@ -36,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DeviceOwnerFragment extends PreferenceFragment {
 
@@ -57,7 +63,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         return instance;
     }
 
-    @SuppressLint("NewApi")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_device_owner, rootKey);
@@ -80,14 +86,24 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         switchPreferencePermissionForced.setOnPreferenceChangeListener((preference, o) -> {
             if ((boolean) o) {
                 switchPreferencePermissionForced.setChecked(true);
-                switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT);
+                switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT/PERMISSION_GRANT_STATE_GRANTED" + getString(R.string.pre_owner_sum_permission_forced));
+                devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT);
+                for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+                    /* ユーザーアプリか確認 */
+                    if (app.sourceDir.startsWith("/data/app/")) {
+                        Common.setPermissionGrantState(getActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                    }
+                }
             } else {
                 switchPreferencePermissionForced.setChecked(false);
-                switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_PROMPT);
+                switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT/PERMISSION_GRANT_STATE_DEFAULT" + getString(R.string.pre_owner_sum_permission_default));
+                devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_PROMPT);
+                for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+                    /* ユーザーアプリか確認 */
+                    if (app.sourceDir.startsWith("/data/app/")) {
+                        Common.setPermissionGrantState(getActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
+                    }
+                }
             }
             return true;
         });
@@ -148,6 +164,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void setPreferenceSettings() {
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
         if (!devicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
@@ -160,17 +177,15 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
             preferenceOwnerSilentInstall.setSummary(getString(R.string.pre_owner_sum_not_use_function));
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
-                    case 0:
-                        switchPreferencePermissionForced.setChecked(false);
-                        switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT");
-                        break;
-                    case 1:
-                        switchPreferencePermissionForced.setChecked(true);
-                        switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT");
-                        break;
-                }
+            switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
+                case DevicePolicyManager.PERMISSION_POLICY_PROMPT:
+                    switchPreferencePermissionForced.setChecked(false);
+                    switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT/PERMISSION_GRANT_STATE_DEFAULT" + getString(R.string.pre_owner_sum_permission_default));
+                    break;
+                case DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT:
+                    switchPreferencePermissionForced.setChecked(true);
+                    switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT/PERMISSION_GRANT_STATE_GRANTED" + getString(R.string.pre_owner_sum_permission_forced));
+                    break;
             }
         }
     }
@@ -189,6 +204,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     }
 
     /* 再表示 */
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onResume() {
         super.onResume();

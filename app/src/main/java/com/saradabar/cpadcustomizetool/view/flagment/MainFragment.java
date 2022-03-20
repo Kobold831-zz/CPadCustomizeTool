@@ -1191,18 +1191,16 @@ public class MainFragment extends PreferenceFragment {
 
         @Override
         protected Boolean doInBackground(Boolean... value) {
-            boolean bl = MainFragment.getInstance().setResolution();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-            return bl;
+            return MainFragment.getInstance().setResolution();
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            if (result) mListener.onSuccess();
-            else mListener.onFailure();
+            Runnable runnable = () -> {
+                if (result) mListener.onSuccess();
+                else mListener.onFailure();
+            };
+            new Handler().postDelayed(runnable, 1000);
         }
 
         public void setListener(Listener listener) {

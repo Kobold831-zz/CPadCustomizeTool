@@ -10,8 +10,8 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 22
 
-        versionCode 37
-        versionName "1.5.7"
+        versionCode 38
+        versionName "1.5.8"
 
         multiDexEnabled true
     }

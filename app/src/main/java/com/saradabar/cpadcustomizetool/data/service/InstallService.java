@@ -11,6 +11,8 @@ import com.saradabar.cpadcustomizetool.data.connection.Updater;
 import com.saradabar.cpadcustomizetool.data.event.InstallEventListenerList;
 import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 
+import java.io.IOException;
+
 public class InstallService extends Service {
 
     @Override
@@ -20,12 +22,12 @@ public class InstallService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        postStatus(intent.getIntExtra("REQUEST_CODE", 0), intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
+        postStatus(intent.getIntExtra("REQUEST_SESSION", -1), intent.getIntExtra("REQUEST_CODE", 0), intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1), intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
         stopSelf();
         return START_NOT_STICKY;
     }
 
-    private void postStatus(int code, int status, String packageName, String extra) {
+    private void postStatus(int sessionId, int code, int status, String extra) {
         InstallEventListenerList installEventListener = new InstallEventListenerList();
         switch (code) {
             case 0:
@@ -36,13 +38,25 @@ public class InstallService extends Service {
         }
         switch (status) {
             case PackageInstaller.STATUS_SUCCESS:
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).close();
+                } catch (Exception ignored) {
+                }
                 installEventListener.installSuccessNotify();
                 break;
             case PackageInstaller.STATUS_FAILURE_ABORTED:
-                installEventListener.installFailureNotify(getErrorMessage(this, status));
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).abandon();
+                } catch (Exception ignored) {
+                }
+                installEventListener.installFailureNotify(getErrorMessage(this, status) + "\n" + extra);
                 break;
             default:
-                installEventListener.installErrorNotify(getErrorMessage(this, status));
+                try {
+                    getPackageManager().getPackageInstaller().openSession(sessionId).abandon();
+                } catch (Exception ignored) {
+                }
+                installEventListener.installErrorNotify(getErrorMessage(this, status) + "\n" + extra);
                 break;
         }
     }

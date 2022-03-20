@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -25,7 +26,6 @@ public class RebootActivity extends Activity {
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
-        bindDchaService();
         if (Preferences.GET_DCHASERVICE_FLAG(this)) {
             startReboot();
         } else {
@@ -36,15 +36,19 @@ public class RebootActivity extends Activity {
 
     private void startReboot() {
         new AlertDialog.Builder(this)
-                .setCancelable(false)
                 .setMessage(R.string.dialog_question_reboot)
                 .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                    try {
-                        mDchaService.rebootPad(0, null);
-                    } catch (RemoteException ignored) {
-                    }
+                    bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+                    Runnable runnable = () -> {
+                        try {
+                            mDchaService.rebootPad(0, null);
+                        } catch (RemoteException ignored) {
+                        }
+                    };
+                    new Handler().postDelayed(runnable, 10);
                 })
                 .setNegativeButton(R.string.dialog_common_no, (dialog, which) -> finishAndRemoveTask())
+                .setOnDismissListener(dialogInterface -> finishAndRemoveTask())
                 .show();
     }
 
@@ -60,7 +64,9 @@ public class RebootActivity extends Activity {
         }
     };
 
-    public void bindDchaService() {
-        bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+    @Override
+    public void onPause() {
+        super.onPause();
+        finishAndRemoveTask();
     }
 }

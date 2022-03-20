@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 
-import com.saradabar.cpadcustomizetool.data.service.DeviceOwnerService;
 import com.saradabar.cpadcustomizetool.data.service.InstallService;
 
 import java.io.File;
@@ -19,11 +18,9 @@ public class SplitInstaller {
 
     public static class Result {
         public final boolean bl;
-        public final String errMsg;
 
-        public Result(boolean result, String errMsg, int i1, int i2) {
+        public Result(boolean result) {
             this.bl = result;
-            this.errMsg = errMsg;
         }
     }
 
@@ -46,11 +43,11 @@ public class SplitInstaller {
     }
 
     public Result splitWriteSession(Context context, File apkFile, int sessionId) throws Exception {
-        return new Result(true, "", writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile), 0);
+        return new Result(writeSession(context.getPackageManager().getPackageInstaller(), sessionId, apkFile));
     }
 
     public Result splitCommitSession(Context context, int sessionId, int code) {
-        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, context, code), "", 0, 0);
+        return new Result(commitSession(context.getPackageManager().getPackageInstaller(), sessionId, context, code));
     }
 
     private int createSession(PackageInstaller packageInstaller) throws IOException {
@@ -59,7 +56,7 @@ public class SplitInstaller {
         return packageInstaller.createSession(params);
     }
 
-    private int writeSession(PackageInstaller packageInstaller, int sessionId, File apkFile) throws IOException {
+    private boolean writeSession(PackageInstaller packageInstaller, int sessionId, File apkFile) throws IOException {
         long sizeBytes = -1;
         String apkPath = apkFile.getAbsolutePath();
 
@@ -81,13 +78,13 @@ public class SplitInstaller {
                 out.write(buffer, 0, c);
             }
             session.fsync(out);
-            return 0;
+            return true;
+        } catch (Exception ignored) {
+            if (session != null) session.abandon();
+            return false;
         } finally {
-            if (out != null) {
-                out.close();
-                in.close();
-                session.close();
-            }
+            if (out != null) out.close();
+            if (in != null) in.close();
         }
     }
 
@@ -98,29 +95,28 @@ public class SplitInstaller {
             Intent intent;
             switch (code) {
                 case 0:
-                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0);
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0).putExtra("REQUEST_SESSION", sessionId);
                     break;
                 case 1:
-                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 1);
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 1).putExtra("REQUEST_SESSION", sessionId);
                     break;
                 default:
-                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0);
+                    intent = new Intent(context, InstallService.class).putExtra("REQUEST_CODE", 0).putExtra("REQUEST_SESSION", sessionId);
                     break;
             }
             PendingIntent pendingIntent = PendingIntent.getService(
                     context,
                     sessionId,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_CANCEL_CURRENT
             );
             session.commit(pendingIntent.getIntentSender());
             return true;
         } catch (Exception ignored) {
+            if (session != null) session.abandon();
             return false;
         } finally {
-            if (session != null) {
-                session.close();
-            }
+            if (session != null) session.close();
         }
     }
 

@@ -13,7 +13,8 @@
                 <SwitchPreference
                     app:iconSpaceReserved="false"
                     android:key="permission_forced"
-                    android:title="@string/pre_owner_title_permission" />
+                    android:title="@string/pre_owner_title_permission"
+                    android:summary="@string/pre_owner_sum_permission_forced"/>
 
                 <Preference
                     app:iconSpaceReserved="false"
