@@ -10,7 +10,7 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.data.handler.CrashHandler;
 import com.saradabar.cpadcustomizetool.data.service.KeepService;
 import com.saradabar.cpadcustomizetool.util.Common;
 
@@ -18,7 +18,7 @@ public class PackageAddedReceiver extends BroadcastReceiver {
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onReceive(Context context, Intent intent) {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(context));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(context));
         SharedPreferences sp = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
         if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
             if (intent.getData().toString().replace("package:", "").equals(context.getPackageName())) {

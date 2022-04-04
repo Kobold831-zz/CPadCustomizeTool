@@ -15,7 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.util.Preferences;
@@ -27,7 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class MainOtherFragment extends PreferenceFragment {
+public class MainOtherFragment extends PreferenceFragmentCompat {
 
     Preference preferenceOtherSettings,
             preferenceSysUiAdjustment,
@@ -51,7 +51,7 @@ public class MainOtherFragment extends PreferenceFragment {
         });
 
         preferenceDevelopmentSettings.setOnPreferenceClickListener(preference -> {
-            if (Settings.Secure.getInt(getActivity().getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
+            if (Settings.Secure.getInt(requireActivity().getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
                 try {
                     startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 } catch (ActivityNotFoundException ignored) {
@@ -71,7 +71,7 @@ public class MainOtherFragment extends PreferenceFragment {
         });
 
         preferenceScreenOffTimeOut.setOnPreferenceClickListener(preference -> {
-            View view = getActivity().getLayoutInflater().inflate(R.layout.view_time_out, null);
+            View view = requireActivity().getLayoutInflater().inflate(R.layout.view_time_out, null);
             Button button = view.findViewById(R.id.time_out_button);
             EditText editText = view.findViewById(R.id.time_out_edit);
             editText.setHint(getString(R.string.layout_time_out_hint, String.valueOf(Integer.MAX_VALUE)));
@@ -80,9 +80,9 @@ public class MainOtherFragment extends PreferenceFragment {
                     .setView(view)
                     .setTitle("スクリーンのタイムアウト")
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> {
-                        ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                        ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
                         try {
-                            Settings.System.putInt(getActivity().getContentResolver(), "screen_off_timeout", Integer.parseInt(editText.getText().toString()));
+                            Settings.System.putInt(requireActivity().getContentResolver(), "screen_off_timeout", Integer.parseInt(editText.getText().toString()));
                             setSummaryScreenOffTimeConvert();
                         } catch (Exception ignored) {
                             new AlertDialog.Builder(getActivity())
@@ -93,10 +93,10 @@ public class MainOtherFragment extends PreferenceFragment {
                     })
                     .show();
             button.setOnClickListener(view1 -> {
-                ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
                 try {
                     editText.setText(String.valueOf(Integer.MAX_VALUE));
-                    Settings.System.putInt(getActivity().getContentResolver(), "screen_off_timeout", Integer.MAX_VALUE);
+                    Settings.System.putInt(requireActivity().getContentResolver(), "screen_off_timeout", Integer.MAX_VALUE);
                     setTextScreenOffTimeConvert(view.findViewById(R.id.time_out_label));
                     setSummaryScreenOffTimeConvert();
                 } catch (Exception ignored) {
@@ -106,7 +106,7 @@ public class MainOtherFragment extends PreferenceFragment {
                             .show();
                 }
             });
-            Runnable runnable = () -> ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
+            Runnable runnable = () -> ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
             new Handler().postDelayed(runnable, 10);
             return false;
         });
@@ -126,7 +126,7 @@ public class MainOtherFragment extends PreferenceFragment {
 
     private void setTextScreenOffTimeConvert(TextView textView) {
         long time, sec, min, hour, day;
-        time = Settings.System.getInt(getActivity().getContentResolver(), "screen_off_timeout", 60) / 1000;
+        time = Settings.System.getInt(requireActivity().getContentResolver(), "screen_off_timeout", 60) / 1000;
         sec = time % 60;
         min = (time / 60) % 60;
         hour = (time / 3600) % 24;
@@ -137,12 +137,12 @@ public class MainOtherFragment extends PreferenceFragment {
         calendar.add(Calendar.SECOND, (int) time);
         date = calendar.getTime();
         DateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.JAPAN);
-        textView.setText(getString(R.string.layout_time_out_label, Settings.System.getInt(getActivity().getContentResolver(), "screen_off_timeout", 60) + "（" + time + "）", day + "日" + hour + "時間" + min + "分" + sec + "秒", df.format(date)));
+        textView.setText(getString(R.string.layout_time_out_label, Settings.System.getInt(requireActivity().getContentResolver(), "screen_off_timeout", 60) + "（" + time + "）", day + "日" + hour + "時間" + min + "分" + sec + "秒", df.format(date)));
     }
 
     private void setSummaryScreenOffTimeConvert() {
         long time, sec, min, hour, day;
-        time = Settings.System.getInt(getActivity().getContentResolver(), "screen_off_timeout", 60) / 1000;
+        time = Settings.System.getInt(requireActivity().getContentResolver(), "screen_off_timeout", 60) / 1000;
         sec = time % 60;
         min = (time / 60) % 60;
         hour = (time / 3600) % 24;

@@ -30,7 +30,7 @@ import com.saradabar.cpadcustomizetool.Receiver.PackageAddedReceiver;
 import com.saradabar.cpadcustomizetool.data.connection.AsyncFileDownload;
 import com.saradabar.cpadcustomizetool.data.connection.Checker;
 import com.saradabar.cpadcustomizetool.data.connection.Updater;
-import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.data.handler.CrashHandler;
 import com.saradabar.cpadcustomizetool.data.event.UpdateEventListener;
 import com.saradabar.cpadcustomizetool.data.handler.ProgressHandler;
 import com.saradabar.cpadcustomizetool.data.service.KeepService;
@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements UpdateEventListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);

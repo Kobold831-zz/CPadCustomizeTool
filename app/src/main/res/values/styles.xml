@@ -11,7 +11,7 @@
         <item name="android:colorAccent">@color/red</item>
     </style>
 
-    <style name="MainPreferenceTheme" parent="android:Theme.Material.Light">
+    <style name="MainPreferenceTheme" parent="Theme.AppCompat.Light">
         <item name="android:colorAccent">@color/red</item>
     </style>
 </resources>

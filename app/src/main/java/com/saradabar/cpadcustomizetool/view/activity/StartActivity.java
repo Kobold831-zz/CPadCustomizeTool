@@ -1,7 +1,6 @@
 package com.saradabar.cpadcustomizetool.view.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -23,8 +22,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import com.saradabar.cpadcustomizetool.MainActivity;
 import com.saradabar.cpadcustomizetool.R;
@@ -44,7 +44,7 @@ import java.util.Objects;
 
 import jp.co.benesse.dcha.dchaservice.IDchaService;
 
-public class StartActivity extends Activity implements InstallEventListener {
+public class StartActivity extends AppCompatActivity implements InstallEventListener {
 
     static StartActivity instance = null;
 
@@ -64,7 +64,7 @@ public class StartActivity extends Activity implements InstallEventListener {
         if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
         if (getIntent().getBooleanExtra("result", false)) {
             setContentView(R.layout.activity_main);
-            transitionFragment(new MainFragment());
+            transitionFragment(new MainFragment(), false);
             return;
         }
         if (devicePolicyManager.isDeviceOwnerApp(getPackageName())) {
@@ -151,12 +151,12 @@ public class StartActivity extends Activity implements InstallEventListener {
                 return true;
             case R.id.app_info_3:
                 menu.findItem(R.id.app_info_3).setVisible(false);
-                mTransitionFragment(new ApplicationSettingsFragment());
+                NullTransitionFragment(new ApplicationSettingsFragment());
                 return true;
             case android.R.id.home:
                 menu.findItem(R.id.app_info_3).setVisible(true);
                 getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                transitionFragment(new MainFragment());
+                transitionFragment(new MainFragment(), false);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -167,20 +167,20 @@ public class StartActivity extends Activity implements InstallEventListener {
         if (getIntent().getBooleanExtra("result", false)) {
             menu.findItem(R.id.app_info_3).setVisible(true);
             getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            transitionFragment(new MainFragment());
+            transitionFragment(new MainFragment(), false);
         }
     }
 
-    private void transitionFragment(PreferenceFragment nextPreferenceFragment) {
-        getFragmentManager()
+    public void transitionFragment(PreferenceFragmentCompat preferenceFragmentCompat, boolean enabled) {
+        getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.layout_main, nextPreferenceFragment)
+                .replace(R.id.layout_main, preferenceFragmentCompat)
                 .commit();
-        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(false);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
     }
 
-    private void mTransitionFragment(PreferenceFragment nextPreferenceFragment) {
-        getFragmentManager()
+    private void NullTransitionFragment(PreferenceFragmentCompat nextPreferenceFragment) {
+        getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
                 .replace(R.id.layout_main, nextPreferenceFragment)
@@ -202,44 +202,6 @@ public class StartActivity extends Activity implements InstallEventListener {
 
     public boolean bindDchaService() {
         return bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    public MainFragment.CopyTask.Listener CopyListener() {
-        return new MainFragment.CopyTask.Listener() {
-            ProgressDialog progressDialog;
-
-            /* プログレスバーの表示 */
-            @Override
-            public void onShow() {
-                progressDialog = new ProgressDialog(StartActivity.this);
-                progressDialog.setTitle("");
-                progressDialog.setMessage(getString(R.string.progress_state_copy_file));
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-            }
-
-            /* 成功 */
-            @Override
-            public void onSuccess() {
-                progressDialog.dismiss();
-                new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(getString(R.string.dialog_info_success))
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                        .show();
-            }
-
-            /* 失敗 */
-            @Override
-            public void onFailure() {
-                progressDialog.dismiss();
-                new AlertDialog.Builder(StartActivity.this)
-                        .setMessage(getString(R.string.dialog_info_failure))
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> dialog.dismiss())
-                        .show();
-            }
-        };
     }
 
     public DeviceOwnerFragment.TryXApkTask.Listener XApkListener() {

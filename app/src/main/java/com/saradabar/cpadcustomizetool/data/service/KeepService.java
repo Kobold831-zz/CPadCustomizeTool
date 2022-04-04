@@ -12,7 +12,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
 
-import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.data.handler.CrashHandler;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 
@@ -38,15 +38,16 @@ public class KeepService extends Service {
         bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
         Runnable runnable = () -> {
             SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-            if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false) && !getHomePackageName().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null))) {
+            if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false) && !getHomePackageName().equals(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null)) && mDchaService != null) {
                 try {
                     mDchaService.clearDefaultPreferredApp(getHomePackageName());
                     mDchaService.setDefaultPreferredHomeApp(sp.getString(Constants.KEY_SAVE_KEEP_HOME, null));
-                } catch (RemoteException ignored) {
+                } catch (Exception ex) {
+                    CrashHandler.LogOverWrite(ex, this);
                 }
             }
         };
-        new Handler().postDelayed(runnable, 10);
+        new Handler().postDelayed(runnable, 1000);
     }
 
     private String getHomePackageName() {
@@ -133,7 +134,7 @@ public class KeepService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
         instance = this;
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
@@ -185,7 +186,7 @@ public class KeepService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) || sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
             startService(Constants.KEEP_SERVICE);
@@ -198,7 +199,7 @@ public class KeepService extends Service {
     }
 
     public void startService() {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブザーバーを有効化 */
         if (sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false)) {
@@ -224,7 +225,7 @@ public class KeepService extends Service {
     }
 
     public void stopService(int stopCode) {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(getApplicationContext()));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブサーバーを無効化 */
         switch (stopCode) {

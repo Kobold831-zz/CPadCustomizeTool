@@ -1,5 +1,6 @@
-package com.saradabar.cpadcustomizetool.data.crash;
+package com.saradabar.cpadcustomizetool.data.handler;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 
@@ -14,12 +15,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class CrashLogger implements Thread.UncaughtExceptionHandler {
+public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
     Context mContext;
     Thread.UncaughtExceptionHandler mDefaultUncaughtExceptionHandler;
 
-    public CrashLogger(Context context) {
+    public CrashHandler(Context context) {
         mContext = context;
         mDefaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
@@ -30,7 +31,6 @@ public class CrashLogger implements Thread.UncaughtExceptionHandler {
         StringWriter stringWriter = new StringWriter();
         ex.printStackTrace(new PrintWriter(stringWriter));
         String stackTrace = stringWriter.toString();
-
         String[] str;
         if (Preferences.GET_CRASH_LOG(mContext) != null) {
             str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(mContext)).replace("    ", "") + getNowDate() + stackTrace + "\n"};
@@ -38,11 +38,24 @@ public class CrashLogger implements Thread.UncaughtExceptionHandler {
             str = new String[]{getNowDate() + stackTrace + "\n"};
         }
         Preferences.SAVE_CRASH_LOG(mContext, str);
-
         mDefaultUncaughtExceptionHandler.uncaughtException(thread, ex);
     }
 
-    public String getNowDate(){
+    @SuppressLint("NewApi")
+    public static void LogOverWrite(Throwable throwable, Context context) {
+        StringWriter stringWriter = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(stringWriter));
+        String stackTrace = stringWriter.toString();
+        String[] str;
+        if (Preferences.GET_CRASH_LOG(context) != null) {
+            str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(context)).replace("    ", "") + getNowDate() + stackTrace + "\n"};
+        } else {
+            str = new String[]{getNowDate() + stackTrace + "\n"};
+        }
+        Preferences.SAVE_CRASH_LOG(context, str);
+    }
+
+    public static String getNowDate(){
         DateFormat df = new SimpleDateFormat("MMM dd HH:mm:ss.SSS z yyyy :\n", Locale.ENGLISH);
         return df.format(System.currentTimeMillis());
     }

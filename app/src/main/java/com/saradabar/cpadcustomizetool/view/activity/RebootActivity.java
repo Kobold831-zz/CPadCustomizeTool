@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.saradabar.cpadcustomizetool.R;
-import com.saradabar.cpadcustomizetool.data.crash.CrashLogger;
+import com.saradabar.cpadcustomizetool.data.handler.CrashHandler;
 import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
@@ -25,7 +25,7 @@ public class RebootActivity extends Activity {
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(new CrashLogger(this));
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
         if (Preferences.GET_DCHASERVICE_FLAG(this)) {
             startReboot();
         } else {

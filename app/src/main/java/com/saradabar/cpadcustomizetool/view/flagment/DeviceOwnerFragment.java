@@ -9,8 +9,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -20,7 +18,7 @@ import android.provider.DocumentsContract;
 
 import androidx.annotation.RequiresApi;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
@@ -40,10 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-public class DeviceOwnerFragment extends PreferenceFragment {
+public class DeviceOwnerFragment extends PreferenceFragmentCompat {
 
     String[] splitInstallData = new String[256];
 
@@ -67,7 +63,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_device_owner, rootKey);
-        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
         instance = this;
         preferenceBlockToUninstallSettings = findPreference("intent_block_to_uninstall_settings");
         preferenceDisableDeviceOwner = findPreference("disable_device_owner");
@@ -88,20 +84,20 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 switchPreferencePermissionForced.setChecked(true);
                 switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT/PERMISSION_GRANT_STATE_GRANTED" + getString(R.string.pre_owner_sum_permission_forced));
                 devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT);
-                for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+                for (ApplicationInfo app : requireActivity().getPackageManager().getInstalledApplications(0)) {
                     /* ユーザーアプリか確認 */
                     if (app.sourceDir.startsWith("/data/app/")) {
-                        Common.setPermissionGrantState(getActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                        Common.setPermissionGrantState(requireActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
                     }
                 }
             } else {
                 switchPreferencePermissionForced.setChecked(false);
                 switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT/PERMISSION_GRANT_STATE_DEFAULT" + getString(R.string.pre_owner_sum_permission_default));
                 devicePolicyManager.setPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class), DevicePolicyManager.PERMISSION_POLICY_PROMPT);
-                for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+                for (ApplicationInfo app : requireActivity().getPackageManager().getInstalledApplications(0)) {
                     /* ユーザーアプリか確認 */
                     if (app.sourceDir.startsWith("/data/app/")) {
-                        Common.setPermissionGrantState(getActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
+                        Common.setPermissionGrantState(requireActivity(), app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT);
                     }
                 }
             }
@@ -112,10 +108,10 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.dialog_question_device_owner)
                     .setPositiveButton(R.string.dialog_common_yes, (dialog, which) -> {
-                        devicePolicyManager.clearDeviceOwnerApp(getActivity().getPackageName());
-                        getActivity().finish();
-                        getActivity().overridePendingTransition(0, 0);
-                        startActivity(getActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
+                        devicePolicyManager.clearDeviceOwnerApp(requireActivity().getPackageName());
+                        requireActivity().finish();
+                        requireActivity().overridePendingTransition(0, 0);
+                        startActivity(requireActivity().getIntent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION).putExtra("result", true));
                     })
                     .setNegativeButton(R.string.dialog_common_no, null)
                     .show();
@@ -166,8 +162,8 @@ public class DeviceOwnerFragment extends PreferenceFragment {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void setPreferenceSettings() {
-        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (!devicePolicyManager.isDeviceOwnerApp(getActivity().getPackageName())) {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (!devicePolicyManager.isDeviceOwnerApp(requireActivity().getPackageName())) {
             preferenceBlockToUninstallSettings.setEnabled(false);
             preferenceDisableDeviceOwner.setEnabled(false);
             switchPreferencePermissionForced.setEnabled(false);
@@ -191,12 +187,12 @@ public class DeviceOwnerFragment extends PreferenceFragment {
     }
 
     private String getNowOwnerPackage() {
-        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        for (ApplicationInfo app : getActivity().getPackageManager().getInstalledApplications(0)) {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE);
+        for (ApplicationInfo app : requireActivity().getPackageManager().getInstalledApplications(0)) {
             /* ユーザーアプリか確認 */
             if (app.sourceDir.startsWith("/data/app/")) {
                 if (devicePolicyManager.isDeviceOwnerApp(app.packageName)) {
-                    return app.loadLabel(getActivity().getPackageManager()).toString();
+                    return app.loadLabel(requireActivity().getPackageManager()).toString();
                 }
             }
         }
@@ -266,7 +262,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
         try {
             try {
                 /* 一時ファイルを消去 */
-                FileUtils.deleteDirectory(getActivity().getExternalCacheDir());
+                FileUtils.deleteDirectory(requireActivity().getExternalCacheDir());
             } catch (IOException ignored) {
             }
             ClipData clipData = data.getClipData();
@@ -357,7 +353,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             /* 拡張子.xapkを.zipに変更 */
             onProgressUpdate(getInstance().getString(R.string.progress_state_rename));
             new File(getInstance().splitInstallData[0]).renameTo(new File(str));
-            File file = new File(Path.getTemporaryPath(getInstance().getActivity()));
+            File file = new File(Path.getTemporaryPath(getInstance().requireActivity()));
             /* zipを展開して外部ディレクトリに一時保存 */
             onProgressUpdate(getInstance().getString(R.string.progress_state_unpack));
             getInstance().totalByte = new File(str).length();
@@ -450,7 +446,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             double fileSize = 0;
             if (getInstance().totalByte <= 0) return 0;
             if (obbPath1 == null) {
-                fileSize = getInstance().getDirectorySize(new File(Path.getTemporaryPath(getInstance().getActivity())));
+                fileSize = getInstance().getDirectorySize(new File(Path.getTemporaryPath(getInstance().requireActivity())));
             } else {
                 try {
                     fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
@@ -469,7 +465,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             double fileSize = 0;
             if (getInstance().totalByte <= 0) return 0;
             if (obbPath1 == null) {
-                fileSize = getInstance().getDirectorySize(new File(Path.getTemporaryPath(getInstance().getActivity())));
+                fileSize = getInstance().getDirectorySize(new File(Path.getTemporaryPath(getInstance().requireActivity())));
             } else {
                 try {
                     fileSize = Files.size(Paths.get(Environment.getExternalStorageDirectory() + "/Android/obb/" + obbPath1 + "/" + obbPath2));
@@ -495,7 +491,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
             SplitInstaller splitInstaller = new SplitInstaller();
             int sessionId;
             try {
-                sessionId = splitInstaller.splitCreateSession(getInstance().getActivity()).i;
+                sessionId = splitInstaller.splitCreateSession(getInstance().requireActivity()).i;
                 if (sessionId < 0) {
                     return false;
                 }
@@ -507,7 +503,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 /* 配列の中身を確認 */
                 if (str != null) {
                     try {
-                        if (!splitInstaller.splitWriteSession(getInstance().getActivity(), new File(str), sessionId).bl) {
+                        if (!splitInstaller.splitWriteSession(getInstance().requireActivity(), new File(str), sessionId).bl) {
                             return false;
                         }
                     } catch (Exception e) {
@@ -519,7 +515,7 @@ public class DeviceOwnerFragment extends PreferenceFragment {
                 }
             }
             try {
-                return splitInstaller.splitCommitSession(getInstance().getActivity(), sessionId, 0).bl;
+                return splitInstaller.splitCommitSession(getInstance().requireActivity(), sessionId, 0).bl;
             } catch (Exception e) {
                 return e.getMessage();
             }

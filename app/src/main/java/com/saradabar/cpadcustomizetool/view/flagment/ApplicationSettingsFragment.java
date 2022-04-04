@@ -13,7 +13,7 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import com.saradabar.cpadcustomizetool.R;
@@ -26,7 +26,7 @@ import com.saradabar.cpadcustomizetool.view.views.SingleListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationSettingsFragment extends PreferenceFragment {
+public class ApplicationSettingsFragment extends PreferenceFragmentCompat {
 
     SwitchPreference autoUpdateCheck,
             changeSettingsDcha,
@@ -39,8 +39,8 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pre_app_settings, rootKey);
-        SharedPreferences sp = getActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-        ContentResolver resolver = getActivity().getContentResolver();
+        SharedPreferences sp = requireActivity().getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+        ContentResolver resolver = requireActivity().getContentResolver();
 
         autoUpdateCheck = findPreference("switch_auto_update_check");
         changeSettingsDcha = findPreference("switch_is_change_settings_use_dcha");
@@ -114,7 +114,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
         });
 
         updateMode.setOnPreferenceClickListener(preference -> {
-            View v = getActivity().getLayoutInflater().inflate(R.layout.layout_update_list, null);
+            View v = requireActivity().getLayoutInflater().inflate(R.layout.layout_update_list, null);
             List<String> list = new ArrayList<>();
             list.add("パッケージインストーラ");
             list.add("ADB");
@@ -161,7 +161,7 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                         }
                         break;
                     case 3:
-                        if (((DevicePolicyManager) getActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(getActivity().getPackageName())) {
+                        if (((DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(requireActivity().getPackageName())) {
                             Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
                             listView.invalidateViews();
                         } else {
@@ -197,18 +197,16 @@ public class ApplicationSettingsFragment extends PreferenceFragment {
                         .setCancelable(false)
                         .setTitle(getString(R.string.dialog_question_are_you_sure))
                         .setMessage(getString(R.string.dialog_confirmation))
-                        .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
-                            new AlertDialog.Builder(getActivity())
-                                    .setCancelable(false)
-                                    .setTitle(getString(R.string.dialog_title_final_confirmation))
-                                    .setMessage(getString(R.string.dialog_final_confirmation))
-                                    .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
-                                        Preferences.SET_CONFIRMATION(true, getActivity());
-                                        dialog1.dismiss();
-                                    })
-                                    .setNegativeButton(R.string.dialog_common_cancel, (dialog1, which1) -> dialog.dismiss())
-                                    .show();
-                        })
+                        .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> new AlertDialog.Builder(getActivity())
+                                .setCancelable(false)
+                                .setTitle(getString(R.string.dialog_title_final_confirmation))
+                                .setMessage(getString(R.string.dialog_final_confirmation))
+                                .setPositiveButton(R.string.dialog_common_continue, (dialog1, which1) -> {
+                                    Preferences.SET_CONFIRMATION(true, getActivity());
+                                    dialog1.dismiss();
+                                })
+                                .setNegativeButton(R.string.dialog_common_cancel, (dialog1, which1) -> dialog.dismiss())
+                                .show())
                         .setNegativeButton(R.string.dialog_common_cancel, (dialog, which) -> dialog.dismiss())
                         .show();
                 return true;
