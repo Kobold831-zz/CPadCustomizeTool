@@ -201,4 +201,14 @@ public class Preferences {
         sp.edit().remove("crash_log").apply();
         return true;
     }
+
+    public static void SET_CRASH(Context context, boolean bl) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean("crash", bl).apply();
+    }
+
+    public static boolean GET_CRASH(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("crash", false);
+    }
 }

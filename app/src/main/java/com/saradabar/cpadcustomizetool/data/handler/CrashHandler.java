@@ -33,11 +33,12 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         String stackTrace = stringWriter.toString();
         String[] str;
         if (Preferences.GET_CRASH_LOG(mContext) != null) {
-            str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(mContext)).replace("    ", "") + getNowDate() + stackTrace + "\n"};
+            str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(mContext)).replace("    ", "") + getNowDate() + deviceInfo + stackTrace + "\n"};
         } else {
-            str = new String[]{getNowDate() + stackTrace + "\n"};
+            str = new String[]{getNowDate() + deviceInfo + stackTrace + "\n"};
         }
         Preferences.SAVE_CRASH_LOG(mContext, str);
+        Preferences.SET_CRASH(mContext, true);
         mDefaultUncaughtExceptionHandler.uncaughtException(thread, ex);
     }
 
@@ -48,12 +49,16 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         String stackTrace = stringWriter.toString();
         String[] str;
         if (Preferences.GET_CRASH_LOG(context) != null) {
-            str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(context)).replace("    ", "") + getNowDate() + stackTrace + "\n"};
+            str = new String[]{String.join(",", Preferences.GET_CRASH_LOG(context)).replace("    ", "") + getNowDate() + deviceInfo + stackTrace + "\n"};
         } else {
-            str = new String[]{getNowDate() + stackTrace + "\n"};
+            str = new String[]{getNowDate() + deviceInfo + stackTrace + "\n"};
         }
         Preferences.SAVE_CRASH_LOG(context, str);
     }
+
+    public static String deviceInfo = "-----DEVICE_INFO_START-----\n" +
+            Build.FINGERPRINT + "\n" +
+            "-----DEVICE_INFO_END-----" + "\n";
 
     public static String getNowDate(){
         DateFormat df = new SimpleDateFormat("MMM dd HH:mm:ss.SSS z yyyy :\n", Locale.ENGLISH);

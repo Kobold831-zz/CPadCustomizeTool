@@ -146,7 +146,7 @@ public class DeviceOwnerFragment extends PreferenceFragmentCompat {
                 break;
             case 1:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+                switchPreferencePermissionForced.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceBlockToUninstallSettings.setEnabled(false);
                 preferenceBlockToUninstallSettings.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceDisableDeviceOwner.setEnabled(false);
@@ -173,15 +173,17 @@ public class DeviceOwnerFragment extends PreferenceFragmentCompat {
             switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
             preferenceOwnerSilentInstall.setSummary(getString(R.string.pre_owner_sum_not_use_function));
         } else {
-            switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
-                case DevicePolicyManager.PERMISSION_POLICY_PROMPT:
-                    switchPreferencePermissionForced.setChecked(false);
-                    switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT/PERMISSION_GRANT_STATE_DEFAULT" + getString(R.string.pre_owner_sum_permission_default));
-                    break;
-                case DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT:
-                    switchPreferencePermissionForced.setChecked(true);
-                    switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT/PERMISSION_GRANT_STATE_GRANTED" + getString(R.string.pre_owner_sum_permission_forced));
-                    break;
+            if (Preferences.GET_MODEL_ID(requireActivity()) != 0) {
+                switch (devicePolicyManager.getPermissionPolicy(new ComponentName(getActivity(), AdministratorReceiver.class))) {
+                    case DevicePolicyManager.PERMISSION_POLICY_PROMPT:
+                        switchPreferencePermissionForced.setChecked(false);
+                        switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_PROMPT/PERMISSION_GRANT_STATE_DEFAULT" + getString(R.string.pre_owner_sum_permission_default));
+                        break;
+                    case DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT:
+                        switchPreferencePermissionForced.setChecked(true);
+                        switchPreferencePermissionForced.setSummary("PERMISSION_POLICY_AUTO_GRANT/PERMISSION_GRANT_STATE_GRANTED" + getString(R.string.pre_owner_sum_permission_forced));
+                        break;
+                }
             }
         }
     }
@@ -214,7 +216,7 @@ public class DeviceOwnerFragment extends PreferenceFragmentCompat {
                 break;
             case 1:
                 switchPreferencePermissionForced.setEnabled(false);
-                switchPreferencePermissionForced.setSummary(getString(R.string.pre_owner_sum_not_use_function));
+                switchPreferencePermissionForced.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceBlockToUninstallSettings.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceDisableDeviceOwner.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                 preferenceBlockToUninstallSettings.setEnabled(false);

@@ -82,8 +82,15 @@ public class MainOtherFragment extends PreferenceFragmentCompat {
                     .setPositiveButton(R.string.dialog_common_ok, (dialog, which) -> {
                         ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(), 0);
                         try {
-                            Settings.System.putInt(requireActivity().getContentResolver(), "screen_off_timeout", Integer.parseInt(editText.getText().toString()));
-                            setSummaryScreenOffTimeConvert();
+                            if (Integer.parseInt(editText.getText().toString()) >= 5000) {
+                                Settings.System.putInt(requireActivity().getContentResolver(), "screen_off_timeout", Integer.parseInt(editText.getText().toString()));
+                                setSummaryScreenOffTimeConvert();
+                            } else {
+                                new AlertDialog.Builder(getActivity())
+                                        .setMessage("最低値5000以下の値を設定することはできません")
+                                        .setPositiveButton(R.string.dialog_common_ok, (dialog1, which1) -> dialog1.dismiss())
+                                        .show();
+                            }
                         } catch (Exception ignored) {
                             new AlertDialog.Builder(getActivity())
                                     .setMessage(R.string.dialog_error)

@@ -39,6 +39,7 @@ import com.saradabar.cpadcustomizetool.util.Constants;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 import com.saradabar.cpadcustomizetool.util.Toast;
 import com.saradabar.cpadcustomizetool.util.Variables;
+import com.saradabar.cpadcustomizetool.view.activity.CrashLogActivity;
 import com.saradabar.cpadcustomizetool.view.activity.StartActivity;
 import com.saradabar.cpadcustomizetool.view.activity.WelAppActivity;
 import com.stephentuso.welcome.WelcomeHelper;
@@ -58,6 +59,38 @@ public class MainActivity extends Activity implements UpdateEventListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
+        if (Preferences.GET_CRASH(this)) {
+            errorCrash();
+            return;
+        }
+        FirstCheck();
+    }
+
+    private void FirstCheck() {
+        registerReceiver();
+        /* ネットワークチェック */
+        if (!isNetWork()) {
+            netWorkError();
+            return;
+        }
+        /* アップデートチェックの可否を確認 */
+        if (Preferences.GET_UPDATE_FLAG(this)) updateCheck();
+        else supportCheck();
+    }
+
+    private void errorCrash() {
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("前回" + getApplicationInfo().loadLabel(getPackageManager()).toString() + "が予期せずに終了しました\n繰り返し発生する場合は\"ログを見る\"を押してクラッシュログを開発者に送信してください")
+                .setPositiveButton(R.string.dialog_common_continue, (dialog, which) -> {
+                    Preferences.SET_CRASH(this, false);
+                    FirstCheck();
+                })
+                .setNeutralButton("ログを見る", (dialog, which) -> startActivity(new Intent(this, CrashLogActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)))
+                .show();
+    }
+
+    private void registerReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
@@ -96,14 +129,6 @@ public class MainActivity extends Activity implements UpdateEventListener {
             }
         };
         registerReceiver(packageReceiver, intentFilter);
-        /* ネットワークチェック */
-        if (!isNetWork()) {
-            netWorkError();
-            return;
-        }
-        /* アップデートチェックの可否を確認 */
-        if (Preferences.GET_UPDATE_FLAG(this)) updateCheck();
-        else supportCheck();
     }
 
     /* ネットワークの接続を確認 */
