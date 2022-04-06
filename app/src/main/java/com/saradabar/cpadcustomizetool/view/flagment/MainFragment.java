@@ -820,7 +820,7 @@ public class MainFragment extends PreferenceFragmentCompat {
         });
 
         preferenceDeviceOwner.setOnPreferenceClickListener(preference -> {
-            StartActivity.getInstance().transitionFragment(new DeviceOwnerFragment(), false);
+            StartActivity.getInstance().transitionFragment(new DeviceOwnerFragment(), true);
             return false;
         });
 

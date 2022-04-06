@@ -175,25 +175,14 @@ public class Preferences {
         return !sp.getBoolean("confirmation", false);
     }
 
-    public static void SAVE_CRASH_LOG(Context context, String[] array){
-        StringBuilder buffer = new StringBuilder();
-        for(String item : array){
-            buffer.append(item).append(",");
-        };
-        String buf = buffer.toString();
-        String str = buf.substring(0, buf.length() - 1);
+    public static void SAVE_CRASH_LOG(Context context, String str){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString("crash_log", str).apply();
     }
 
-    public static String[] GET_CRASH_LOG(Context context){
+    public static String GET_CRASH_LOG(Context context){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String str = sp.getString("crash_log","");
-        if(str != null && str.length() != 0){
-            return str.split(",");
-        }else{
-            return null;
-        }
+        return sp.getString("crash_log","");
     }
 
     public static boolean REMOVE_CRASH_LOG(Context context) {

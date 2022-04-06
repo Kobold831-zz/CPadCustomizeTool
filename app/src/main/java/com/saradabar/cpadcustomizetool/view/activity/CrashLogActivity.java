@@ -12,6 +12,8 @@ import androidx.annotation.RequiresApi;
 import com.saradabar.cpadcustomizetool.R;
 import com.saradabar.cpadcustomizetool.util.Preferences;
 
+import java.util.Arrays;
+
 public class CrashLogActivity extends Activity {
 
     TextView textView;
@@ -26,7 +28,7 @@ public class CrashLogActivity extends Activity {
         textView = findViewById(R.id.textView);
         scrollView = findViewById(R.id.scrollView);
         if (Preferences.GET_CRASH_LOG(this) != null) {
-            addText(String.join(",", Preferences.GET_CRASH_LOG(this)));
+            addText(Preferences.GET_CRASH_LOG(this));
         } else {
             addText(getString(R.string.logger_empty));
         }

@@ -185,7 +185,7 @@ public class StartActivity extends AppCompatActivity implements InstallEventList
                 .addToBackStack(null)
                 .replace(R.id.layout_main, nextPreferenceFragment)
                 .commit();
-        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     ServiceConnection mDchaServiceConnection = new ServiceConnection() {
