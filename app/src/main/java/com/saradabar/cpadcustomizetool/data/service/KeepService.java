@@ -227,67 +227,63 @@ public class KeepService extends Service {
         Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
         SharedPreferences sp = getSharedPreferences(Constants.SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
         /* オブサーバーを無効化 */
-        try {
-            switch (stopCode) {
-                case 1:
-                    if (isNavigationObserverEnable) {
-                        getContentResolver().unregisterContentObserver(NavigationObserver);
-                        isNavigationObserverEnable = false;
-                    }
-                    break;
-                case 2:
-                    if (isUiObserverEnable) {
-                        getContentResolver().unregisterContentObserver(DchaStateObserver);
-                        isUiObserverEnable = false;
-                    }
-                    break;
-                case 3:
-                    if (isUnknownObserverEnable) {
-                        getContentResolver().unregisterContentObserver(MarketObserver);
-                        isUnknownObserverEnable = false;
-                    }
-                    break;
-                case 4:
-                    if (isUsbObserverEnable) {
-                        getContentResolver().unregisterContentObserver(UsbDebugObserver);
-                        isUsbObserverEnable = false;
-                    }
-                    break;
-                case 5:
-                    if (isHomeObserverEnable) {
-                        isHomeObserverEnable = false;
-                    }
-                    break;
-                case 6:
-                    if (isNavigationObserverEnable) {
-                        getContentResolver().unregisterContentObserver(NavigationObserver);
-                        isNavigationObserverEnable = false;
-                    }
-                    if (isUiObserverEnable) {
-                        getContentResolver().unregisterContentObserver(DchaStateObserver);
-                        isUiObserverEnable = false;
-                    }
-                    if (isUnknownObserverEnable) {
-                        getContentResolver().unregisterContentObserver(MarketObserver);
-                        isUnknownObserverEnable = false;
-                    }
-                    if (isUsbObserverEnable) {
-                        getContentResolver().unregisterContentObserver(UsbDebugObserver);
-                        isUsbObserverEnable = false;
-                    }
-                    if (isHomeObserverEnable) {
-                        isHomeObserverEnable = false;
-                    }
-                    stopService(Constants.KEEP_SERVICE);
-                    stopService(Constants.PROTECT_KEEP_SERVICE);
-                    break;
-            }
-            if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+        switch (stopCode) {
+            case 1:
+                if (isNavigationObserverEnable) {
+                    getContentResolver().unregisterContentObserver(NavigationObserver);
+                    isNavigationObserverEnable = false;
+                }
+                break;
+            case 2:
+                if (isUiObserverEnable) {
+                    getContentResolver().unregisterContentObserver(DchaStateObserver);
+                    isUiObserverEnable = false;
+                }
+                break;
+            case 3:
+                if (isUnknownObserverEnable) {
+                    getContentResolver().unregisterContentObserver(MarketObserver);
+                    isUnknownObserverEnable = false;
+                }
+                break;
+            case 4:
+                if (isUsbObserverEnable) {
+                    getContentResolver().unregisterContentObserver(UsbDebugObserver);
+                    isUsbObserverEnable = false;
+                }
+                break;
+            case 5:
+                if (isHomeObserverEnable) {
+                    isHomeObserverEnable = false;
+                }
+                break;
+            case 6:
+                if (isNavigationObserverEnable) {
+                    getContentResolver().unregisterContentObserver(NavigationObserver);
+                    isNavigationObserverEnable = false;
+                }
+                if (isUiObserverEnable) {
+                    getContentResolver().unregisterContentObserver(DchaStateObserver);
+                    isUiObserverEnable = false;
+                }
+                if (isUnknownObserverEnable) {
+                    getContentResolver().unregisterContentObserver(MarketObserver);
+                    isUnknownObserverEnable = false;
+                }
+                if (isUsbObserverEnable) {
+                    getContentResolver().unregisterContentObserver(UsbDebugObserver);
+                    isUsbObserverEnable = false;
+                }
+                if (isHomeObserverEnable) {
+                    isHomeObserverEnable = false;
+                }
                 stopService(Constants.KEEP_SERVICE);
                 stopService(Constants.PROTECT_KEEP_SERVICE);
-            }
-        } catch (Exception ex) {
-            CrashHandler.LogOverWrite(ex, this);
+                break;
+        }
+        if (!sp.getBoolean(Constants.KEY_ENABLED_KEEP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_DCHA_STATE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_MARKET_APP_SERVICE, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_USB_DEBUG, false) && !sp.getBoolean(Constants.KEY_ENABLED_KEEP_HOME, false)) {
+            stopService(Constants.KEEP_SERVICE);
+            stopService(Constants.PROTECT_KEEP_SERVICE);
         }
     }
 }
