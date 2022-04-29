@@ -845,7 +845,7 @@ public class MainFragment extends PreferenceFragmentCompat {
                 preferenceSilentInstall.setEnabled(false);
                 break;
             case 1:
-                if (!Build.VERSION.RELEASE.contains("01.")) {
+                if (!Build.ID.contains("01.")) {
                     switchKeepMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
                     switchKeepMarketApp.setEnabled(false);
                     switchMarketApp.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
