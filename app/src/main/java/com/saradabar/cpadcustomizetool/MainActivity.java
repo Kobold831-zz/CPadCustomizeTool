@@ -105,10 +105,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
                         context.startService(new Intent(context, KeepService.class));
                     }
                     if (sp.getBoolean("permission_forced", false)) {
-                        for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
-                            /* ユーザーアプリか確認 */
-                            if (app.sourceDir.startsWith("/data/app/")) {
-                                Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
+                                /* ユーザーアプリか確認 */
+                                if (app.sourceDir.startsWith("/data/app/")) {
+                                    Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                                }
                             }
                         }
                     }
@@ -118,10 +120,12 @@ public class MainActivity extends Activity implements UpdateEventListener {
                         context.startService(new Intent(context, KeepService.class));
                     }
                     if (sp.getBoolean("permission_forced", false)) {
-                        for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
-                            /* ユーザーアプリか確認 */
-                            if (app.sourceDir.startsWith("/data/app/")) {
-                                Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            for (ApplicationInfo app : getPackageManager().getInstalledApplications(0)) {
+                                /* ユーザーアプリか確認 */
+                                if (app.sourceDir.startsWith("/data/app/")) {
+                                    Common.setPermissionGrantState(context, app.packageName, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                                }
                             }
                         }
                     }

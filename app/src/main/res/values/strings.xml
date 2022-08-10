@@ -145,6 +145,7 @@
     <string name="dialog_title_final_confirmation">最終確認</string>
     <string name="dialog_title_select_mode">モードを選択してください</string>
     <!-- ダイアログメッセージ -->
+    <string name="dialog_notice_support_ended">0000.00.00をもってこのアプリケーションはサポートを終了します\nサポート終了後にこのアプリケーションを起動することはできません\n今までのご利用ありがとうございました</string>
     <string name="dialog_notice_start">このアプリはアンチウイルスソフトに不審なプログラムとして誤検知される場合があります\n詳しくは、CTabLabに所属している開発者に問い合わせてください\nこのダイアログは次回起動以降表示しません</string>
     <string name="dialog_emergency_select_course">受講中の講座を選択してください</string>
     <string name="dialog_mode_select_settings">実行時に変更する設定を選択してください\n設定変更後は”OK”を押してください</string>
@@ -161,6 +162,7 @@
     <string name="dialog_info_success_silent_install">サイレントインストールに成功しました</string>
     <string name="dialog_info_update_caution">遷移先のページより新しいバージョンのapkファイルをダウンロードしてadbでインストールしてください</string>
     <!-- ダイアログエラー -->
+    <string name="dialog_error_support_ended">このアプリケーションはサポートを終了しました\nアプリケーションを起動できません</string>
     <string name="dialog_error">エラーが発生しました</string>
     <string name="dialog_error_start_use">このアプリは使用できません\n続行する場合機能が制限されます</string>
     <string name="dialog_error_start_connection">サーバーと接続できませんでした\n通信状態を確認してください</string>

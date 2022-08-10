@@ -19,11 +19,12 @@ public class Common {
         return new ComponentName(context, com.saradabar.cpadcustomizetool.Receiver.AdministratorReceiver.class);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void setPermissionGrantState(Context context, String packageName, int i) {
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        for (String permission : getRuntimePermissions(context, packageName)) {
-            devicePolicyManager.setPermissionGrantState(new ComponentName(context, AdministratorReceiver.class), packageName, permission, i);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String permission : getRuntimePermissions(context, packageName)) {
+                devicePolicyManager.setPermissionGrantState(new ComponentName(context, AdministratorReceiver.class), packageName, permission, i);
+            }
         }
     }
 

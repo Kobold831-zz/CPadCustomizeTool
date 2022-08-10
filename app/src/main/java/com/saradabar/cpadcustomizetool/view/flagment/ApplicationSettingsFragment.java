@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -150,7 +151,7 @@ public class ApplicationSettingsFragment extends PreferenceFragmentCompat {
                         listView.invalidateViews();
                         break;
                     case 2:
-                        if (MainFragment.getInstance().bindDchaService(Constants.FLAG_CHECK, true)) {
+                        if (MainFragment.getInstance().bindDchaService(Constants.FLAG_CHECK, true) && Preferences.GET_MODEL_ID(getActivity()) != 0) {
                             Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
                             listView.invalidateViews();
                         } else {
@@ -161,7 +162,7 @@ public class ApplicationSettingsFragment extends PreferenceFragmentCompat {
                         }
                         break;
                     case 3:
-                        if (((DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(requireActivity().getPackageName())) {
+                        if (((DevicePolicyManager) requireActivity().getSystemService(Context.DEVICE_POLICY_SERVICE)).isDeviceOwnerApp(requireActivity().getPackageName()) && Preferences.GET_MODEL_ID(getActivity()) != 0) {
                             Preferences.SET_UPDATE_MODE(getActivity(), (int) id);
                             listView.invalidateViews();
                         } else {
@@ -186,6 +187,17 @@ public class ApplicationSettingsFragment extends PreferenceFragmentCompat {
             changeSettingsDcha.setChecked(false);
             changeSettingsDcha.setSummary(getString(R.string.pre_app_sum_confirmation_dcha));
             changeSettingsDcha.setEnabled(false);
+        }
+
+        switch (Preferences.GET_MODEL_ID(getActivity())) {
+            case 0:
+                autoUsbDebug.setEnabled(false);
+                autoUsbDebug.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
+                break;
+            case 1:
+                autoUsbDebug.setEnabled(false);
+                autoUsbDebug.setSummary(Build.MODEL + getString(R.string.pre_main_sum_message_1));
+                break;
         }
     }
 
