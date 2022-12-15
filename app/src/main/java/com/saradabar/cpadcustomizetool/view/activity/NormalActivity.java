@@ -36,6 +36,9 @@ public class NormalActivity extends Activity {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
         bindService(Constants.DCHA_SERVICE, mDchaServiceConnection, Context.BIND_AUTO_CREATE);
+
+        ActivityManager activityManager = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
+
         Runnable runnable = () -> {
             if (!startCheck()) {
                 Toast.toast(this, R.string.toast_not_completed_settings);
@@ -52,9 +55,9 @@ public class NormalActivity extends Activity {
             if (setDchaSettings()) {
                 switch (PreferenceManager.getDefaultSharedPreferences(this).getString("emergency_mode", "")) {
                     case "1":
-                        ActivityManager.killBackgroundProcesses("jp.co.benesse.touch.allgrade.b003.touchhomelauncher");
+                        activityManager.killBackgroundProcesses("jp.co.benesse.touch.allgrade.b003.touchhomelauncher");
                     case "2":
-                        ActivityManager.killBackgroundProcesses("jp.co.benesse.touch.home");
+                        activityManager.killBackgroundProcesses("jp.co.benesse.touch.home");
                 }
                 Toast.toast(this, R.string.toast_execution);
             }
